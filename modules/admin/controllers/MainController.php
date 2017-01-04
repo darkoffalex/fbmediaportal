@@ -29,7 +29,7 @@ class MainController extends Controller
     public function actionLogin()
     {
         $this->layout = 'main-login';
-        $this->view->title = "Вход в админ панель";
+        $this->view->title = Yii::t('admin','Login to admin panel');
 
         /* @var $identity User */
         $identity = Yii::$app->user->identity;

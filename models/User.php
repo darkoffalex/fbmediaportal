@@ -132,6 +132,9 @@ class User extends UserDB implements IdentityInterface
     public function attributeLabels()
     {
         $baseLabels = parent::attributeLabels();
+        foreach($baseLabels as $attribute => $label){
+            $baseLabels[$attribute] = Yii::t('admin',$label);
+        }
         return $baseLabels;
     }
 

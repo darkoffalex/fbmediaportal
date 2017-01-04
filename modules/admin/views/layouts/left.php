@@ -30,7 +30,7 @@
 //                    ],
 
                     [
-                        'label' => 'Выход',
+                        'label' => Yii::t('admin','Exit'),
                         'icon' => 'fa fa-sign-out',
                         'url' => ['/admin/main/logout']
                     ]
