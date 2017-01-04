@@ -3,8 +3,8 @@
 $params = require(__DIR__ . '/params.php');
 
 $config = [
-    'id' => 'Болванка',
-    'name' => 'Болванка',
+    'id' => 'FB Media Portal',
+    'name' => 'FB Media Portal',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'language' => 'ru',
@@ -15,6 +15,16 @@ $config = [
     ],
 
     'components' => [
+
+        'i18n' => [
+            'translations' => [
+                'admin' => [
+                    'class' => 'yii\i18n\PhpMessageSource',
+                    'basePath' => '@app/messages',
+                    'sourceLanguage' => 'en-US',
+                ],
+            ],
+        ],
 
         'assetManager' => [
             'bundles' => [

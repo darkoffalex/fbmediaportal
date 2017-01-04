@@ -5,7 +5,7 @@ namespace app\helpers;
 class Help
 {
     /**
-     * Дебаг различных переменных
+     * Debug variables
      * @param $var
      * @param bool|false $return
      * @return string
@@ -30,7 +30,7 @@ class Help
     }
 
     /**
-     * Логирование в файл
+     * Log to file
      * @param $filename
      * @param $text
      * @return bool|int
@@ -44,25 +44,5 @@ class Help
         }catch (\Exception $ex){
             return false;
         }
-    }
-
-    /**
-     * Генерация случайной строки заданной длины
-     * @param int $length
-     * @param bool|false $numbersOnly
-     * @return string
-     */
-    public static function rndstr($length = 10,$numbersOnly = false) {
-
-        $charactersNr = '0123456789';
-        $charactersChar = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $characters = $numbersOnly ? $charactersNr : $charactersNr.$charactersChar;
-
-        $charactersLength = strlen($characters);
-        $randomString = '';
-        for ($i = 0; $i < $length; $i++) {
-            $randomString .= $characters[rand(0, $charactersLength - 1)];
-        }
-        return $randomString;
     }
 }

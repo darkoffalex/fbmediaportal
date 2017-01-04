@@ -2,6 +2,8 @@
 
 namespace app\modules\admin;
 
+use app\helpers\Help;
+use app\models\User;
 use Yii;
 use yii\helpers\Url;
 
@@ -37,7 +39,10 @@ class AdminModule extends \yii\base\Module
             return false;
         }
 
-        if(Yii::$app->user->isGuest && $action->id != 'login'){
+        /* @var $user User */
+        $user = !Yii::$app->user->isGuest ? Yii::$app->user->identity : null;
+
+        if((empty($user) || !$user->hasAdminAccess()) && $action->id != 'login'){
             Yii::$app->response->redirect(Url::to(['/admin/main/login']));
             return false;
         }

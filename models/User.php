@@ -2,38 +2,21 @@
 
 namespace app\models;
 
-class User extends \yii\base\Object implements \yii\web\IdentityInterface
+use Yii;
+use yii\base\NotSupportedException;
+use yii\web\IdentityInterface;
+use app\helpers\Constants;
+
+class User extends UserDB implements IdentityInterface
 {
-    public $id;
-    public $username;
     public $password;
-    public $authKey;
-    public $accessToken;
-
-    private static $users = [
-        '100' => [
-            'id' => '100',
-            'username' => 'admin',
-            'password' => 'admin',
-            'authKey' => 'test100key',
-            'accessToken' => '100-token',
-        ],
-        '101' => [
-            'id' => '101',
-            'username' => 'demo',
-            'password' => 'demo',
-            'authKey' => 'test101key',
-            'accessToken' => '101-token',
-        ],
-    ];
-
 
     /**
      * @inheritdoc
      */
     public static function findIdentity($id)
     {
-        return isset(self::$users[$id]) ? new static(self::$users[$id]) : null;
+        return static::findOne(['id' => $id, 'status_id' => Constants::STATUS_ENABLED]);
     }
 
     /**
@@ -41,13 +24,7 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        foreach (self::$users as $user) {
-            if ($user['accessToken'] === $token) {
-                return new static($user);
-            }
-        }
-
-        return null;
+        throw new NotSupportedException('"findIdentityByAccessToken" is not implemented.');
     }
 
     /**
@@ -58,13 +35,7 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
      */
     public static function findByUsername($username)
     {
-        foreach (self::$users as $user) {
-            if (strcasecmp($user['username'], $username) === 0) {
-                return new static($user);
-            }
-        }
-
-        return null;
+        return static::findOne(['username' => $username, 'status_id' => Constants::STATUS_ENABLED]);
     }
 
     /**
@@ -80,7 +51,7 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
      */
     public function getAuthKey()
     {
-        return $this->authKey;
+        return $this->auth_key;
     }
 
     /**
@@ -88,17 +59,108 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
      */
     public function validateAuthKey($authKey)
     {
-        return $this->authKey === $authKey;
+        return $this->getAuthKey() === $authKey;
     }
 
     /**
      * Validates password
      *
      * @param string $password password to validate
-     * @return bool if password provided is valid for current user
+     * @return boolean if password provided is valid for current user
      */
     public function validatePassword($password)
     {
-        return $this->password === $password;
+        return Yii::$app->security->validatePassword($password, $this->password_hash);
+    }
+
+    /**
+     * Generates password hash from password and sets it to the model
+     *
+     * @param string $password
+     */
+    public function setPassword($password)
+    {
+        $this->password_hash = Yii::$app->security->generatePasswordHash($password);
+    }
+
+    /**
+     * Generates "remember me" authentication key
+     */
+    public function generateAuthKey()
+    {
+        $this->auth_key = Yii::$app->security->generateRandomString();
+    }
+
+    /**
+     * Finds out if password reset token is valid
+     *
+     * @param string $token password reset token
+     * @return boolean
+     */
+    public static function isPasswordResetTokenValid($token)
+    {
+        if (empty($token)) {
+            return false;
+        }
+
+        $timestamp = (int) substr($token, strrpos($token, '_') + 1);
+        $expire = Yii::$app->params['user.passwordResetTokenExpire'];
+        return $timestamp + $expire >= time();
+    }
+
+    /**
+     * Finds user by password reset token
+     *
+     * @param string $token password reset token
+     * @return static|null
+     */
+    public static function findByPasswordResetToken($token)
+    {
+        if (!static::isPasswordResetTokenValid($token)) {
+            return null;
+        }
+
+        return static::findOne([
+            'password_reset_token' => $token,
+            'status_id' => Constants::STATUS_ENABLED,
+        ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function attributeLabels()
+    {
+        $baseLabels = parent::attributeLabels();
+        return $baseLabels;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function rules()
+    {
+        $rules = parent::rules();
+        $rules[] = ['username', 'unique'];
+        $rules[] = ['password', 'required', 'on' => 'create'];
+        $rules[] = ['password', 'string', 'min' => 6];
+
+        return $rules;
+    }
+
+    /**
+     * Finds out if user has access to admin panel
+     * @return bool
+     */
+    public function hasAdminAccess()
+    {
+        if($this->status_id != Constants::STATUS_ENABLED){
+            return false;
+        }
+
+        return in_array($this->role_id,[
+            Constants::ROLE_ADMIN,
+            Constants::ROLE_REDACTOR
+        ]);
     }
 }
