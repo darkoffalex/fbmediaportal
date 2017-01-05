@@ -3,9 +3,13 @@
 namespace app\modules\admin\controllers;
 
 use app\models\CategoryTrl;
+use app\models\CategoryTrlDB;
 use app\models\LabelTrl;
 use app\models\Language;
 use app\models\LanguagesSearch;
+use app\models\PostImageTrl;
+use app\models\PostTrl;
+use app\models\PostVoteAnswerTrl;
 use Yii;
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Url;
@@ -123,6 +127,9 @@ class LanguagesController extends Controller
         //TODO: delete all translatable objects
         CategoryTrl::deleteAll(['lng' => $model->prefix]);
         LabelTrl::deleteAll(['lng' => $model->prefix]);
+        PostVoteAnswerTrl::deleteAll(['lng' => $model->prefix]);
+        PostImageTrl::deleteAll(['lng' => $model->prefix]);
+        PostTrl::deleteAll(['lng' => $model->prefix]);
 
         $model->delete();
 

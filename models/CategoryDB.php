@@ -19,6 +19,8 @@ use Yii;
  * @property string $icon_file
  *
  * @property CategoryTrl[] $categoryTrls
+ * @property PostCategory[] $postCategories
+ * @property Post[] $posts
  */
 class CategoryDB extends \yii\db\ActiveRecord
 {
@@ -67,5 +69,21 @@ class CategoryDB extends \yii\db\ActiveRecord
     public function getCategoryTrls()
     {
         return $this->hasMany(CategoryTrl::className(), ['category_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPostCategories()
+    {
+        return $this->hasMany(PostCategory::className(), ['category_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPosts()
+    {
+        return $this->hasMany(Post::className(), ['id' => 'post_id'])->viaTable('post_category', ['category_id' => 'id']);
     }
 }
