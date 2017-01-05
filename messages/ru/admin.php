@@ -62,5 +62,10 @@ return [
     'Languages list' => 'Список языков',
     'Configurations' => 'Настройки',
     'Source Word' => 'Исходное слово',
-    'Labels list' => 'Список надписей'
+    'Labels list' => 'Список надписей',
+    'Internal name' => 'Внутр. имя',
+    'META description' => 'META описание',
+    'META keywords' => 'META ключевые слова',
+    'Update category' => 'Редактировать категорию',
+    'You have no categories' => 'Нет созданных рубрик'
 ];

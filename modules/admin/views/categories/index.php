@@ -54,7 +54,11 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <td><?= $category->id; ?></td>
                                 <td>
                                     <?php for($i=1; $i < $category->getDepth(); $i++): ?> - <?php endfor; ?>
-                                    <?= $category->name; ?>
+                                    <?php if($category->getDepth() == 1): ?>
+                                        <strong><?= $category->name; ?></strong>
+                                    <?php else: ?>
+                                        <?= $category->name; ?>
+                                    <?php endif; ?>
                                 </td>
                                 <td><?= 0; ?></td>
                                 <td>

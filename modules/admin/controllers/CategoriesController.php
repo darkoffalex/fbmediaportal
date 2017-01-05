@@ -99,7 +99,7 @@ class CategoriesController extends Controller
             //if validated - save and go to detail edit
             if($model->validate()){
                 $model->save();
-                return $this->redirect(Url::to(['/admin/categories/update', 'id' => $model->id]));
+                return $this->redirect(Url::to(['/admin/categories/edit', 'id' => $model->id]));
             }
         }
 
@@ -113,7 +113,7 @@ class CategoriesController extends Controller
      * @throws NotFoundHttpException
      * @throws \Exception
      */
-    public function actionUpdate($id)
+    public function actionEdit($id)
     {
         /* @var $model Category */
         $model = Category::findOne((int)$id);
@@ -132,9 +132,19 @@ class CategoriesController extends Controller
             $model->updated_at = date('Y-m-d H:i:s',time());
             $model->updated_by_id = Yii::$app->user->id;
 
-            //if validated - save and go to detail edit
+            //if validated - save
             if($model->validate()){
+
+                //update main object
                 $model->update();
+
+                //save translations
+                foreach($model->translations as $lng => $attributes){
+                    $trl = $model->getATrl($lng);
+                    $trl->setAttributes($attributes);
+                    $trl->isNewRecord ? $trl->save() : $trl->update();
+                }
+
             }
         }
 

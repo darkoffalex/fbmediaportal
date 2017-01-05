@@ -17,6 +17,11 @@ use yii\helpers\ArrayHelper;
 class Category extends CategoryDB
 {
     /**
+     * @var array for loading translations from POST
+     */
+    public $translations = [];
+
+    /**
      * @inheritdoc
      */
     public function attributeLabels()
@@ -35,6 +40,7 @@ class Category extends CategoryDB
     {
         $baseRules = parent::rules();
         $baseRules[] = [['name'],'required'];
+        $baseRules[] = [['translations'],'safe'];
         return $baseRules;
     }
 

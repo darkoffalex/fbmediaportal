@@ -29,13 +29,13 @@ $controller = $this->context;
 
     <div class="modal-body">
         <?= $form->field($model, 'name')->textInput(); ?>
+
         <?= $form->field($model, 'status_id')->dropDownList([
             Constants::STATUS_ENABLED => Yii::t('admin','Enabled'),
             Constants::STATUS_DISABLED => Yii::t('admin','Disabled'),
         ]); ?>
-        <?= $form->field($model, 'parent_category_id')->dropDownList(array_merge([
-            0 => Yii::t('admin','[NONE]')
-        ],ArrayHelper::map(Category::getRecursiveItems(),'id','name'))); ?>
+
+        <?= $form->field($model, 'parent_category_id')->dropDownList([0 => Yii::t('admin','[NONE]')] + ArrayHelper::map(Category::getRecursiveItems(),'id','name')); ?>
     </div>
 
     <div class="modal-footer">
