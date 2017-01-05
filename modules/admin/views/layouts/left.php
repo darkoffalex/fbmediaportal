@@ -39,6 +39,13 @@
                         'url' => ['/admin/users/index'],
                     ],
                     [
+                        'label' => Yii::t('admin','Categories'),
+                        'icon' => 'fa fa-folder',
+                        'active' => $c == 'categories',
+                        'visible' => true,
+                        'url' => ['/admin/categories/index'],
+                    ],
+                    [
                         'label' => Yii::t('admin','Exit'),
                         'icon' => 'fa fa-sign-out',
                         'url' => ['/admin/main/logout']

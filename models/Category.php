@@ -2,12 +2,17 @@
 
 namespace app\models;
 
+use app\helpers\Constants;
 use Yii;
+use yii\helpers\ArrayHelper;
+
 /**
  * @property CategoryTrl $trl
  * @property CategoryTrl $aTrl
  * @property Category $parent
  * @property Category[] $children
+ * @property User $createdBy
+ * @property User $updatedBy
  */
 class Category extends CategoryDB
 {
@@ -50,6 +55,22 @@ class Category extends CategoryDB
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCreatedBy()
+    {
+        return $this->hasOne(User::className(),['id' => 'created_by_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUpdatedBy()
+    {
+        return $this->hasOne(User::className(),['id' => 'updated_by_id']);
+    }
+
+    /**
      * @return CategoryTrl
      */
     public function getATrl()
@@ -67,5 +88,79 @@ class Category extends CategoryDB
     {
         $lng = Yii::$app->language;
         return $this->hasOne(CategoryTrl::className(), ['category_id' => 'id'])->where(['lng' => $lng]);
+    }
+
+
+    /**
+     * Recursively deletes all sub-categories and category itself
+     * @throws \Exception
+     */
+    public function recursiveDelete()
+    {
+        if(count($this->children) > 0){
+            foreach($this->children as $child){
+                $child->recursiveDelete();
+            }
+        }
+
+        $this->delete();
+    }
+
+    /**
+     * Returns nesting depth level
+     * @return int
+     */
+    public function getDepth()
+    {
+        return count($this->getBreadCrumbs(false));
+    }
+
+    /**
+     * Get bread crumbs pairs
+     * @param string $attributeName
+     * @param bool|true $useTrl
+     * @return array
+     */
+    public function getBreadCrumbs($useTrl = true, $attributeName = 'name')
+    {
+        $result = [];
+
+        $currentItem = $this;
+
+        $result[$this->id] = $useTrl ? ArrayHelper::getValue($this->trl,$attributeName) : $this->getAttribute($attributeName);
+
+        while(!empty($currentItem->parent)){
+            $result[$currentItem->parent_category_id] = $useTrl ? ArrayHelper::getValue($currentItem->parent->trl,$attributeName) : $currentItem->parent->getAttribute($attributeName);
+            $currentItem = $currentItem->parent;
+        };
+
+        return array_reverse($result,true);
+    }
+
+    /**
+     * Get recursive listed categories
+     * @param int $rootId
+     * @param bool|false $justEnabled
+     * @return Category[]
+     */
+    public static function getRecursiveItems($rootId = 0, $justEnabled = false)
+    {
+        /* @var $result self[] */
+        $result = [];
+
+        /* @var $items self[] */
+        $q = self::find()->orderBy('priority ASC')->where(['parent_category_id' => $rootId]);
+        if($justEnabled) $q->where(['status_id' => Constants::STATUS_ENABLED]);
+        $items = $q->all();
+
+        foreach($items as $category){
+            $result[] = $category;
+
+            if(!empty($category->children)){
+                $result = array_merge($result,self::getRecursiveItems($category->id,$justEnabled));
+            }
+        }
+
+        return $result;
     }
 }

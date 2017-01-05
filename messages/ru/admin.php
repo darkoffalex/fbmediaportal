@@ -41,5 +41,17 @@ return [
     'Saved' => 'Сохранено',
     'All changes accepted' => 'Все изменения сохранены',
     'No' => 'Нет',
-    'Yes' => 'Да'
+    'Yes' => 'Да',
+    'to' => 'до',
+    'Category not found' => 'Рубрика не найдена',
+    'Category list' => 'Список рубрик',
+    'Categories' => 'Рубрики',
+    'Items' => 'Материалов',
+    'Updated' => 'Обновлен',
+    'Status' => 'Состояние',
+    'Delete' => 'Удалить',
+    'Parent Category ID' => 'Родительская рубрика',
+    'Close' => 'Закрыть',
+    'Basic configurations' => 'Основная конфигурация',
+    '[NONE]' => '[НЕТ]',
 ];
