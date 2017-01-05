@@ -14,6 +14,7 @@
                 'options' => ['class' => 'sidebar-menu'],
                 'items' => [
 
+                    ['label' => Yii::t('admin','Basic'), 'options' => ['class' => 'header']],
                     [
                         'label' => Yii::t('admin','Users'),
                         'icon' => 'fa fa-users',
@@ -30,6 +31,7 @@
                         'url' => ['/admin/categories/index'],
                     ],
 
+                    ['label' => Yii::t('admin','Common config'), 'options' => ['class' => 'header']],
                     [
                         'label' => Yii::t('admin','Translations'),
                         'icon' => 'fa fa-globe',

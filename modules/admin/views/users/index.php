@@ -57,25 +57,6 @@ $gridColumns = [
     ],
 
     [
-        'attribute' => 'status_id',
-        'filter' => [
-            Constants::STATUS_ENABLED => Yii::t('admin','Enabled'),
-            Constants::STATUS_DISABLED => Yii::t('admin','Disabled'),
-        ],
-        'enableSorting' => false,
-        'format' => 'raw',
-        'value' => function ($model, $key, $index, $column){
-            /* @var $model \app\models\User */
-            $statuses = [
-                Constants::STATUS_ENABLED => Yii::t('admin','Enabled'),
-                Constants::STATUS_DISABLED => Yii::t('admin','Disabled'),
-            ];
-
-            return !empty($statuses[$model->status_id]) ? $statuses[$model->status_id] : Yii::t('admin','Unknown');
-        },
-    ],
-
-    [
         'attribute' => 'role_id',
         'filter' => [
             Constants::ROLE_ADMIN => Yii::t('admin','Administrator'),
@@ -96,26 +77,26 @@ $gridColumns = [
         },
     ],
 
-    [
-        'attribute' => 'last_online_at',
-        'filter' => \kartik\daterange\DateRangePicker::widget([
-            'model' => $searchModel,
-            'convertFormat' => true,
-            'attribute' => 'last_online_at',
-            'pluginOptions' => [
-                'locale' => [
-                    'format'=>'Y-m-d',
-                    'separator'=>' - ',
-                ],
-            ],
-        ]),
-        'enableSorting' => true,
-        'format' => 'raw',
-        'value' => function ($model, $key, $index, $column){
-            /* @var $model \app\models\User */
-            return !empty($model->last_online_at) ? $model->last_online_at : Yii::t('admin','No data');
-        },
-    ],
+//    [
+//        'attribute' => 'last_online_at',
+//        'filter' => \kartik\daterange\DateRangePicker::widget([
+//            'model' => $searchModel,
+//            'convertFormat' => true,
+//            'attribute' => 'last_online_at',
+//            'pluginOptions' => [
+//                'locale' => [
+//                    'format'=>'Y-m-d',
+//                    'separator'=>' - ',
+//                ],
+//            ],
+//        ]),
+//        'enableSorting' => true,
+//        'format' => 'raw',
+//        'value' => function ($model, $key, $index, $column){
+//            /* @var $model \app\models\User */
+//            return !empty($model->last_online_at) ? $model->last_online_at : Yii::t('admin','No data');
+//        },
+//    ],
 
     [
         'attribute' => 'counter_comments',
@@ -137,24 +118,43 @@ $gridColumns = [
         },
     ],
 
+//    [
+//        'attribute' => 'created_at',
+//        'filter' => \kartik\daterange\DateRangePicker::widget([
+//            'model' => $searchModel,
+//            'convertFormat' => true,
+//            'attribute' => 'created_at',
+//            'pluginOptions' => [
+//                'locale' => [
+//                    'format'=>'Y-m-d',
+//                    'separator'=>' - ',
+//                ],
+//            ],
+//        ]),
+//        'enableSorting' => true,
+//        'format' => 'raw',
+//        'value' => function ($model, $key, $index, $column){
+//            /* @var $model \app\models\User */
+//            return !empty($model->created_at) ? $model->created_at : Yii::t('admin','No data');
+//        },
+//    ],
+
     [
-        'attribute' => 'created_at',
-        'filter' => \kartik\daterange\DateRangePicker::widget([
-            'model' => $searchModel,
-            'convertFormat' => true,
-            'attribute' => 'created_at',
-            'pluginOptions' => [
-                'locale' => [
-                    'format'=>'Y-m-d',
-                    'separator'=>' - ',
-                ],
-            ],
-        ]),
-        'enableSorting' => true,
+        'attribute' => 'status_id',
+        'filter' => [
+            Constants::STATUS_ENABLED => Yii::t('admin','Enabled'),
+            Constants::STATUS_DISABLED => Yii::t('admin','Disabled'),
+        ],
+        'enableSorting' => false,
         'format' => 'raw',
         'value' => function ($model, $key, $index, $column){
             /* @var $model \app\models\User */
-            return !empty($model->created_at) ? $model->created_at : Yii::t('admin','No data');
+            $statuses = [
+                Constants::STATUS_ENABLED => '<span class="label label-success">'.Yii::t('admin','Enabled').'</span>',
+                Constants::STATUS_DISABLED => '<span class="label label-danger">'.Yii::t('admin','Disabled').'</span>',
+            ];
+
+            return !empty($statuses[$model->status_id]) ? $statuses[$model->status_id] : Yii::t('admin','Unknown');
         },
     ],
 

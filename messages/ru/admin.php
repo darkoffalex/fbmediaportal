@@ -67,5 +67,7 @@ return [
     'META description' => 'META описание',
     'META keywords' => 'META ключевые слова',
     'Update category' => 'Редактировать категорию',
-    'You have no categories' => 'Нет созданных рубрик'
+    'You have no categories' => 'Нет созданных рубрик',
+    'Basic' => 'Основное',
+    'Common config' => 'Общее'
 ];
