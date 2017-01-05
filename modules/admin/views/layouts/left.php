@@ -14,23 +14,6 @@
                 'options' => ['class' => 'sidebar-menu'],
                 'items' => [
 
-//                    [
-//                        'label' => 'Ссылка',
-//                        'icon' => 'fa fa-file-text-o',
-//                        'url' => [''],
-//                        'active' => false,
-//                        'visible' => false,
-//                        'items' => [
-//                            [
-//                                'label' => 'Под-ссылка',
-//                                'icon' => 'fa fa-circle-o',
-//                                'url' => [''],
-//                                'active' => false,
-//                                'visible' => false
-//                            ]
-//                        ]
-//                    ],
-
                     [
                         'label' => Yii::t('admin','Users'),
                         'icon' => 'fa fa-users',
@@ -38,6 +21,7 @@
                         'visible' => $user->role_id == \app\helpers\Constants::ROLE_ADMIN,
                         'url' => ['/admin/users/index'],
                     ],
+
                     [
                         'label' => Yii::t('admin','Categories'),
                         'icon' => 'fa fa-folder',
@@ -45,6 +29,31 @@
                         'visible' => true,
                         'url' => ['/admin/categories/index'],
                     ],
+
+                    [
+                        'label' => Yii::t('admin','Translations'),
+                        'icon' => 'fa fa-globe',
+                        'url' => [''],
+                        'active' => in_array($c,['languages','labels']),
+                        'visible' => true,
+                        'items' => [
+                            [
+                                'label' => Yii::t('admin','Languages'),
+                                'icon' => 'fa fa-circle-o',
+                                'url' => ['/admin/languages/index'],
+                                'active' => $c == 'languages',
+                                'visible' => true
+                            ],
+                            [
+                                'label' => Yii::t('admin','Labels'),
+                                'icon' => 'fa fa-circle-o',
+                                'url' => ['/admin/languages/index'],
+                                'active' => $c == 'labels',
+                                'visible' => true
+                            ]
+                        ]
+                    ],
+
                     [
                         'label' => Yii::t('admin','Exit'),
                         'icon' => 'fa fa-sign-out',

@@ -54,4 +54,11 @@ return [
     'Close' => 'Закрыть',
     'Basic configurations' => 'Основная конфигурация',
     '[NONE]' => '[НЕТ]',
+    'Languages' => 'Языки',
+    'Labels' => 'Надписи',
+    'Translations' => 'Переводы',
+    'Self Name' => 'Самоназвание',
+    'Prefix' => 'Префикс',
+    'Languages list' => 'Список языков',
+    'Configurations' => 'Настройки'
 ];

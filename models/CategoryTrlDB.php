@@ -12,6 +12,9 @@ use Yii;
  * @property string $lng
  * @property string $name
  * @property string $description
+ * @property string $meta_keywords
+ * @property string $meta_description
+ * @property string $seo_alias
  *
  * @property Category $category
  */
@@ -32,8 +35,8 @@ class CategoryTrlDB extends \yii\db\ActiveRecord
     {
         return [
             [['category_id'], 'integer'],
-            [['description'], 'string'],
-            [['lng', 'name'], 'string', 'max' => 255],
+            [['description', 'meta_description'], 'string'],
+            [['lng', 'name', 'meta_keywords', 'seo_alias'], 'string', 'max' => 255],
             [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => Category::className(), 'targetAttribute' => ['category_id' => 'id']],
         ];
     }
@@ -49,6 +52,9 @@ class CategoryTrlDB extends \yii\db\ActiveRecord
             'lng' => 'Lng',
             'name' => 'Name',
             'description' => 'Description',
+            'meta_keywords' => 'Meta Keywords',
+            'meta_description' => 'Meta Description',
+            'seo_alias' => 'Seo Alias',
         ];
     }
 
