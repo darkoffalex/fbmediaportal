@@ -31,6 +31,14 @@
                         'url' => ['/admin/categories/index'],
                     ],
 
+                    [
+                        'label' => Yii::t('admin','Posts'),
+                        'icon' => 'fa fa-file',
+                        'active' => $c == 'posts',
+                        'visible' => true,
+                        'url' => ['/admin/posts/index'],
+                    ],
+
                     ['label' => Yii::t('admin','Common config'), 'options' => ['class' => 'header']],
                     [
                         'label' => Yii::t('admin','Translations'),

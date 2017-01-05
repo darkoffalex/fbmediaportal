@@ -69,5 +69,9 @@ return [
     'Update category' => 'Редактировать категорию',
     'You have no categories' => 'Нет созданных рубрик',
     'Basic' => 'Основное',
-    'Common config' => 'Общее'
+    'Common config' => 'Общее',
+    'Posts' => 'Материалы',
+    'Posts list' => 'Список материалов',
+    'Content Type ID' => 'Вид материала',
+    'Content' => 'Содержимое'
 ];
