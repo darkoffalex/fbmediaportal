@@ -12,6 +12,7 @@ class Constants
     //Types of users (imported/created)
     const USR_TYPE_CREATED = 1;
     const USR_TYPE_IMPORTED = 2;
+    const USR_TYPE_FB_AUTHORIZED = 3;
 
     //Statuses of objects (enabled/disabled/suspended)
     const STATUS_DISABLED = 0;

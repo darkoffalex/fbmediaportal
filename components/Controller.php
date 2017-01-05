@@ -2,29 +2,31 @@
 
 namespace app\components;
 
+use Yii;
 use yii\web\Controller as BaseController;
 use yii\base\Module;
 use yii\base\Action;
 use yii\web\NotFoundHttpException;
+use app\models\User;
 
 class Controller extends BaseController
 {
     /**
-     * Переопределить конструктор
+     * Redefine base constructor
      * @param string $id
      * @param Module $module
      * @param array $config
      */
     public function __construct($id, $module, $config = [])
     {
-        //заголовок страниц
+        //title of pages
         $this->view->title = "Мой сайт";
 
-        //мета-теги
+        //meta tags
         $this->view->registerMetaTag(['name' => 'description', 'content' => ""]);
         $this->view->registerMetaTag(['name' => 'keywords', 'content' => ""]);
 
-        //open-graph мета-теги
+        //open-graph meta tags
         $this->view->registerMetaTag(['property' => 'og:description', 'content' => ""]);
         $this->view->registerMetaTag(['property' => 'og:url', 'content' => ""]);
         $this->view->registerMetaTag(['property' => 'og:site_name', 'content' => ""]);
@@ -33,25 +35,33 @@ class Controller extends BaseController
         $this->view->registerMetaTag(['property' => 'og:image:width', 'content' => '200']);
         $this->view->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
 
-        //временная зона
+        //timezone
         date_default_timezone_set('Europe/Moscow');
 
-        //включить внешние ключи (для операций со SQLITE базой)
+        //enable foreign keys (for SQLITE database)
 //        Yii::$app->db->createCommand("PRAGMA foreign_keys = ON")->execute();
 
-        //базовый конструктор
+        //base constructor
         parent::__construct($id,$module,$config);
     }
 
     /**
-     * Выполнять перед каждым action'ом
+     * Run before every action on frontend part
      * @param Action $action
      * @return bool
      * @throws \yii\web\BadRequestHttpException
      */
     public function beforeAction($action)
     {
-        //TODO: здесь код что будет выполняться пепед каждый действием
+        /* @var $user User */
+        $user = !Yii::$app->user->isGuest ? Yii::$app->user->identity : null;
+
+        //Update the last visit time
+        if(!empty($user)){
+            $user->last_online_at = date('Y-m-d H:i:s', time());
+            $user->update();
+        }
+
         return parent::beforeAction($action);
     }
 }

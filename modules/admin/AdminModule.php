@@ -42,6 +42,13 @@ class AdminModule extends \yii\base\Module
         /* @var $user User */
         $user = !Yii::$app->user->isGuest ? Yii::$app->user->identity : null;
 
+        //Update the last visit time
+        if(!empty($user)){
+            $user->last_online_at = date('Y-m-d H:i:s', time());
+            $user->update();
+        }
+
+        //Redirect to login page if not authenticated
         if((empty($user) || !$user->hasAdminAccess()) && $action->id != 'login'){
             Yii::$app->response->redirect(Url::to(['/admin/main/login']));
             return false;

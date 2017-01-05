@@ -6,6 +6,8 @@
 
     <section class="sidebar">
 
+        <?php $c = Yii::$app->controller->id; ?>
+        <?php $a = Yii::$app->controller->action->id; ?>
 
         <?= dmstr\widgets\Menu::widget(
             [
@@ -29,6 +31,13 @@
 //                        ]
 //                    ],
 
+                    [
+                        'label' => Yii::t('admin','Users'),
+                        'icon' => 'fa fa-users',
+                        'active' => $c == 'users',
+                        'visible' => $user->role_id == \app\helpers\Constants::ROLE_ADMIN,
+                        'url' => ['/admin/users/index'],
+                    ],
                     [
                         'label' => Yii::t('admin','Exit'),
                         'icon' => 'fa fa-sign-out',

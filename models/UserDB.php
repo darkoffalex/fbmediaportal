@@ -26,6 +26,8 @@ use Yii;
  * @property string $last_online_at
  * @property integer $created_by_id
  * @property integer $updated_by_id
+ * @property integer $counter_comments
+ * @property integer $counter_posts
  */
 class UserDB extends \yii\db\ActiveRecord
 {
@@ -44,7 +46,7 @@ class UserDB extends \yii\db\ActiveRecord
     {
         return [
             [['auth_key', 'password_hash', 'password_reset_token', 'fb_user_id', 'fb_avatar_url'], 'string'],
-            [['role_id', 'type_id', 'status_id', 'created_by_id', 'updated_by_id'], 'integer'],
+            [['role_id', 'type_id', 'status_id', 'created_by_id', 'updated_by_id', 'counter_comments', 'counter_posts'], 'integer'],
             [['created_at', 'updated_at', 'last_online_at'], 'safe'],
             [['username', 'name', 'surname', 'email', 'avatar_file'], 'string', 'max' => 255],
         ];
@@ -75,6 +77,8 @@ class UserDB extends \yii\db\ActiveRecord
             'last_online_at' => 'Last Online At',
             'created_by_id' => 'Created By ID',
             'updated_by_id' => 'Updated By ID',
+            'counter_comments' => 'Counter Comments',
+            'counter_posts' => 'Counter Posts',
         ];
     }
 }

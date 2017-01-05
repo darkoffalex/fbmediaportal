@@ -14,16 +14,16 @@ use yii\web\Controller;
 class MainController extends Controller
 {
     /**
-     * Renders the index view for the module
+     * Redirects to the main page
      * @return string
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        return $this->redirect(Url::to(['/admin/users/index']));
     }
 
     /**
-     * Логин админ-пользователя при помощи формы
+     * Login through form
      * @return string
      */
     public function actionLogin()
@@ -46,7 +46,7 @@ class MainController extends Controller
     }
 
     /**
-     * Логаут
+     * Logout
      * @return \yii\web\Response
      */
     public function actionLogout()
