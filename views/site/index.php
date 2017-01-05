@@ -12,8 +12,8 @@ $user = Yii::$app->user->identity;
 <div class="site-index">
 
     <div class="jumbotron">
-        <h1>Поздравляем!</h1>
-        <p class="lead">Ваш сайт-болванка запущен</p>
+        <h1>Новостной FB портал</h1>
+        <p class="lead">Проект в разработке</p>
     </div>
 
     <div class="body-content">
