@@ -9,7 +9,7 @@ use yii\data\ActiveDataProvider;
 class PostSearch extends Post
 {
 
-    public $internal_name, $name, $content;
+    public $trl_name, $content;
 
     /**
      * Validation rules for search
@@ -18,7 +18,7 @@ class PostSearch extends Post
     public function rules()
     {
         return [
-            [['internal_name', 'name', 'content'], 'string', 'max' => 255],
+            [['trl_name', 'name', 'content'], 'string', 'max' => 255],
             [['content_type_id', 'type_id'], 'integer'],
         ];
     }
@@ -31,7 +31,7 @@ class PostSearch extends Post
         $baseLabels = parent::attributeLabels();
 
         $newLabels = [
-            'internal_name' => Yii::t('admin','Internal name'),
+            'trl_name' => Yii::t('admin','Name'),
             'content' => Yii::t('admin','Content'),
         ];
 
@@ -53,8 +53,8 @@ class PostSearch extends Post
 
         if($this->validate()){
 
-            if(!empty($this->internal_name)){
-                $q->andWhere(['like','name', $this->internal_name]);
+            if(!empty($this->name)){
+                $q->andWhere(['like','name', $this->name]);
             }
 
             if(!empty($this->content_type_id)){
@@ -65,15 +65,15 @@ class PostSearch extends Post
                 $q->andWhere(['type_id' => $this->content_type_id]);
             }
 
-            if(!empty($this->name)){
-                $q->joinWith('postTrls as trl')->andWhere(['lng' => $lng, 'trl.name' => $this->name]);
+            if(!empty($this->trl_name)){
+                $q->joinWith('postTrls as trl')->andWhere(['lng' => $lng, 'trl.name' => $this->trl_name]);
             }
         }
 
         return new ActiveDataProvider([
             'query' => $q,
             'pagination' => [
-                'pageSize' => 10,
+                'pageSize' => 50,
             ],
         ]);
     }

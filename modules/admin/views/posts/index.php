@@ -5,6 +5,7 @@ use yii\bootstrap\Html;
 use yii\helpers\Url;
 use app\helpers\Constants;
 use app\helpers\Help;
+use yii\helpers\ArrayHelper;
 
 /* @var $searchModel \app\models\PostSearch */
 /* @var $dataProvider \yii\data\ActiveDataProvider */
@@ -22,7 +23,10 @@ $this->params['breadcrumbs'][] = $this->title;
 $gridColumns = [
     ['class' => 'yii\grid\SerialColumn'],
 
-    ['attribute' => 'internal_name'],
+    [
+        'attribute' => 'name',
+        'label' => Yii::t('admin','Internal name')
+    ],
 
     [
         'attribute' => 'type_id',
@@ -69,7 +73,21 @@ $gridColumns = [
     ],
 
     [
-        'attribute' => 'name',
+        'label' => Yii::t('admin','Categories'),
+        'enableSorting' => false,
+        'format' => 'raw',
+        'value' => function ($model, $key, $index, $column) use ($lng){
+            /* @var $model \app\models\Post */
+            $resultString = "";
+            foreach($model->categories as $category){
+                $resultString.="<span class='label label-primary'>{$category->name}</span>";
+            }
+        },
+    ],
+
+    [
+        'attribute' => 'trl_name',
+        'enableSorting' => false,
         'format' => 'raw',
         'value' => function ($model, $key, $index, $column) use ($lng){
             /* @var $model \app\models\Post */
@@ -82,7 +100,15 @@ $gridColumns = [
         'format' => 'raw',
         'value' => function ($model, $key, $index, $column) use ($lng){
             /* @var $model \app\models\Post */
-            return 'IN PROGRESS..';
+            switch($model->content_type_id){
+                case Constants::CONTENT_TYPE_ARTICLE:
+                case Constants::CONTENT_TYPE_NEWS:
+                    $trl = $model->getATrl($lng);
+                    return "<p>{$trl->small_text}</p>{$trl->text}";
+                    break;
+                default:
+                    return "<p>In progress...</p>";
+            }
         },
     ],
 

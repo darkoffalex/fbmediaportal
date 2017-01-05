@@ -72,6 +72,12 @@ return [
     'Common config' => 'Общее',
     'Posts' => 'Материалы',
     'Posts list' => 'Список материалов',
-    'Content Type ID' => 'Вид материала',
-    'Content' => 'Содержимое'
+    'Content Type ID' => 'Вид',
+    'Content' => 'Содержимое',
+    'Article' => 'Статья',
+    'News' => 'Новость',
+    'Voting' => 'Опрос',
+    'Photo' => 'Фото',
+    'Video' => 'Видео',
+    'Update post' => 'Редактировать материал'
 ];

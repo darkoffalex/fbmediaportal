@@ -49,7 +49,7 @@ class Post extends PostDB
         $trl = PostTrl::findOne(['post_id' => $this->id, 'lng' => $lng]);
 
         if(empty($trl)){
-            $trl = new LabelTrl();
+            $trl = new PostTrl();
             $trl -> post_id = $this->id;
             $trl -> lng = $lng;
         }
