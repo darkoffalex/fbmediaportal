@@ -60,5 +60,7 @@ return [
     'Self Name' => 'Самоназвание',
     'Prefix' => 'Префикс',
     'Languages list' => 'Список языков',
-    'Configurations' => 'Настройки'
+    'Configurations' => 'Настройки',
+    'Source Word' => 'Исходное слово',
+    'Labels list' => 'Список надписей'
 ];

@@ -47,7 +47,7 @@
                             [
                                 'label' => Yii::t('admin','Labels'),
                                 'icon' => 'fa fa-circle-o',
-                                'url' => ['/admin/languages/index'],
+                                'url' => ['/admin/labels/index'],
                                 'active' => $c == 'labels',
                                 'visible' => true
                             ]

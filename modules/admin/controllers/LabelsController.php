@@ -2,7 +2,10 @@
 
 namespace app\modules\admin\controllers;
 
+use app\helpers\Help;
 use app\models\CategoryTrl;
+use app\models\Label;
+use app\models\LabelSearch;
 use app\models\LabelTrl;
 use app\models\Language;
 use app\models\LanguagesSearch;
@@ -13,7 +16,7 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
-class LanguagesController extends Controller
+class LabelsController extends Controller
 {
     /**
      * Render list of all languages
@@ -21,18 +24,18 @@ class LanguagesController extends Controller
      */
     public function actionIndex()
     {
-        $searchModel = new LanguagesSearch();
+        $searchModel = new LabelSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         return $this->render('index', compact('searchModel','dataProvider'));
     }
 
     /**
-     * Creating a language (modal window)
+     * Creating a label (modal window)
      * @return array|string|Response
      */
     public function actionCreate()
     {
-        $model = new Language();
+        $model = new Label();
 
         //ajax validation
         if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
@@ -54,8 +57,19 @@ class LanguagesController extends Controller
 
             //if validated - save and go to list
             if($model->validate()){
+
+                //save main object
                 $model->save();
-                return $this->redirect(Url::to(['/admin/languages/index']));
+
+                //save translations
+                foreach($model->translations as $lng => $word){
+                    $trl = $model->getATrl($lng);
+                    $trl->word = $word;
+                    $trl->isNewRecord ? $trl->save() : $trl->update();
+                }
+
+                //back to list
+                return $this->redirect(Url::to(['/admin/labels/index']));
             }
         }
 
@@ -63,7 +77,7 @@ class LanguagesController extends Controller
     }
 
     /**
-     * Updating a language (modal window)
+     * Updating a label (modal window)
      * @param $id
      * @return array|string|Response
      * @throws NotFoundHttpException
@@ -71,11 +85,11 @@ class LanguagesController extends Controller
      */
     public function actionUpdate($id)
     {
-        /* @var $model Language */
-        $model = Language::findOne((int)$id);
+        /* @var $model Label */
+        $model = Label::findOne((int)$id);
 
         if(empty($model)){
-            throw new NotFoundHttpException(Yii::t('admin','Language not found'),404);
+            throw new NotFoundHttpException(Yii::t('admin','Label not found'),404);
         }
 
         //ajax validation
@@ -96,8 +110,19 @@ class LanguagesController extends Controller
 
             //if validated - save and go to list
             if($model->validate()){
+
+                //save main object
                 $model->update();
-                return $this->redirect(Url::to(['/admin/languages/index']));
+
+                //save translations
+                foreach($model->translations as $lng => $word){
+                    $trl = $model->getATrl($lng);
+                    $trl->word = $word;
+                    $trl->isNewRecord ? $trl->save() : $trl->update();
+                }
+
+                //back to list
+                return $this->redirect(Url::to(['/admin/labels/index']));
             }
         }
 
@@ -105,7 +130,7 @@ class LanguagesController extends Controller
     }
 
     /**
-     * Deleting languages
+     * Deleting labels
      * @param $id
      * @return Response
      * @throws NotFoundHttpException
@@ -114,15 +139,11 @@ class LanguagesController extends Controller
     public function actionDelete($id)
     {
         /* @var $model Language */
-        $model = Language::findOne((int)$id);
+        $model = Label::findOne((int)$id);
 
-        if(empty($model) || Language::find()->count() < 2){
-            throw new NotFoundHttpException(Yii::t('admin','Language not found'),404);
+        if(empty($model)){
+            throw new NotFoundHttpException(Yii::t('admin','Label not found'),404);
         }
-
-        //TODO: delete all translatable objects
-        CategoryTrl::deleteAll(['lng' => $model->prefix]);
-        LabelTrl::deleteAll(['lng' => $model->prefix]);
 
         $model->delete();
 

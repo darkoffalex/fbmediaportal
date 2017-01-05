@@ -71,14 +71,23 @@ class Category extends CategoryDB
     }
 
     /**
+     * @param string|null $lng
      * @return CategoryTrl
      */
-    public function getATrl()
+    public function getATrl($lng = null)
     {
-        $lng = Yii::$app->language;
+        $lng = empty($lng) ? Yii::$app->language : $lng;
+
         /* @var $trl CategoryTrl */
         $trl = CategoryTrl::findOne(['category_id' => $this->id, 'lng' => $lng]);
-        return !empty($trl) ? $trl : new CategoryTrl();
+
+        if(empty($trl)){
+            $trl = new CategoryTrl();
+            $trl -> category_id = $this->id;
+            $trl -> lng = $lng;
+        }
+
+        return $trl;
     }
 
     /**

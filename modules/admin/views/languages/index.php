@@ -31,7 +31,7 @@ $gridColumns = [
         'template' => '{delete} &nbsp; {update}',
         'buttons' => [
             'update' => function ($url,$model,$key) {
-                /* @var $model \app\models\User */
+                /* @var $model \app\models\Language */
                 return Html::a('<span class="glyphicon glyphicon-pencil"></span>', Url::to(['/admin/languages/update', 'id' => $model->id]), ['data-toggle'=>'modal', 'data-target'=>'.modal', 'title' => Yii::t('admin','Edit')]);
             },
         ],
