@@ -107,31 +107,20 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
 
                     <div class="form-group dropdown inactive-links">
                         <label class="control-label"><?= Yii::t('admin','Categories'); ?></label>
+
                         <div class="form-control categories-tags" data-toggle="dropdown">
-
+                            <?php foreach($model->categories as $cat): ?>
+                                <span class="label label-primary margin-r-5">
+                                    <?= $cat->name; ?>
+                                    <span class="fa fa-close icon-pointer" data-remove data-category-id="<?= $cat->id; ?>"></span>
+                                    <input type="hidden" name="Post[categoriesChecked][]" value="<?= $cat->id; ?>">
+                                </span>
+                            <?php endforeach; ?>
                         </div>
-
-                        <div class="checkboxes"></div>
 
                         <?php echo DropdownX::widget([
                             'items' => Category::buildRecursiveArrayForDropDown(),
                         ]);  ?>
-
-                        <script type="text/javascript">
-                            $(document).ready(function(){
-
-                                $('[data-category-add]').click(function(){
-                                    var categoryAdd = $(this).data('category-add');
-                                    var categoryRemove = $(this).data('category-remove');
-                                    var categoryName = $(this).data('category-name');
-
-                                    $('.categories-tags').append('<span class="label label-primary">'+categoryName+' <span class="fa fa-close" data-category-id="'+categoryAdd+'"></span></span>');
-                                    //$('.categories-tags').find(['data-category-id="'+categoryRemove+'"']).remove();
-
-                                    return false;
-                                });
-                            });
-                        </script>
                     </div>
 
                     <hr>

@@ -18,7 +18,7 @@ class Post extends PostDB
     /**
      * @var array for loading categories relation info
      */
-    public $categories = [];
+    public $categoriesChecked = [];
 
     /**
      * @inheritdoc
@@ -38,7 +38,7 @@ class Post extends PostDB
     public function rules()
     {
         $baseRules = parent::rules();
-        $baseRules[] = [['translations','categories'],'safe'];
+        $baseRules[] = [['translations','categoriesChecked'],'safe'];
         return $baseRules;
     }
 

@@ -7,10 +7,12 @@ use app\helpers\Help;
 use app\models\Category;
 use app\models\Language;
 use app\models\Post;
+use app\models\PostCategory;
 use app\models\PostSearch;
 use kartik\form\ActiveForm;
 use Yii;
 use app\helpers\Constants;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -111,6 +113,26 @@ class PostsController extends Controller
                     $trl->setAttributes($attributes);
                     $trl->isNewRecord ? $trl->save() : $trl->update();
                 }
+
+                //update categories (delete ignored)
+                foreach($model->categories as $category){
+                    if(!in_array($category->id,$model->categoriesChecked)){
+                        PostCategory::deleteAll(['post_id' => $model->id, 'category_id' => $category->id]);
+                    }
+                }
+
+                //update categories (add checked)
+                $current = ArrayHelper::map($model->categories,'id','id');
+                foreach($model->categoriesChecked as $catID){
+                    if(!in_array($catID,$current)){
+                        $pc = new PostCategory();
+                        $pc->category_id = $catID;
+                        $pc->post_id = $model->id;
+                        $pc->save();
+                    }
+                }
+
+                $model->refresh();
             }
         }
 

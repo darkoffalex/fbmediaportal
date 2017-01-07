@@ -203,7 +203,8 @@ class Category extends CategoryDB
                     'options' => [
                         'data-category-name' => $category->name,
                         'data-category-add' => $category->id,
-                        'data-category-remove' => $category->parent_category_id
+                        'data-category-remove' => $category->parent_category_id,
+                        'data-no-click' => 'true'
                     ]
                 ];
             }else{
