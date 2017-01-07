@@ -51,7 +51,14 @@ $languages = \app\models\Language::find()->all();
                     Constants::STATUS_DISABLED => Yii::t('admin','Disabled'),
                 ]); ?>
 
-                <?php $all = ArrayHelper::map(Category::getRecursiveItems(),'id','name'); ?>
+                <?php $all = ArrayHelper::map(Category::getRecursiveItems(),'id',function($model,$defaultValue){
+                    /* @var $model Category */
+                    $result = "";
+                    for($i=1;$i<$model->getDepth();$i++){$result.= "-";}
+                    $result.= $model->name;
+                    return $result;
+                }); ?>
+                
                 <?php if(!$model->isNewRecord): ?>
                     <?php unset($all[$model->id]); ?>
                 <?php endif; ?>

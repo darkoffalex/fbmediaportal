@@ -35,7 +35,16 @@ $controller = $this->context;
             Constants::STATUS_DISABLED => Yii::t('admin','Disabled'),
         ]); ?>
 
-        <?= $form->field($model, 'parent_category_id')->dropDownList([0 => Yii::t('admin','[NONE]')] + ArrayHelper::map(Category::getRecursiveItems(),'id','name')); ?>
+        <?= $form->field($model, 'parent_category_id')->dropDownList(
+            [0 => Yii::t('admin','[NONE]')] +
+            ArrayHelper::map(Category::getRecursiveItems(),'id',function($model,$defaultValue){
+                /* @var $model Category */
+                $result = "";
+                for($i=1;$i<$model->getDepth();$i++){$result.= "-";}
+                $result.= $model->name;
+                return $result;
+            })
+        ); ?>
     </div>
 
     <div class="modal-footer">
