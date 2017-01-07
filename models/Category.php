@@ -178,4 +178,49 @@ class Category extends CategoryDB
 
         return $result;
     }
+
+    /**
+     * Build a recursive array for drop-down controls in forms
+     * @param int $rootId
+     * @param bool|false $justEnabled
+     * @return Category[]
+     */
+    public static function buildRecursiveArrayForDropDown($rootId = 0, $justEnabled = false)
+    {
+        /* @var $result self[] */
+        $result = [];
+
+        /* @var $items self[] */
+        $q = self::find()->orderBy('priority ASC')->where(['parent_category_id' => $rootId]);
+        if($justEnabled) $q->where(['status_id' => Constants::STATUS_ENABLED]);
+        $items = $q->all();
+
+        foreach($items as $category){
+            if(empty($category->children)){
+                $tmp = [
+                    'label' => $category->name,
+                    'url' => '#',
+                    'options' => [
+                        'data-category-name' => $category->name,
+                        'data-category-add' => $category->id,
+                        'data-category-remove' => $category->parent_category_id
+                    ]
+                ];
+            }else{
+                $tmp = [
+                    'label' => $category->name,
+                    'options' => [
+                        'data-category-name' => $category->name,
+                        'data-category-add' => $category->id,
+                        'data-category-remove' => $category->parent_category_id
+                    ],
+                    'items' => self::buildRecursiveArrayForDropDown($category->id,$justEnabled)
+                ];
+            }
+
+            $result[] = $tmp;
+        }
+
+        return $result;
+    }
 }

@@ -22,7 +22,7 @@ return [
     'Actions' => 'Действия',
     'Created' => 'Создан',
     'Imported' => 'Импортирован',
-    'Enabled' => 'Акативирован',
+    'Enabled' => 'Активирован',
     'Disabled' => 'Деактивирован',
     'Administrator' => 'Администратор',
     'Redactor' => 'Редактор',

@@ -7,6 +7,7 @@ use app\models\User;
 use app\helpers\Constants;
 use yii\helpers\ArrayHelper;
 use app\models\Category;
+use kartik\dropdown\DropdownX;
 
 $this->title = Yii::t('admin',$model->isNewRecord ? 'Create post' : 'Update post');
 $this->params['breadcrumbs'][] = ['label' => Yii::t('admin','Posts'), 'url' => Url::to(['/admin/posts/index'])];
@@ -103,6 +104,38 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                 <div class="box-header with-border"><h3 class="box-title"><?= Yii::t('admin','Basic configurations'); ?></h3></div>
 
                 <div class="box-body">
+
+                    <div class="form-group dropdown inactive-links">
+                        <label class="control-label"><?= Yii::t('admin','Categories'); ?></label>
+                        <div class="form-control categories-tags" data-toggle="dropdown">
+
+                        </div>
+
+                        <div class="checkboxes"></div>
+
+                        <?php echo DropdownX::widget([
+                            'items' => Category::buildRecursiveArrayForDropDown(),
+                        ]);  ?>
+
+                        <script type="text/javascript">
+                            $(document).ready(function(){
+
+                                $('[data-category-add]').click(function(){
+                                    var categoryAdd = $(this).data('category-add');
+                                    var categoryRemove = $(this).data('category-remove');
+                                    var categoryName = $(this).data('category-name');
+
+                                    $('.categories-tags').append('<span class="label label-primary">'+categoryName+' <span class="fa fa-close" data-category-id="'+categoryAdd+'"></span></span>');
+                                    //$('.categories-tags').find(['data-category-id="'+categoryRemove+'"']).remove();
+
+                                    return false;
+                                });
+                            });
+                        </script>
+                    </div>
+
+                    <hr>
+
                     <?= $form->field($model, 'name')->textInput()->label(Yii::t('admin','Internal name')); ?>
 
                     <?= $form->field($model, 'status_id')->dropDownList([
@@ -117,6 +150,7 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                         Constants::CONTENT_TYPE_VIDEO => Yii::t('admin','Video'),
                         Constants::CONTENT_TYPE_VOTING => Yii::t('admin','Voting'),
                     ]); ?>
+
                 </div>
 
                 <div class="box-footer">
