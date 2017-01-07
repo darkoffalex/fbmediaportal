@@ -5,11 +5,13 @@ namespace app\modules\admin\controllers;
 use app\helpers\Constants;
 use app\models\UserSearch;
 use Yii;
+use yii\db\Query;
 use yii\helpers\Url;
 use app\models\User;
 use app\models\LoginForm;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 class UsersController extends Controller
 {
@@ -201,5 +203,53 @@ class UsersController extends Controller
         }
 
         return $this->renderAjax('_preview',compact('model'));
+    }
+
+    /**
+     * Ajax search method for auto-complete fields
+     * @param null $q
+     * @param null $id
+     * @return array
+     */
+    public function actionAjaxSearch($q = null, $id = null)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $out = ['results' => ['id' => '', 'text' => '']];
+
+        $words = explode(' ',$q,2);
+
+        if (!is_null($q)) {
+            $query = new Query();
+            $query->select('id, name, surname, username')->from('user');
+
+            if(count($words) > 1){
+                $query->where(['like','name',$words[0]])
+                    ->andWhere(['like','surname',$words[1]])
+                    ->limit(20);
+            }else{
+                $query->where(['like','name', $q])
+                    ->orWhere(['like','surname',$q])
+                    ->orWhere(['like','username', $q])
+                    ->limit(20);
+            }
+
+            $command = $query->createCommand();
+            $data = array_values($command->queryAll());
+            $tmp = [];
+
+            foreach($data as $index => $arr){
+                $tmp[] = ['id' => $arr['id'], 'text' => $arr['name'].' '.$arr['surname']];
+            }
+
+            $out['results'] = $tmp;
+        }
+        elseif ($id > 0) {
+            $user = User::findOne((int)$id);
+            if(!empty($user)){
+                $out['results'] = ['id' => $id, 'text' => $user->name];
+            }
+        }
+        return $out;
     }
 }

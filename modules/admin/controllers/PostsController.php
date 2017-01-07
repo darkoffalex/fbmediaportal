@@ -9,6 +9,7 @@ use app\models\Language;
 use app\models\Post;
 use app\models\PostCategory;
 use app\models\PostSearch;
+use app\models\User;
 use kartik\form\ActiveForm;
 use Yii;
 use app\helpers\Constants;
@@ -67,9 +68,19 @@ class PostsController extends Controller
 
             //if validated - save and go to list
             if($model->validate()){
-                $model->save();
-                return $this->redirect(Url::to(['/admin/posts/update', 'id' => $model->id]));
+
+                //save post
+                if($model->save()){
+
+                    //update counter (increase)
+                    $model->author->counter_posts++;
+                    $model->author->update();
+
+                    return $this->redirect(Url::to(['/admin/posts/update', 'id' => $model->id]));
+                }
             }
+
+            return $this->redirect(Url::to(['/admin/posts/index']));
         }
 
         return $this->renderAjax('_create',compact('model'));
@@ -93,6 +104,12 @@ class PostsController extends Controller
 
         //if something coming from POST
         if(Yii::$app->request->isPost){
+
+            /* @var $oldAuthor User */
+            $oldAuthor = $model->author;
+
+            /* @var $newAuthor User */
+            $newAuthor = null;
 
             //load data
             $model->load(Yii::$app->request->post());;
@@ -132,7 +149,29 @@ class PostsController extends Controller
                     }
                 }
 
+                //load all related stuff again
                 $model->refresh();
+
+                //retrieve new author
+                $newAuthor = $model->author;
+
+                //if post moved from one author to another - update counters for both
+                if(ArrayHelper::getValue($newAuthor,'id') != ArrayHelper::getValue($oldAuthor,'id')){
+                    if(!empty($oldAuthor)){
+                        $oldAuthor->counter_posts = count($oldAuthor->posts);
+                        $oldAuthor->update();
+                    }
+                    if(!empty($newAuthor)){
+                        $newAuthor->counter_posts = count($newAuthor->posts);
+                        $newAuthor->update();
+                    }
+                //update just current's author's counter (for confidence)
+                }else{
+                    if(!empty($model->author)){
+                        $model->author->counter_posts = count($model->author->posts);
+                        $model->author->update();
+                    }
+                }
             }
         }
 

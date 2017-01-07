@@ -32,6 +32,16 @@ $gridColumns = [
     ],
 
     [
+        'attribute' => 'author_id',
+        'format' => 'raw',
+        'value' => function ($model, $key, $index, $column){
+            /* @var $model \app\models\Post */
+            return !empty($model->author) ? Html::a($model->author->name.' '.$model->author->surname,['/admin/users/preview', 'id' => $model->author_id],['data-toggle'=>'modal','data-target'=>'.modal']) : $model->author_custom_name;
+        },
+    ],
+
+
+    [
         'attribute' => 'type_id',
         'filter' => [
             Constants::POST_TYPE_CREATED => Yii::t('admin','Created'),
@@ -83,31 +93,33 @@ $gridColumns = [
             /* @var $model \app\models\Post */
             $resultString = "";
             foreach($model->categories as $category){
-                $resultString.="<span class='label label-primary'>{$category->name}</span>";
+                $resultString.="<span class='label label-primary'>{$category->name}</span><br><br>";
             }
+            return $resultString;
         },
     ],
 
-    [
-        'attribute' => 'trl_name',
-        'enableSorting' => false,
-        'format' => 'raw',
-        'value' => function ($model, $key, $index, $column) use ($lng){
-            /* @var $model \app\models\Post */
-            return $model->getATrl($lng)->name;
-        },
-    ],
+//    [
+//        'attribute' => 'trl_name',
+//        'enableSorting' => false,
+//        'format' => 'raw',
+//        'value' => function ($model, $key, $index, $column) use ($lng){
+//            /* @var $model \app\models\Post */
+//            return $model->getATrl($lng)->name;
+//        },
+//    ],
 
     [
         'attribute' => 'content',
         'format' => 'raw',
+        'contentOptions'=>['style'=>'font-size:12px;'],
         'value' => function ($model, $key, $index, $column) use ($lng){
             /* @var $model \app\models\Post */
             switch($model->content_type_id){
                 case Constants::CONTENT_TYPE_ARTICLE:
                 case Constants::CONTENT_TYPE_NEWS:
                     $trl = $model->getATrl($lng);
-                    return "<p>{$trl->small_text}</p>{$trl->text}";
+                    return "<h4 style='font-size: 16px;'>{$trl->name}</h4><p>{$trl->small_text}</p>{$trl->text}";
                     break;
                 default:
                     return "<p>In progress...</p>";

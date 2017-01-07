@@ -82,5 +82,11 @@ return [
     'Update post' => 'Редактировать материал',
     'Last activity' => 'Последняя активаность',
     'User information' => 'Информация о пользователе',
-    'View' => 'Смотреть'
+    'View' => 'Смотреть',
+    'Small text (excerpt)' => 'Выдержка (кратко)',
+    'Full text' => 'Полный текст',
+    'Author ID' => 'Автор',
+    'Author Custom Name' => 'Свое имя автора',
+    'Waiting for results' => 'Ожидание загрузки...',
+    'Search for a user...' => 'Поиск пользователя'
 ];

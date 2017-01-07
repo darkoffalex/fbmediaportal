@@ -99,12 +99,12 @@ $gridColumns = [
 //    ],
 
     [
-        'attribute' => 'counter_comments',
-        'label' => Yii::t('admin','Comments'),
+        'attribute' => 'counter_posts',
+        'label' => Yii::t('admin','Posts'),
         'filter' => \kartik\field\FieldRange::widget([
             'model' => $searchModel,
-            'attribute1' => 'counter_comments_min',
-            'attribute2' => 'counter_comments_max',
+            'attribute1' => 'counter_posts_min',
+            'attribute2' => 'counter_posts_max',
             'type' => \kartik\field\FieldRange::INPUT_TEXT,
             'separator' => Yii::t('admin','to'),
             'label' => null,
@@ -114,7 +114,7 @@ $gridColumns = [
         'format' => 'raw',
         'value' => function ($model, $key, $index, $column){
             /* @var $model \app\models\User */
-            return !empty($model->counter_comments) ? Html::a($model->counter_comments,['/admin/users/comments','id' => $model->id]) : 0;
+            return !empty($model->counter_posts) ? Html::a($model->counter_posts,['/admin/users/posts','id' => $model->id]) : 0;
         },
     ],
 

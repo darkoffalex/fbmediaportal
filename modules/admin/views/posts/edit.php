@@ -4,8 +4,9 @@ use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Url;
 use app\models\User;
+use yii\web\JsExpression;
+use kartik\select2\Select2;
 use app\helpers\Constants;
-use yii\helpers\ArrayHelper;
 use app\models\Category;
 use kartik\dropdown\DropdownX;
 
@@ -140,6 +141,31 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                         Constants::CONTENT_TYPE_VOTING => Yii::t('admin','Voting'),
                     ]); ?>
 
+                    <hr>
+
+                    <?= $form->field($model,'author_id')->widget(Select2::classname(), [
+                        'initValueText' => !empty($model->author) ? $model->author->name.' '.$model->author->surname : '',
+                        'options' => ['placeholder' => Yii::t('admin','Search for a user...')],
+                        'language' => Yii::$app->language,
+                        'theme' => Select2::THEME_DEFAULT,
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                            'minimumInputLength' => 2,
+                            'language' => [
+                                'errorLoading' => new JsExpression("function () { return '".Yii::t('admin','Waiting for results')."'; }"),
+                            ],
+                            'ajax' => [
+                                'url' => Url::to(['/admin/users/ajax-search']),
+                                'dataType' => 'json',
+                                'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                            ],
+                            'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                            'templateResult' => new JsExpression('function(user) { return user.text; }'),
+                            'templateSelection' => new JsExpression('function (user) { return user.text; }'),
+                        ],
+                    ]) ?>
+
+                    <?= $form->field($model,'author_custom_name')->textInput(); ?>
                 </div>
 
                 <div class="box-footer">

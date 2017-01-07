@@ -34,6 +34,7 @@ $controller = $this->context;
                 ]; ?>
 
                 <h2><?= $model->name.' '.$model->surname; ?></h2>
+                <p><strong><?= Yii::t('admin','Username') ?>: </strong> <span class="tags"><?= $model->username; ?></span> </p>
                 <p><strong><?= Yii::t('admin','Role ID') ?>: </strong> <span class="tags"><?= $roleNames[$model->role_id]; ?></span> </p>
                 <p><strong><?= Yii::t('admin','Type ID') ?>: </strong> <span class="tags"><?= $typeNames[$model->type_id]; ?></span> </p>
                 <p><strong><?= Yii::t('admin','Last activity') ?>: </strong> <span class="tags"><?= $model->last_online_at; ?></span> </p>
