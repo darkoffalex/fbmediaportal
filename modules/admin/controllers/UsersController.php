@@ -133,6 +133,7 @@ class UsersController extends Controller
     /**
      * Delete existing user
      * @param $id
+     * @return \yii\web\Response
      * @throws NotFoundHttpException
      * @throws \Exception
      */
@@ -151,12 +152,13 @@ class UsersController extends Controller
         $model->delete();
 
         //back to list
-        $this->redirect(Yii::$app->request->referrer);
+        return $this->redirect(Yii::$app->request->referrer);
     }
 
     /**
      * Change status of existing user
      * @param $id
+     * @return \yii\web\Response
      * @throws NotFoundHttpException
      * @throws \Exception
      */
@@ -178,6 +180,26 @@ class UsersController extends Controller
         $model->update();
 
         //back to list
-        $this->redirect(Yii::$app->request->referrer);
+        return $this->redirect(Yii::$app->request->referrer);
+    }
+
+    /**
+     * Small preview of users (basic information) for modal windows
+     * @param $id
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionPreview($id)
+    {
+        //get user by id
+        /* @var $model User */
+        $model = User::findOne((int)$id);
+
+        //if user not found or if user is current
+        if(empty($model)){
+            throw new NotFoundHttpException(Yii::t('admin','User not found'),404);
+        }
+
+        return $this->renderAjax('_preview',compact('model'));
     }
 }

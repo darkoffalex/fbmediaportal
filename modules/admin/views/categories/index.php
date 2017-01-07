@@ -62,10 +62,10 @@ $this->params['breadcrumbs'][] = $this->title;
                                 </td>
                                 <td><?= 0; ?></td>
                                 <td>
-                                    <a href="#"><?= $category->createdBy->name.' '.$category->createdBy->surname; ?></a><br>
+                                    <a href="<?= Url::to(['/admin/users/preview', 'id' => $category->createdBy->id]); ?>" data-toggle="modal" data-target=".modal"><?= $category->createdBy->name.' '.$category->createdBy->surname; ?></a><br>
                                 </td>
                                 <td>
-                                    <a href="#"><?= $category->updatedBy->name.' '.$category->updatedBy->surname; ?></a><br>
+                                    <a href="<?= Url::to(['/admin/users/preview', 'id' => $category->updatedBy->id]); ?>" data-toggle="modal" data-target=".modal"><?= $category->updatedBy->name.' '.$category->updatedBy->surname; ?></a><br>
                                 </td>
                                 <td>
                                     <?php if($category->status_id == Constants::STATUS_ENABLED): ?>
