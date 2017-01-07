@@ -14,6 +14,9 @@ use yii\helpers\ArrayHelper;
 /* @var $user \app\models\User */
 /* @var $lng string */
 
+/* @var $languages \app\models\Language[] */
+$languages = \app\models\Language::find()->all();
+
 $controller = $this->context;
 $user = Yii::$app->user->identity;
 
@@ -130,7 +133,18 @@ $gridColumns = [
     <div class="col-xs-12">
         <div class="box">
             <div class="box-header">
-                <h3 class="box-title"><?= Yii::t('admin','List'); ?></h3>
+                <ul class="nav nav-tabs">
+
+                    <?php foreach($languages as $index => $language): ?>
+                        <li class="<?= $lng == $language->prefix ? 'active' : '' ?>">
+                            <a href="<?= Url::to(['/admin/posts/index','lng' => $language->prefix]); ?>"><?= $language->self_name.' ('.$language->prefix.')'; ?></a>
+                        </li>
+                    <?php endforeach; ?>
+
+                    <li class="pull-right"><a href="#" class="text-muted"><i class="fa fa-globe"></i></a></li>
+                </ul>
+
+<!--                <h3 class="box-title">--><?//= Yii::t('admin','List'); ?><!--</h3>-->
             </div>
             <div class="box-body">
                 <?= GridView::widget([
