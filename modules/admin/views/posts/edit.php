@@ -124,6 +124,26 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                         ]);  ?>
                     </div>
 
+                    <?= $form->field($model,'sticky_position_main')->dropDownList([
+                        0 => Yii::t('admin','[NON STICKY]'),
+                        1 => Yii::t('admin','On position {position_nr}',['position_nr' => 1]),
+                        2 => Yii::t('admin','On position {position_nr}',['position_nr' => 2]),
+                        3 => Yii::t('admin','On position {position_nr}',['position_nr' => 3]),
+                        4 => Yii::t('admin','On position {position_nr}',['position_nr' => 4]),
+                    ]); ?>
+
+                    <?php foreach($model->postCategories as $pc): ?>
+                        <div class="form-group field-post-sticky_position_main">
+                            <label class="control-label" for="post-sticky_position_cat_<?= $pc->post_id.'_'.$pc->category_id; ?>"><?= Yii::t('admin','Sticky on page of category "{cat}"',['cat' => $pc->category->name]); ?></label>
+                            <select id="post-sticky_position_cat_<?= $pc->post_id.'_'.$pc->category_id; ?>" class="form-control" name="Post[categoriesStickyPositions][<?= $pc->post_id.'_'.$pc->category_id; ?>]">
+                                <option value="0"><?= Yii::t('admin','[NON STICKY]'); ?></option>
+                                <?php for($i=1; $i <= 4; $i++): ?>
+                                    <option <?php if($pc->sticky_position == $i): ?> selected <?php endif; ?> value="<?= $i; ?>"><?= Yii::t('admin','On position {position_nr}',['position_nr' => $i]); ?></option>
+                                <?php endfor; ?>
+                            </select>
+                        </div>
+                    <?php endforeach; ?>
+
                     <hr>
 
                     <?= $form->field($model, 'name')->textInput()->label(Yii::t('admin','Internal name')); ?>

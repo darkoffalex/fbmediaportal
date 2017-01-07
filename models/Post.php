@@ -21,6 +21,11 @@ class Post extends PostDB
     public $categoriesChecked = [];
 
     /**
+     * @var array for setting sticky positions for every category relation
+     */
+    public $categoriesStickyPositions = [];
+
+    /**
      * @inheritdoc
      */
     public function attributeLabels()
@@ -38,7 +43,7 @@ class Post extends PostDB
     public function rules()
     {
         $baseRules = parent::rules();
-        $baseRules[] = [['translations','categoriesChecked'],'safe'];
+        $baseRules[] = [['translations','categoriesChecked','categoriesStickyPositions'],'safe'];
         return $baseRules;
     }
 

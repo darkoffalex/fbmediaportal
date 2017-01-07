@@ -149,6 +149,17 @@ class PostsController extends Controller
                     }
                 }
 
+                //update positions for categories
+                foreach($model->categoriesStickyPositions as $cpID => $stickyPosition){
+                    $postId = explode('_',$cpID)[0];
+                    $categoryId = explode('_',$cpID)[1];
+                    $pc = PostCategory::findOne(['category_id' => $categoryId,'post_id' => $postId]);
+                    if(!empty($pc)){
+                        $pc->sticky_position = $stickyPosition;
+                        $pc->update();
+                    }
+                }
+
                 //load all related stuff again
                 $model->refresh();
 

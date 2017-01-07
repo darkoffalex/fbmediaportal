@@ -88,5 +88,9 @@ return [
     'Author ID' => 'Автор',
     'Author Custom Name' => 'Свое имя автора',
     'Waiting for results' => 'Ожидание загрузки...',
-    'Search for a user...' => 'Поиск пользователя'
+    'Search for a user...' => 'Поиск пользователя',
+    '[NON STICKY]' => '[НЕ ЗАКРЕПЛЯТЬ]',
+    'Sticky Position Main' => 'Закрепить на глвной странице',
+    'On position {position_nr}' => 'В позиции {position_nr}',
+    'Sticky on page of category "{cat}"' => 'Закрепить на странице категории "{cat}"'
 ];
