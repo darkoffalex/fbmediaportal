@@ -101,5 +101,9 @@ return [
     'Is External' => 'Внешний ресурс',
     'Image file' => 'Файл изображения',
     'Signature (under image)' => 'Подпись изображения (под фото)',
-    'File Url' => 'URL путь к файлу'
+    'File Url' => 'URL путь к файлу',
+    'Source Url' => 'Ссылка на источник',
+    'Video Key Yt' => 'Видео ID (Youtube)',
+    'Video Key Fb' => 'Видео ID (Facebook)',
+    'Please select file' => 'Пожалуйста выберите файл'
 ];

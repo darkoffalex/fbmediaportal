@@ -10,6 +10,7 @@ use app\models\Post;
 use app\models\PostCategory;
 use app\models\PostImage;
 use app\models\PostSearch;
+use app\models\PostSources;
 use app\models\User;
 use kartik\form\ActiveForm;
 use Yii;
@@ -129,6 +130,20 @@ class PostsController extends Controller
 
                 //update
                 $model->update();
+
+                //if URL of source not empty - add it to auto-complete list next time
+                if(!empty($model->source_url)){
+                    /* @var $source PostSources */
+                    if(PostSources::find()->where(['url' => $model->source_url])->count() == 0){
+                        $sourceUrl = new PostSources();
+                        $sourceUrl->url = $model->source_url;
+                        $sourceUrl->created_at = date('Y-m-d H:i:s',time());
+                        $sourceUrl->updated_at = date('Y-m-d H:i:s',time());
+                        $sourceUrl->created_by_id = Yii::$app->user->id;
+                        $sourceUrl->updated_by_id = Yii::$app->user->id;
+                        $sourceUrl->save();
+                    }
+                }
 
                 //save translations
                 foreach($model->translations as $lng => $attributes){
@@ -259,6 +274,13 @@ class PostsController extends Controller
         return $this->actionListImages($postId);
     }
 
+    /**
+     * Editing images
+     * @param $id
+     * @return string
+     * @throws NotFoundHttpException
+     * @throws \Exception
+     */
     public function actionEditImage($id)
     {
         /* @var $model PostImage */

@@ -9,6 +9,9 @@ use kartik\select2\Select2;
 use app\helpers\Constants;
 use app\models\Category;
 use kartik\dropdown\DropdownX;
+use kartik\typeahead\Typeahead;
+use yii\helpers\ArrayHelper;
+use app\models\PostSources;
 
 $this->title = Yii::t('admin',$model->isNewRecord ? 'Create post' : 'Update post');
 $this->params['breadcrumbs'][] = ['label' => Yii::t('admin','Posts'), 'url' => Url::to(['/admin/posts/index'])];
@@ -218,7 +221,34 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
 
                     <?= $form->field($model,'author_custom_name')->textInput(); ?>
 
+                    <?= $form->field($model,'source_url')->widget(Typeahead::className(),[
+                        'defaultSuggestions' => array_values(ArrayHelper::map(PostSources::find()->orderBy('created_at DESC')->limit(10)->all(),'id','url')),
+                        'pluginOptions' => ['highlight' => true],
+                        'dataset' => [
+                            [
+                                'local' => array_values(([''] + ArrayHelper::map(PostSources::find()->orderBy('created_at DESC')->all(),'id','url'))),
+                                'limit' => 20
+                            ]
+                        ]
+                    ]); ?>
+
                     <hr>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <?= $form->field($model,'video_key_yt')->textInput(); ?>
+                            <?php if(!empty($model->video_key_yt)): ?>
+                                <iframe width="300" src="https://www.youtube.com/embed/<?= $model->video_key_yt; ?>" frameborder="0" allowfullscreen></iframe>
+                            <?php endif; ?>
+                        </div>
+                        <div class="col-md-6">
+                            <?= $form->field($model,'video_key_fb')->textInput(); ?>
+                            <?php if(!empty($model->video_key_fb)): ?>
+                                <iframe src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F<?= $model->video_key_fb; ?>%2F&width=300&show_text=false&appId=915460531914741&height=150" width="300" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowTransparency="true"></iframe>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
                     <label><?= Yii::t('admin','Images'); ?></label>
                     <table class="table table-hover ajax-reloadable" data-reload-url="<?= Url::to(['/admin/posts/list-images','id'=>$model->id]); ?>">
                         <tbody>
