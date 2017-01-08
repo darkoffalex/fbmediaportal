@@ -3,6 +3,8 @@
 namespace app\models;
 
 use Yii;
+use yii\helpers\Url;
+use yii\web\UploadedFile;
 
 /**
  * @property PostImageTrl $trl
@@ -16,11 +18,17 @@ class PostImage extends PostImageDB
     public $translations = [];
 
     /**
+     * @var UploadedFile
+     */
+    public $image = null;
+
+    /**
      * @inheritdoc
      */
     public function attributeLabels()
     {
         $baseLabels = parent::attributeLabels();
+        $baseLabels['image'] = 'Image file';
         foreach($baseLabels as $attribute => $label){
             $baseLabels[$attribute] = Yii::t('admin',$label);
         }
@@ -33,6 +41,7 @@ class PostImage extends PostImageDB
     public function rules()
     {
         $baseRules = parent::rules();
+        $baseRules[] = [['image'], 'file', 'extensions' => ['png', 'jpg', 'gif'], 'maxSize' => 1024*1024];
         $baseRules[] = [['translations'],'safe'];
         return $baseRules;
     }
@@ -49,13 +58,14 @@ class PostImage extends PostImageDB
         $trl = PostImageTrl::findOne(['post_image_id' => $this->id, 'lng' => $lng]);
 
         if(empty($trl)){
-            $trl = new LabelTrl();
+            $trl = new PostImageTrl();
             $trl -> post_image_id = $this->id;
             $trl -> lng = $lng;
         }
 
         return $trl;
     }
+
 
     /**
      * @return \yii\db\ActiveQuery
@@ -64,5 +74,13 @@ class PostImage extends PostImageDB
     {
         $lng = Yii::$app->language;
         return $this->hasOne(LabelTrl::className(), ['post_image_id' => 'id'])->where(['lng' => $lng]);
+    }
+
+    /**
+     * @return string
+     */
+    public function getFullUrl()
+    {
+        return $this->is_external ? $this->file_url : Url::to('@web/uploads/img/'.$this->file_path);
     }
 }

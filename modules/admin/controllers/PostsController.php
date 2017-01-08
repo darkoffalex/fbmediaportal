@@ -8,6 +8,7 @@ use app\models\Category;
 use app\models\Language;
 use app\models\Post;
 use app\models\PostCategory;
+use app\models\PostImage;
 use app\models\PostSearch;
 use app\models\User;
 use kartik\form\ActiveForm;
@@ -18,6 +19,7 @@ use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
+use yii\web\UploadedFile;
 
 class PostsController extends Controller
 {
@@ -95,6 +97,10 @@ class PostsController extends Controller
     {
         /* @var $model Post */
         $model = Post::findOne((int)$id);
+
+        if(empty($model)){
+            throw new NotFoundHttpException(Yii::t('admin','Post not found'),404);
+        }
 
         //ajax validation
         if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
@@ -187,5 +193,82 @@ class PostsController extends Controller
         }
 
         return $this->render('edit',compact('model'));
+    }
+
+
+    /**
+     * Uploading images via ajax
+     * @param $id
+     * @return array|string
+     * @throws NotFoundHttpException
+     * @throws \Exception
+     */
+    public function actionCreateImage($id)
+    {
+        /* @var $post Post */
+        $post = Post::findOne((int)$id);
+
+        if(empty($post)){
+            throw new NotFoundHttpException(Yii::t('admin','Post not found'),404);
+        }
+
+        //new image model
+        $model = new PostImage();
+
+        //if post given
+        if(Yii::$app->request->isPost){
+
+            //load all necessary data
+            $model->load(Yii::$app->request->post());
+            $model->image = UploadedFile::getInstance($model,'image');
+
+            //if all data valid
+            if($model->validate()){
+
+                //if should load from file
+                if(!$model->is_external){
+
+                    //generate name
+                    $filename = Yii::$app->security->generateRandomString(16).'.'.$model->image->extension;
+
+                    //try save to dir
+                    try{
+                        if($model->image->saveAs(Yii::getAlias('@webroot/uploads/img/'.$filename))){
+                            $model->file_path = $filename;
+                        }
+                    }catch (\Exception $ex){
+                        Help::log('upload_errors.txt',$ex->getMessage());
+                    }
+                }
+
+                //set basic settings and save
+                $model->created_at = date('Y-m-d H:i:s', time());
+                $model->updated_at = date('Y-m-d H:i:s', time());
+                $model->created_by_id = Yii::$app->user->id;
+                $model->updated_by_id = Yii::$app->user->id;
+                $model->priority = Sort::GetNextPriority(PostImage::className(),['post_id' => $post->id]);
+                $model->post_id = $post->id;
+                $model->image = null;
+                $saved = $model->save();
+
+                //save translations if base object was saved
+                if($saved){
+                    foreach($model->translations as $lng => $attributes){
+                        $trl = $model->getATrl($lng);
+                        $trl->setAttributes($attributes);
+                        $trl->isNewRecord ? $trl->save() : $trl->update();
+                    }
+                }
+
+                //refresh post
+                $post->refresh();
+
+                //It's ok, can reload table
+                return 'OK';
+            }
+        }
+
+        //render form
+        return $this->renderAjax('_edit_image',compact('model','post'));
     }
 }

@@ -106,6 +106,37 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
 
                 <div class="box-body">
 
+                    <p>
+                        <strong><?= Yii::t('admin','Type ID') ?></strong> :
+                        <?php
+                        $types = [
+                            Constants::POST_TYPE_CREATED => Yii::t('admin','Created'),
+                            Constants::POST_TYPE_IMPORTED => Yii::t('admin','Imported'),
+                        ];
+                        echo !empty($types[$model->type_id]) ? $types[$model->type_id] : Yii::t('admin','Unknown')
+                        ?>
+                    </p>
+
+                    <p>
+                        <strong><?= Yii::t('admin','Content Type ID') ?></strong> :
+                        <?php
+                        $types = [
+                            Constants::CONTENT_TYPE_ARTICLE => Yii::t('admin','Article'),
+                            Constants::CONTENT_TYPE_NEWS => Yii::t('admin','News'),
+                            Constants::CONTENT_TYPE_PHOTO => Yii::t('admin','Photo'),
+                            Constants::CONTENT_TYPE_VIDEO => Yii::t('admin','Video'),
+                            Constants::CONTENT_TYPE_VOTING => Yii::t('admin','Voting'),
+                        ];
+                        echo !empty($types[$model->content_type_id]) ? $types[$model->content_type_id] : Yii::t('admin','Unknown')
+                        ?>
+                    </p>
+
+                    <p>
+                        <strong><?= Yii::t('admin','Comments') ?></strong> : 0
+                    </p>
+
+                    <hr>
+
                     <div class="form-group dropdown inactive-links">
                         <label class="control-label"><?= Yii::t('admin','Categories'); ?></label>
 
@@ -186,6 +217,49 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                     ]) ?>
 
                     <?= $form->field($model,'author_custom_name')->textInput(); ?>
+
+                    <hr>
+                    <label><?= Yii::t('admin','Images'); ?></label>
+                    <table class="table table-hover ajax-reloadable" data-reload-url="<?= Url::to(['/admin/posts/list-images','id'=>$model->id]); ?>">
+                        <tbody>
+                        <tr>
+                            <th><?= Yii::t('admin','Preview'); ?></th>
+                            <th><?= Yii::t('admin','Status'); ?></th>
+                            <th><?= Yii::t('admin','Actions'); ?></th>
+                        </tr>
+                        <?php if(!empty($model->postImages)): ?>
+                            <?php foreach($model->postImages as $image): ?>
+                                <tr>
+                                    <td>
+                                        <img height="200px" src="<?= $image->getFullUrl(); ?>">
+                                    </td>
+                                    <td>
+                                        <?php if($image->status_id == Constants::STATUS_ENABLED): ?>
+                                            <span class="label label-success"><?= Yii::t('admin','Enabled'); ?></span>
+                                        <?php elseif($image->status_id == Constants::STATUS_DISABLED): ?>
+                                            <span class="label label-danger"><?= Yii::t('admin','Disabled'); ?></span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <a href="<?= Url::to(['/admin/posts/delete-image', 'id' => $image->id]); ?>" data-ajax-reloader=".ajax-reloadable" title="<?= Yii::t('admin','Delete'); ?>" aria-label="<?= Yii::t('admin','Delete'); ?>" data-confirm="<?= Yii::t('yii','Are you sure you want to delete this item?') ?>"><span class="glyphicon glyphicon-trash"></span></a>
+                                        &nbsp;
+                                        <a href="<?= Url::to(['/admin/posts/edit-image', 'id' => $image->id]); ?>" data-toggle="modal" data-target=".modal"><span class="glyphicon glyphicon-pencil"></span></a>
+                                        &nbsp;
+                                        <a href="<?= Url::to(['/admin/posts/move-image', 'id' => $image->id, 'dir' => 'up']); ?>" data-ajax-reloader=".ajax-reloadable"><span class="glyphicon glyphicon-arrow-up"></span></a>
+                                        &nbsp;
+                                        <a href="<?= Url::to(['/admin/posts/move-image', 'id' => $image->id, 'dir' => 'down']); ?>" data-ajax-reloader=".ajax-reloadable"><span class="glyphicon glyphicon-arrow-down"></span></a>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="3"><?= Yii::t('admin','Post has no images'); ?></td>
+                            </tr>
+                        <?php endif; ?>
+
+                        </tbody>
+                    </table>
+                    <a href="<?= Url::to(['/admin/posts/create-image','id'=>$model->id]); ?>" data-toggle="modal" data-target=".modal" class="btn btn-primary btn-xs pull-right"><?= Yii::t('admin','Add image'); ?></a>
                 </div>
 
                 <div class="box-footer">

@@ -92,5 +92,14 @@ return [
     '[NON STICKY]' => '[НЕ ЗАКРЕПЛЯТЬ]',
     'Sticky Position Main' => 'Закрепить на глвной странице',
     'On position {position_nr}' => 'В позиции {position_nr}',
-    'Sticky on page of category "{cat}"' => 'Закрепить на странице категории "{cat}"'
+    'Sticky on page of category "{cat}"' => 'Закрепить на странице категории "{cat}"',
+    'Images' => 'Изображения',
+    'Preview' => 'Превью',
+    'Post has no images' => 'У материала нет изображений',
+    'Add image' => 'Добавить изображение',
+    'Image settings' => 'Настройки изображения',
+    'Is External' => 'Внешний ресурс',
+    'Image file' => 'Файл изображения',
+    'Signature (under image)' => 'Подпись изображения (под фото)',
+    'File Url' => 'URL путь к файлу'
 ];

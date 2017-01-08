@@ -6,9 +6,9 @@ use app\helpers\Constants;
 use yii\helpers\ArrayHelper;
 use app\models\Category;
 
-/* @var $model \app\models\Category */
+/* @var $model \app\models\Post */
 /* @var $this \yii\web\View */
-/* @var $controller \app\modules\admin\controllers\CategoriesController */
+/* @var $controller \app\modules\admin\controllers\PostsController */
 
 $controller = $this->context;
 ?>
