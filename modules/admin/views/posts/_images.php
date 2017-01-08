@@ -33,7 +33,7 @@ $controller = $this->context;
                 <?php endif; ?>
             </td>
             <td>
-                <a href="<?= Url::to(['/admin/posts/delete-image', 'id' => $image->id]); ?>" data-ajax-reloader=".ajax-reloadable" title="<?= Yii::t('admin','Delete'); ?>" aria-label="<?= Yii::t('admin','Delete'); ?>" data-confirm="<?= Yii::t('yii','Are you sure you want to delete this item?') ?>"><span class="glyphicon glyphicon-trash"></span></a>
+                <a href="<?= Url::to(['/admin/posts/delete-image', 'id' => $image->id]); ?>" data-ajax-reloader=".ajax-reloadable" title="<?= Yii::t('admin','Delete'); ?>" aria-label="<?= Yii::t('admin','Delete'); ?>" data-confirm-ajax="<?= Yii::t('yii','Are you sure you want to delete this item?') ?>"><span class="glyphicon glyphicon-trash"></span></a>
                 &nbsp;
                 <a href="<?= Url::to(['/admin/posts/edit-image', 'id' => $image->id]); ?>" data-toggle="modal" data-target=".modal"><span class="glyphicon glyphicon-pencil"></span></a>
                 &nbsp;

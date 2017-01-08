@@ -25,17 +25,17 @@ class m170105_101143_create_language_table extends Migration
         ]);
 
         $this->insert('language',[
-            'name' => 'English',
-            'self_name' => 'English',
-            'prefix' => 'en',
+            'name' => 'Russian',
+            'self_name' => 'Русский',
+            'prefix' => 'ru',
             'created_at' => date('Y-m-d H:i:s',time()),
             'updated_at' => date('Y-m-d H:i:s',time()),
         ]);
 
         $this->insert('language',[
-            'name' => 'Russian',
-            'self_name' => 'Русский',
-            'prefix' => 'ru',
+            'name' => 'English',
+            'self_name' => 'English',
+            'prefix' => 'en',
             'created_at' => date('Y-m-d H:i:s',time()),
             'updated_at' => date('Y-m-d H:i:s',time()),
         ]);

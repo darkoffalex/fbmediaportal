@@ -197,6 +197,153 @@ class PostsController extends Controller
 
 
     /**
+     * Listing all images related with post
+     * @param $id
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionListImages($id)
+    {
+        /* @var $post Post */
+        $post = Post::findOne((int)$id);
+
+        if(empty($post)){
+            throw new NotFoundHttpException(Yii::t('admin','Post not found'),404);
+        }
+
+        return $this->renderPartial('_images',compact('post'));
+    }
+
+    /**
+     * Delete image of post
+     * @param $id
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionDeleteImage($id)
+    {
+        /* @var $image PostImage */
+        $image = PostImage::findOne((int)$id);
+        $postId = $image->post_id;
+
+        if(empty($image)){
+            throw new NotFoundHttpException(Yii::t('admin','Image not found'),404);
+        }
+
+        //delete
+        $image->deleteFile();
+        $image->delete();
+
+        return $this->actionListImages($postId);
+    }
+
+    /**
+     * Move priority
+     * @param $id
+     * @param $dir
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionMoveImage($id,$dir)
+    {
+        /* @var $image PostImage */
+        $image = PostImage::findOne((int)$id);
+        $postId = $image->post_id;
+
+        if(empty($image)){
+            throw new NotFoundHttpException(Yii::t('admin','Image not found'),404);
+        }
+
+        Sort::Move($image,$dir,PostImage::className(),['post_id' => $postId]);
+
+        return $this->actionListImages($postId);
+    }
+
+    public function actionEditImage($id)
+    {
+        /* @var $model PostImage */
+        $model = PostImage::findOne((int)$id);
+
+        if(empty($model)){
+            throw new NotFoundHttpException(Yii::t('admin','Image not found'),404);
+        }
+
+        $post = $model->post;
+
+        //if post given
+        if(Yii::$app->request->isPost){
+
+            //load all necessary data
+            $model->load(Yii::$app->request->post());
+            $model->image = UploadedFile::getInstance($model,'image');
+
+            //if all data valid
+            if($model->validate()){
+
+                //if should load from file
+                if(!$model->is_external){
+
+                    if(!empty($model->image) && $model->image->size > 0){
+                        //generate name
+                        $filename = Yii::$app->security->generateRandomString(16).'.'.$model->image->extension;
+
+                        //try save to dir
+                        try{
+                            //delete old file
+                            $model->deleteFile();
+
+                            //save new file and set filename
+                            if($model->image->saveAs(Yii::getAlias('@webroot/uploads/img/'.$filename))){
+                                $model->file_path = $filename;
+                            }
+                        }catch (\Exception $ex){
+                            Help::log('upload_errors.txt',$ex->getMessage());
+                            $model->addError('image','Error while saving file');
+                        }
+                    }else{
+                        //file wasn't uploaded recently
+                        if(!$model->hasFile()){
+                            $model->addError('image',Yii::t('admin','Please select file'));
+                        }
+                    }
+                //if external
+                }else{
+                    //delete old file
+                    $model->deleteFile();
+                }
+
+                //if form has no errors
+                if(!$model->hasErrors()){
+
+                    //set basic settings and save
+                    $model->updated_at = date('Y-m-d H:i:s', time());
+                    $model->updated_by_id = Yii::$app->user->id;
+                    $model->image = null;
+                    $saved = $model->update();
+
+                    //save translations if base object was saved
+                    if($saved){
+                        foreach($model->translations as $lng => $attributes){
+                            $trl = $model->getATrl($lng);
+                            $trl->setAttributes($attributes);
+                            $trl->isNewRecord ? $trl->save() : $trl->update();
+                        }
+                    }
+
+                    //refresh post
+                    $post->refresh();
+
+                    //It's ok, can reload table
+                    return 'OK';
+                }
+            }
+        }
+
+        //render form
+        return $this->renderAjax('_edit_image',compact('model','post'));
+    }
+
+    /**
      * Uploading images via ajax
      * @param $id
      * @return array|string
@@ -228,43 +375,52 @@ class PostsController extends Controller
                 //if should load from file
                 if(!$model->is_external){
 
-                    //generate name
-                    $filename = Yii::$app->security->generateRandomString(16).'.'.$model->image->extension;
+                    if(!empty($model->image) && $model->image->size > 0){
+                        //generate name
+                        $filename = Yii::$app->security->generateRandomString(16).'.'.$model->image->extension;
 
-                    //try save to dir
-                    try{
-                        if($model->image->saveAs(Yii::getAlias('@webroot/uploads/img/'.$filename))){
-                            $model->file_path = $filename;
+                        //try save to dir
+                        try{
+                            if($model->image->saveAs(Yii::getAlias('@webroot/uploads/img/'.$filename))){
+                                $model->file_path = $filename;
+                            }
+                        }catch (\Exception $ex){
+                            Help::log('upload_errors.txt',$ex->getMessage());
+                            $model->addError('image','Error while saving file');
                         }
-                    }catch (\Exception $ex){
-                        Help::log('upload_errors.txt',$ex->getMessage());
+                    }else{
+                        $model->addError('image',Yii::t('admin','Please select file'));
                     }
                 }
 
-                //set basic settings and save
-                $model->created_at = date('Y-m-d H:i:s', time());
-                $model->updated_at = date('Y-m-d H:i:s', time());
-                $model->created_by_id = Yii::$app->user->id;
-                $model->updated_by_id = Yii::$app->user->id;
-                $model->priority = Sort::GetNextPriority(PostImage::className(),['post_id' => $post->id]);
-                $model->post_id = $post->id;
-                $model->image = null;
-                $saved = $model->save();
+                //if form has no errors
+                if(!$model->hasErrors()){
 
-                //save translations if base object was saved
-                if($saved){
-                    foreach($model->translations as $lng => $attributes){
-                        $trl = $model->getATrl($lng);
-                        $trl->setAttributes($attributes);
-                        $trl->isNewRecord ? $trl->save() : $trl->update();
+                    //set basic settings and save
+                    $model->created_at = date('Y-m-d H:i:s', time());
+                    $model->updated_at = date('Y-m-d H:i:s', time());
+                    $model->created_by_id = Yii::$app->user->id;
+                    $model->updated_by_id = Yii::$app->user->id;
+                    $model->priority = Sort::GetNextPriority(PostImage::className(),['post_id' => $post->id]);
+                    $model->post_id = $post->id;
+                    $model->image = null;
+                    $saved = $model->save();
+
+                    //save translations if base object was saved
+                    if($saved){
+                        foreach($model->translations as $lng => $attributes){
+                            $trl = $model->getATrl($lng);
+                            $trl->setAttributes($attributes);
+                            $trl->isNewRecord ? $trl->save() : $trl->update();
+                        }
                     }
+
+                    //refresh post
+                    $post->refresh();
+
+                    //It's ok, can reload table
+                    return 'OK';
                 }
-
-                //refresh post
-                $post->refresh();
-
-                //It's ok, can reload table
-                return 'OK';
             }
         }
 

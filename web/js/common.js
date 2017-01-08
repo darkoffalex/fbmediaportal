@@ -61,14 +61,19 @@ $(document).ready(function () {
     },1);
 
 
-    /************************* I M A G E  M A N A G E M E N T  W I N D O W *************************/
+    /********************************** I M A G E  M A N A G E M E N T  W I N D O W ***********************************/
 
+    /**
+     * Toggle fields depending on image source type
+     */
     $(document).on('change','[name="PostImage[is_external]"]',function(){
         $('.url_field').toggle();
         $('.file_field').toggle();
     });
 
-
+    /**
+     * Overriding submit action for form (to send via ajax) and reload table if returned OK
+     */
     $(document).on('click','#create-image-form .submit-btn',function(){
 
         var form = $('#create-image-form');
@@ -84,12 +89,49 @@ $(document).ready(function () {
                     $('.modal-content').html(data);
                 }else{
                     var table = $('.ajax-reloadable');
-                    table.load(table.data('reload-url'));
+
+                    $.ajax({
+                        url: table.data('reload-url'),
+                        type: 'GET',
+                        async: false,
+                        success: function(reloaded_data){
+                            table.html(reloaded_data);
+                            $('.modal').modal('hide');
+                        }
+                    });
                 }
             },
             cache: false,
             contentType: false,
             processData: false
+        });
+
+        return false;
+    });
+
+    /**
+     * Reloading links (updates container's html via ajax)
+     */
+    $(document).on('click','[data-ajax-reloader]', function(){
+
+        var confirmMsg = $(this).data('confirm-ajax');
+
+        if(confirmMsg){
+            if(!confirm(confirmMsg)){
+                return false;
+            }
+        }
+
+        var container = $($(this).data('ajax-reloader'));
+        var link = $(this);
+
+        $.ajax({
+            url: link.attr('href'),
+            type: 'GET',
+            async: false,
+            success: function(reloaded_data){
+                container.html(reloaded_data);
+            }
         });
 
         return false;

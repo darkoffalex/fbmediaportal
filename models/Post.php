@@ -76,4 +76,13 @@ class Post extends PostDB
         $lng = Yii::$app->language;
         return $this->hasOne(LabelTrl::className(), ['post_id' => 'id'])->where(['lng' => $lng]);
     }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPostImages()
+    {
+        $relation = parent::getPostImages();
+        return $relation->orderBy('priority ASC');
+    }
 }

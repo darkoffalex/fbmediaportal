@@ -83,4 +83,29 @@ class PostImage extends PostImageDB
     {
         return $this->is_external ? $this->file_url : Url::to('@web/uploads/img/'.$this->file_path);
     }
+
+    /**
+     * Checks if file is exist
+     * @return bool
+     */
+    public function hasFile()
+    {
+        if(empty($this->file_path)){
+            return false;
+        }
+        return file_exists(Yii::getAlias('@webroot/uploads/img/'.$this->file_path));
+    }
+
+    /**
+     * Deletes uploaded file if exist
+     * @return bool
+     */
+    public function deleteFile()
+    {
+        if(!$this->hasFile()){
+            return false;
+        }
+
+        return unlink(Yii::getAlias('@webroot/uploads/img/'.$this->file_path));
+    }
 }
