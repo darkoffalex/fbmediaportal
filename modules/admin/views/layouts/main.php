@@ -29,6 +29,7 @@ $controller = $this->context;
         </style>
 
     </head>
+    <!-- sidebar-collapse-->
     <body class="hold-transition <?= \dmstr\helpers\AdminLteHelper::skinClass(); ?> sidebar-mini">
     <?php $this->beginBody() ?>
 

@@ -82,7 +82,7 @@ $languages = \app\models\Language::find()->all();
 
     <div class="modal-footer">
         <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><?= Yii::t('admin','Close'); ?></button>
-        <button type="button" class="btn btn-primary submit-btn"><?= Yii::t('admin','Save') ?></button>
+        <button type="button" class="btn btn-primary submit-ajax-btn" data-ajax-form="#create-image-form" data-ok-reload=".ajax-reloadable"><?= Yii::t('admin','Save') ?></button>
     </div>
 
 <?php ActiveForm::end(); ?>

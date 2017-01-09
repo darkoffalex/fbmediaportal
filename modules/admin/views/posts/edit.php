@@ -18,6 +18,8 @@ $this->params['breadcrumbs'][] = ['label' => Yii::t('admin','Posts'), 'url' => U
 $this->params['breadcrumbs'][] = $this->title;
 
 /* @var $model \app\models\Post */
+/* @var $this \yii\web\View */
+
 /* @var $languages \app\models\Language[] */
 $languages = \app\models\Language::find()->all();
 ?>
@@ -91,9 +93,14 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                                 <textarea id="post_trl-meta_small_text_<?= $lng->prefix; ?>" class="form-control" name="Post[translations][<?= $lng->prefix; ?>][small_text]"><?= $model->getATrl($lng->prefix)->small_text; ?></textarea>
                             </div>
 
-                            <div class="form-group field-post_trl-meta_keywords">
+                            <div class="form-group field-post_trl-text">
                                 <label class="control-label" for="post_trl-full_text_<?= $lng->prefix; ?>"><?= Yii::t('admin','Full text'); ?></label>
                                 <textarea id="post_trl-full_text_<?= $lng->prefix; ?>" class="form-control editor-area" name="Post[translations][<?= $lng->prefix; ?>][text]"><?= $model->getATrl($lng->prefix)->text; ?></textarea>
+                            </div>
+
+                            <div class="form-group field-post_trl-question">
+                                <label class="control-label" for="post_trl-question_<?= $lng->prefix; ?>"><?= Yii::t('admin','Question'); ?></label>
+                                <input id="post_trl-question_<?= $lng->prefix; ?>" value="<?= $model->getATrl($lng->prefix)->question; ?>" class="form-control" name="Post[translations][<?= $lng->prefix; ?>][question]" type="text">
                             </div>
                         </div><!-- /.tab-pane -->
                     <?php endforeach; ?>
@@ -248,48 +255,25 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                             <?php endif; ?>
                         </div>
                     </div>
+                    <br>
 
                     <label><?= Yii::t('admin','Images'); ?></label>
-                    <table class="table table-hover ajax-reloadable" data-reload-url="<?= Url::to(['/admin/posts/list-images','id'=>$model->id]); ?>">
-                        <tbody>
-                        <tr>
-                            <th><?= Yii::t('admin','Preview'); ?></th>
-                            <th><?= Yii::t('admin','Status'); ?></th>
-                            <th><?= Yii::t('admin','Actions'); ?></th>
-                        </tr>
-                        <?php if(!empty($model->postImages)): ?>
-                            <?php foreach($model->postImages as $image): ?>
-                                <tr>
-                                    <td>
-                                        <img height="200px" src="<?= $image->getFullUrl(); ?>">
-                                    </td>
-                                    <td>
-                                        <?php if($image->status_id == Constants::STATUS_ENABLED): ?>
-                                            <span class="label label-success"><?= Yii::t('admin','Enabled'); ?></span>
-                                        <?php elseif($image->status_id == Constants::STATUS_DISABLED): ?>
-                                            <span class="label label-danger"><?= Yii::t('admin','Disabled'); ?></span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <a href="<?= Url::to(['/admin/posts/delete-image', 'id' => $image->id]); ?>" data-ajax-reloader=".ajax-reloadable" title="<?= Yii::t('admin','Delete'); ?>" aria-label="<?= Yii::t('admin','Delete'); ?>" data-confirm-ajax="<?= Yii::t('yii','Are you sure you want to delete this item?') ?>"><span class="glyphicon glyphicon-trash"></span></a>
-                                        &nbsp;
-                                        <a href="<?= Url::to(['/admin/posts/edit-image', 'id' => $image->id]); ?>" data-toggle="modal" data-target=".modal"><span class="glyphicon glyphicon-pencil"></span></a>
-                                        &nbsp;
-                                        <a href="<?= Url::to(['/admin/posts/move-image', 'id' => $image->id, 'dir' => 'up']); ?>" data-ajax-reloader=".ajax-reloadable"><span class="glyphicon glyphicon-arrow-up"></span></a>
-                                        &nbsp;
-                                        <a href="<?= Url::to(['/admin/posts/move-image', 'id' => $image->id, 'dir' => 'down']); ?>" data-ajax-reloader=".ajax-reloadable"><span class="glyphicon glyphicon-arrow-down"></span></a>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <tr>
-                                <td colspan="3"><?= Yii::t('admin','Post has no images'); ?></td>
-                            </tr>
-                        <?php endif; ?>
-
-                        </tbody>
+                    <table class="table table-hover table-bordered ajax-reloadable" data-reload-url="<?= Url::to(['/admin/posts/list-images','id'=>$model->id]); ?>">
+                        <?= $this->render('_images', ['post' => $model]); ?>
                     </table>
+                    <br>
                     <a href="<?= Url::to(['/admin/posts/create-image','id'=>$model->id]); ?>" data-toggle="modal" data-target=".modal" class="btn btn-primary btn-xs pull-right"><?= Yii::t('admin','Add image'); ?></a>
+                    <div style="clear: both;"></div>
+
+                    <hr>
+
+                    <label><?= Yii::t('admin','Voting answers'); ?></label>
+                    <table class="table table-hover table-bordered ajax-reloadable-answers" data-reload-url="<?= Url::to(['/admin/posts/list-answers','id'=>$model->id]); ?>">
+                        <?= $this->render('_answers',['post' => $model]); ?>
+                    </table>
+                    <br>
+                    <a href="<?= Url::to(['/admin/posts/update-answer','post_id' => $model->id]); ?>" data-toggle="modal" data-target=".modal" class="btn btn-primary btn-xs pull-right"><?= Yii::t('admin','Add answer'); ?></a>
+                    <div style="clear: both;"></div>
                 </div>
 
                 <div class="box-footer">

@@ -11,10 +11,12 @@ use app\models\PostCategory;
 use app\models\PostImage;
 use app\models\PostSearch;
 use app\models\PostSources;
+use app\models\PostVoteAnswer;
 use app\models\User;
 use kartik\form\ActiveForm;
 use Yii;
 use app\helpers\Constants;
+use yii\base\InvalidParamException;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\web\Controller;
@@ -448,5 +450,119 @@ class PostsController extends Controller
 
         //render form
         return $this->renderAjax('_edit_image',compact('model','post'));
+    }
+
+    /**
+     * Update or create answer
+     * @param null|int $post_id
+     * @param null|int $id
+     * @return string
+     * @throws NotFoundHttpException
+     * @throws \yii\db\Exception
+     */
+    public function actionUpdateAnswer($post_id = null, $id = null)
+    {
+        //if creating (given just post_id)
+        if(!empty($post_id)){
+            /* @var $post Post */
+            $post = Post::findOne((int)$post_id);
+
+            if(empty($post)){
+                throw new NotFoundHttpException(Yii::t('admin','Post not found'),404);
+            }
+            $model = new PostVoteAnswer();
+
+        //if updating (empty post_id, but have id)
+        }elseif(!empty($id)){
+            $model = PostVoteAnswer::findOne((int)$id);
+
+            if(empty($model)){
+                throw new NotFoundHttpException(Yii::t('admin','Answer not found'),404);
+            }
+            $post = $model->post;
+        //or wrong parameters
+        }else{
+            throw new InvalidParamException(Yii::t('admin','Wrong parameters'),404);
+        }
+
+        //if post given
+        if(Yii::$app->request->isPost){
+
+            //load all necessary data
+            $model->load(Yii::$app->request->post());
+
+            //if all data is valid
+            if($model->validate()){
+
+                if($model->isNewRecord){
+                    $model->post_id = $post->id;
+                    $model->created_at = date('Y-m-d H:i:s', time());
+                    $model->created_by_id = Yii::$app->user->id;
+                    $model->priority = Sort::GetNextPriority(PostVoteAnswer::className(),['post_id' => $post->id]);
+                }
+
+                $model->updated_at = date('Y-m-d H:i:s', time());
+                $model->updated_by_id = Yii::$app->user->id;
+                $model->isNewRecord ? $model->save() : $model->update();
+
+                //if successfully saved or updated - update translations
+                if(!$model->hasErrors()){
+                    foreach($model->translations as $lng => $attributes){
+                        $trl = $model->getATrl($lng);
+                        $trl->setAttributes($attributes);
+                        $trl->isNewRecord ? $trl->save() : $trl->update();
+                    }
+                }
+
+                //OK message (to reload container)
+                return 'OK';
+
+            }
+
+        }
+
+        //render form
+        return $this->renderAjax('_edit_answer',compact('model','post'));
+    }
+
+    /**
+     * Listing all answers related with post
+     * @param $id
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionListAnswers($id)
+    {
+        /* @var $post Post */
+        $post = Post::findOne((int)$id);
+
+        if(empty($post)){
+            throw new NotFoundHttpException(Yii::t('admin','Post not found'),404);
+        }
+
+        return $this->renderPartial('_answers',compact('post'));
+    }
+
+    /**
+     * Deleting answer variant
+     * @param $id
+     * @return string
+     * @throws NotFoundHttpException
+     * @throws \Exception
+     */
+    public function actionDeleteAnswer($id)
+    {
+        /* @var $answer PostImage */
+        $answer = PostVoteAnswer::findOne((int)$id);
+        $postId = $answer->post_id;
+
+        if(empty($answer)){
+            throw new NotFoundHttpException(Yii::t('admin','Answer not found'),404);
+        }
+
+        //delete
+        $answer->delete();
+
+        return $this->actionListAnswers($postId);
     }
 }

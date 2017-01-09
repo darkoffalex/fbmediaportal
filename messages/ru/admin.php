@@ -105,5 +105,15 @@ return [
     'Source Url' => 'Ссылка на источник',
     'Video Key Yt' => 'Видео ID (Youtube)',
     'Video Key Fb' => 'Видео ID (Facebook)',
-    'Please select file' => 'Пожалуйста выберите файл'
+    'Please select file' => 'Пожалуйста выберите файл',
+    'Question' => 'Вопрос',
+    'Voting answers' => 'Ответы опроса',
+    'Answer' => 'Ответ',
+    'Votes' => 'Голосов',
+    'Percent' => 'Процент',
+    'No answers found' => 'Не найдено ответов',
+    'Add answer' => 'Добавить ответ',
+    'Answer settings' => 'Настройки ответа',
+    'Answer text' => 'Текст ответа',
+    'Voted Qnt' => 'Число голосов'
 ];

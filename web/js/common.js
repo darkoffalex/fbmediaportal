@@ -74,10 +74,11 @@ $(document).ready(function () {
     /**
      * Overriding submit action for form (to send via ajax) and reload table if returned OK
      */
-    $(document).on('click','#create-image-form .submit-btn',function(){
+    $(document).on('click','[data-ajax-form]',function(){
 
-        var form = $('#create-image-form');
+        var form = $($(this).data('ajax-form'));
         var formData = new FormData(form[0]);
+        var okReload = $($(this).data('ok-reload'));
 
         $.ajax({
             url: form.attr('action'),
@@ -88,14 +89,12 @@ $(document).ready(function () {
                 if(data != 'OK'){
                     $('.modal-content').html(data);
                 }else{
-                    var table = $('.ajax-reloadable');
-
                     $.ajax({
-                        url: table.data('reload-url'),
+                        url: okReload.data('reload-url'),
                         type: 'GET',
                         async: false,
                         success: function(reloaded_data){
-                            table.html(reloaded_data);
+                            okReload.html(reloaded_data);
                             $('.modal').modal('hide');
                         }
                     });

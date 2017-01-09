@@ -2,3 +2,10 @@
 {
     cursor: pointer;
 }
+
+.tab-content.inner-block
+{
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-top: none;
+}

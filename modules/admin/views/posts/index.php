@@ -112,7 +112,7 @@ $gridColumns = [
     [
         'attribute' => 'content',
         'format' => 'raw',
-        'contentOptions'=>['style'=>'font-size:12px;'],
+        'contentOptions'=>['style'=>'font-size:12px; width: 360px;'],
         'value' => function ($model, $key, $index, $column) use ($lng){
             /* @var $model \app\models\Post */
             switch($model->content_type_id){

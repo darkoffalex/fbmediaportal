@@ -23,7 +23,7 @@ $controller = $this->context;
     <?php foreach($post->postImages as $image): ?>
         <tr>
             <td>
-                <img height="200px" src="<?= $image->getFullUrl(); ?>">
+                <img height="150px" src="<?= $image->getFullUrl(); ?>">
             </td>
             <td>
                 <?php if($image->status_id == Constants::STATUS_ENABLED): ?>
@@ -48,4 +48,5 @@ $controller = $this->context;
         <td colspan="3"><?= Yii::t('admin','Post has no images'); ?></td>
     </tr>
 <?php endif; ?>
+</tbody>
 

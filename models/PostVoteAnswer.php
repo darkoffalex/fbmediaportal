@@ -49,7 +49,7 @@ class PostVoteAnswer extends PostVoteAnswerDB
         $trl = PostVoteAnswerTrl::findOne(['answer_id' => $this->id, 'lng' => $lng]);
 
         if(empty($trl)){
-            $trl = new LabelTrl();
+            $trl = new PostVoteAnswerTrl();
             $trl -> answer_id = $this->id;
             $trl -> lng = $lng;
         }
@@ -63,6 +63,23 @@ class PostVoteAnswer extends PostVoteAnswerDB
     public function getTrl()
     {
         $lng = Yii::$app->language;
-        return $this->hasOne(LabelTrl::className(), ['answer_id' => 'id'])->where(['lng' => $lng]);
+        return $this->hasOne(PostVoteAnswerTrl::className(), ['answer_id' => 'id'])->where(['lng' => $lng]);
+    }
+
+    /**
+     * Get percentage of votes
+     * @return int
+     */
+    public function getPercentage()
+    {
+        $siblingAnswers = $this->post->postVoteAnswers;
+
+        $total = 0;
+
+        foreach($siblingAnswers as $answer){
+            $total += $answer->voted_qnt;
+        }
+
+        return $total > 0 ? (int)(($this->voted_qnt/$total)*100) : 0;
     }
 }
