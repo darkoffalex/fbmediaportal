@@ -38,7 +38,7 @@ $(document).ready(function () {
             event.stopPropagation();
 
             $(this).parent().siblings().removeClass('open');
-            $(this).parent().toggleClass('open');
+            $(this).parent().addClass('open');
         }).on('click',function(event){
             var categoryAdd = $(this).parent().data('category-add');
             var categoryName = $(this).parent().data('category-name');
@@ -57,9 +57,25 @@ $(document).ready(function () {
             setTag(categoryAdd,categoryName,'.categories-tags');
 
             return false;
+        }).on('mouseover',function(event){
+            $(this).parent().siblings().removeClass('open');
         });
-    },1);
 
+        /*
+        $(document).mousemove(function(e)
+        {
+            var tg = $(e.target);
+            var classNames = tg.attr('class');
+
+            if(classNames != 'dropdown-menu' &&
+                classNames != 'dropdown-toggle' && classNames != 'dropdown'
+                && classNames != 'categories-tags' && classNames != undefined){
+                $('.dropdown-menu').dropdown('toggle');
+            }
+        });
+        */
+
+    },1);
 
     /********************************** I M A G E  M A N A G E M E N T  W I N D O W ***********************************/
 

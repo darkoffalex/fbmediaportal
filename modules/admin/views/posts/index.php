@@ -22,6 +22,7 @@ $user = Yii::$app->user->identity;
 
 $this->title = Yii::t('admin','Posts list');
 $this->params['breadcrumbs'][] = $this->title;
+$currentView = $this;
 
 $gridColumns = [
     ['class' => 'yii\grid\SerialColumn'],
@@ -113,17 +114,9 @@ $gridColumns = [
         'attribute' => 'content',
         'format' => 'raw',
         'contentOptions'=>['style'=>'font-size:12px; width: 360px;'],
-        'value' => function ($model, $key, $index, $column) use ($lng){
+        'value' => function ($model, $key, $index, $column) use ($lng, $currentView){
             /* @var $model \app\models\Post */
-            switch($model->content_type_id){
-                case Constants::CONTENT_TYPE_ARTICLE:
-                case Constants::CONTENT_TYPE_NEWS:
-                    $trl = $model->getATrl($lng);
-                    return "<h4 style='font-size: 16px;'>{$trl->name}</h4><p>{$trl->small_text}</p>{$trl->text}";
-                    break;
-                default:
-                    return "<p>In progress...</p>";
-            }
+            return $currentView->render('_cell_preview',compact('model','lng'));
         },
     ],
 
@@ -144,7 +137,7 @@ $gridColumns = [
 <div class="row">
     <div class="col-xs-12">
         <div class="box">
-            <div class="box-header">
+            <div class="box-header" style="padding-bottom: 0;">
                 <ul class="nav nav-tabs">
 
                     <?php foreach($languages as $index => $language): ?>
@@ -158,13 +151,15 @@ $gridColumns = [
 
 <!--                <h3 class="box-title">--><?//= Yii::t('admin','List'); ?><!--</h3>-->
             </div>
-            <div class="box-body">
-                <?= GridView::widget([
-                    'filterModel' => $searchModel,
-                    'dataProvider' => $dataProvider,
-                    'columns' => $gridColumns,
-                    'pjax' => false,
-                ]); ?>
+            <div class="box-body" style="padding-top: 0;">
+                <div class="tab-content inner-block">
+                    <?= GridView::widget([
+                        'filterModel' => $searchModel,
+                        'dataProvider' => $dataProvider,
+                        'columns' => $gridColumns,
+                        'pjax' => false,
+                    ]); ?>
+                </div>
             </div>
             <div class="box-footer">
                 <a data-target=".modal" data-toggle="modal" href="<?php echo Url::to(['/admin/posts/create']); ?>" class="btn btn-primary"><?= Yii::t('admin','Create'); ?></a>

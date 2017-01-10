@@ -68,54 +68,9 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
 
     <div class="row">
         <div class="col-md-12">
-            <!-- Custom Tabs -->
-            <div class="nav-tabs-custom">
-                <ul class="nav nav-tabs">
-
-                    <?php foreach($languages as $index => $lng): ?>
-                        <li class="<?= $index == 0 ? 'active' : '' ?>">
-                            <a href="#tab_<?= $index; ?>" data-toggle="tab" aria-expanded="true"><?= $lng->self_name.' ('.$lng->prefix.')'; ?></a>
-                        </li>
-                    <?php endforeach; ?>
-
-                    <li class="pull-right"><a href="#" class="text-muted"><i class="fa fa-globe"></i></a></li>
-                </ul>
-                <div class="tab-content">
-                    <?php foreach($languages as $index => $lng): ?>
-                        <div class="tab-pane <?= $index == 0 ? 'active' : '' ?>" id="tab_<?= $index; ?>">
-                            <div class="form-group field-post_trl-name">
-                                <label class="control-label" for="post_trl-name_<?= $lng->prefix; ?>"><?= Yii::t('admin','Name'); ?></label>
-                                <input id="post_trl-name_<?= $lng->prefix; ?>" value="<?= $model->getATrl($lng->prefix)->name; ?>" class="form-control" name="Post[translations][<?= $lng->prefix; ?>][name]" type="text">
-                            </div>
-
-                            <div class="form-group field-post_trl-meta_small_text">
-                                <label class="control-label" for="post_trl-meta_small_text_<?= $lng->prefix; ?>"><?= Yii::t('admin','Small text (excerpt)'); ?></label>
-                                <textarea id="post_trl-meta_small_text_<?= $lng->prefix; ?>" class="form-control" name="Post[translations][<?= $lng->prefix; ?>][small_text]"><?= $model->getATrl($lng->prefix)->small_text; ?></textarea>
-                            </div>
-
-                            <div class="form-group field-post_trl-text">
-                                <label class="control-label" for="post_trl-full_text_<?= $lng->prefix; ?>"><?= Yii::t('admin','Full text'); ?></label>
-                                <textarea id="post_trl-full_text_<?= $lng->prefix; ?>" class="form-control editor-area" name="Post[translations][<?= $lng->prefix; ?>][text]"><?= $model->getATrl($lng->prefix)->text; ?></textarea>
-                            </div>
-
-                            <div class="form-group field-post_trl-question">
-                                <label class="control-label" for="post_trl-question_<?= $lng->prefix; ?>"><?= Yii::t('admin','Question'); ?></label>
-                                <input id="post_trl-question_<?= $lng->prefix; ?>" value="<?= $model->getATrl($lng->prefix)->question; ?>" class="form-control" name="Post[translations][<?= $lng->prefix; ?>][question]" type="text">
-                            </div>
-                        </div><!-- /.tab-pane -->
-                    <?php endforeach; ?>
-                </div><!-- /.tab-content -->
-            </div><!-- nav-tabs-custom -->
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-12">
             <div class="box box-primary">
-                <div class="box-header with-border"><h3 class="box-title"><?= Yii::t('admin','Basic configurations'); ?></h3></div>
-
+                <div class="box-header with-border"><h3 class="box-title"><?= Yii::t('admin','Information'); ?></h3></div>
                 <div class="box-body">
-
                     <p>
                         <strong><?= Yii::t('admin','Type ID') ?></strong> :
                         <?php
@@ -142,8 +97,66 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                     </p>
 
                     <p>
-                        <strong><?= Yii::t('admin','Comments') ?></strong> : 0
+                        <strong><?= Yii::t('admin','Comments') ?></strong> : 0 <a href="#">(<?= Yii::t('admin','View'); ?>)</a>
                     </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-header with-border"><h3 class="box-title"><?= Yii::t('admin','Settings'); ?></h3></div>
+                <div class="box-body">
+
+                    <?= $form->field($model, 'name')->textInput()->label(Yii::t('admin','Internal name')); ?>
+
+                    <?= $form->field($model, 'status_id')->dropDownList([
+                        Constants::STATUS_ENABLED => Yii::t('admin','Enabled'),
+                        Constants::STATUS_DISABLED => Yii::t('admin','Disabled'),
+                    ]); ?>
+
+                    <ul class="nav nav-tabs">
+                        <?php foreach($languages as $index => $lng): ?>
+                            <li class="<?= $index == 0 ? 'active' : '' ?>">
+                                <a href="#tab_<?= $index; ?>" data-toggle="tab" aria-expanded="true"><?= $lng->self_name.' ('.$lng->prefix.')'; ?></a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <div class="tab-content inner-block">
+                        <?php foreach($languages as $index => $lng): ?>
+                            <div class="tab-pane <?= $index == 0 ? 'active' : '' ?>" id="tab_<?= $index; ?>">
+
+                                <div class="form-group field-post_trl-name">
+                                    <label class="control-label" for="post_trl-name_<?= $lng->prefix; ?>"><?= Yii::t('admin','Name'); ?></label>
+                                    <input id="post_trl-name_<?= $lng->prefix; ?>" value="<?= $model->getATrl($lng->prefix)->name; ?>" class="form-control" name="Post[translations][<?= $lng->prefix; ?>][name]" type="text">
+                                </div>
+
+                                <?php if(in_array($model->content_type_id,[Constants::CONTENT_TYPE_NEWS,Constants::CONTENT_TYPE_ARTICLE])): ?>
+                                    <div class="form-group field-post_trl-meta_small_text">
+                                        <label class="control-label" for="post_trl-meta_small_text_<?= $lng->prefix; ?>"><?= Yii::t('admin','Small text (excerpt)'); ?></label>
+                                        <textarea id="post_trl-meta_small_text_<?= $lng->prefix; ?>" class="form-control" name="Post[translations][<?= $lng->prefix; ?>][small_text]"><?= $model->getATrl($lng->prefix)->small_text; ?></textarea>
+                                    </div>
+                                <?php endif; ?>
+
+                                <?php if(in_array($model->content_type_id,[Constants::CONTENT_TYPE_PHOTO,Constants::CONTENT_TYPE_ARTICLE,Constants::CONTENT_TYPE_NEWS,Constants::CONTENT_TYPE_VIDEO])): ?>
+                                    <div class="form-group field-post_trl-text">
+                                        <label class="control-label" for="post_trl-full_text_<?= $lng->prefix; ?>"><?= Yii::t('admin','Full text'); ?></label>
+                                        <textarea id="post_trl-full_text_<?= $lng->prefix; ?>" class="form-control editor-area" name="Post[translations][<?= $lng->prefix; ?>][text]"><?= $model->getATrl($lng->prefix)->text; ?></textarea>
+                                    </div>
+                                <?php endif;?>
+
+                                <?php if($model->content_type_id == Constants::CONTENT_TYPE_VOTING): ?>
+                                    <div class="form-group field-post_trl-question">
+                                        <label class="control-label" for="post_trl-question_<?= $lng->prefix; ?>"><?= Yii::t('admin','Question'); ?></label>
+                                        <textarea id="post_trl-question_<?= $lng->prefix; ?>" class="form-control" name="Post[translations][<?= $lng->prefix; ?>][question]"><?= $model->getATrl($lng->prefix)->question; ?></textarea>
+                                    </div>
+                                <?php endif; ?>
+
+                            </div><!-- /.tab-pane -->
+                        <?php endforeach; ?>
+                    </div><!-- /.tab-content -->
 
                     <hr>
 
@@ -187,23 +200,6 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
 
                     <hr>
 
-                    <?= $form->field($model, 'name')->textInput()->label(Yii::t('admin','Internal name')); ?>
-
-                    <?= $form->field($model, 'status_id')->dropDownList([
-                        Constants::STATUS_ENABLED => Yii::t('admin','Enabled'),
-                        Constants::STATUS_DISABLED => Yii::t('admin','Disabled'),
-                    ]); ?>
-
-                    <?= $form->field($model, 'content_type_id')->dropDownList([
-                        Constants::CONTENT_TYPE_ARTICLE => Yii::t('admin','Article'),
-                        Constants::CONTENT_TYPE_NEWS => Yii::t('admin','News'),
-                        Constants::CONTENT_TYPE_PHOTO => Yii::t('admin','Photo'),
-                        Constants::CONTENT_TYPE_VIDEO => Yii::t('admin','Video'),
-                        Constants::CONTENT_TYPE_VOTING => Yii::t('admin','Voting'),
-                    ]); ?>
-
-                    <hr>
-
                     <?= $form->field($model,'author_id')->widget(Select2::classname(), [
                         'initValueText' => !empty($model->author) ? $model->author->name.' '.$model->author->surname : '',
                         'options' => ['placeholder' => Yii::t('admin','Search for a user...')],
@@ -228,52 +224,50 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
 
                     <?= $form->field($model,'author_custom_name')->textInput(); ?>
 
-                    <?= $form->field($model,'source_url')->widget(Typeahead::className(),[
-                        'defaultSuggestions' => array_values(ArrayHelper::map(PostSources::find()->orderBy('created_at DESC')->limit(10)->all(),'id','url')),
-                        'pluginOptions' => ['highlight' => true],
-                        'dataset' => [
-                            [
-                                'local' => array_values(([''] + ArrayHelper::map(PostSources::find()->orderBy('created_at DESC')->all(),'id','url'))),
-                                'limit' => 20
-                            ]
-                        ]
-                    ]); ?>
-
-                    <hr>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <?= $form->field($model,'video_key_yt')->textInput(); ?>
-                            <?php if(!empty($model->video_key_yt)): ?>
-                                <iframe width="300" src="https://www.youtube.com/embed/<?= $model->video_key_yt; ?>" frameborder="0" allowfullscreen></iframe>
-                            <?php endif; ?>
+                    <?php if(in_array($model->content_type_id,[Constants::CONTENT_TYPE_ARTICLE,Constants::CONTENT_TYPE_NEWS,Constants::CONTENT_TYPE_VIDEO])): ?>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <?= $form->field($model,'video_key_yt')->textInput(); ?>
+                                <?php if(!empty($model->video_key_yt)): ?>
+                                    <iframe width="300" src="https://www.youtube.com/embed/<?= $model->video_key_yt; ?>" frameborder="0" allowfullscreen></iframe>
+                                <?php endif; ?>
+                            </div>
+                            <div class="col-md-6">
+                                <?= $form->field($model,'video_key_fb')->textInput(); ?>
+                                <?php if(!empty($model->video_key_fb)): ?>
+                                    <iframe src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F<?= $model->video_key_fb; ?>%2F&width=300&show_text=false&appId=915460531914741&height=150" width="300" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowTransparency="true"></iframe>
+                                <?php endif; ?>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <?= $form->field($model,'video_key_fb')->textInput(); ?>
-                            <?php if(!empty($model->video_key_fb)): ?>
-                                <iframe src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F<?= $model->video_key_fb; ?>%2F&width=300&show_text=false&appId=915460531914741&height=150" width="300" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowTransparency="true"></iframe>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                    <br>
+                    <?php endif; ?>
 
-                    <label><?= Yii::t('admin','Images'); ?></label>
-                    <table class="table table-hover table-bordered ajax-reloadable" data-reload-url="<?= Url::to(['/admin/posts/list-images','id'=>$model->id]); ?>">
-                        <?= $this->render('_images', ['post' => $model]); ?>
-                    </table>
-                    <br>
-                    <a href="<?= Url::to(['/admin/posts/create-image','id'=>$model->id]); ?>" data-toggle="modal" data-target=".modal" class="btn btn-primary btn-xs pull-right"><?= Yii::t('admin','Add image'); ?></a>
-                    <div style="clear: both;"></div>
+                    <?php if(in_array($model->content_type_id,[Constants::CONTENT_TYPE_ARTICLE,Constants::CONTENT_TYPE_NEWS,Constants::CONTENT_TYPE_PHOTO])): ?>
+                        <hr>
+                        <label><?= Yii::t('admin','Images'); ?></label>
+                        <table class="table table-hover table-bordered ajax-reloadable" data-reload-url="<?= Url::to(['/admin/posts/list-images','id'=>$model->id]); ?>">
+                            <?= $this->render('_images', ['post' => $model]); ?>
+                        </table>
+                        <br>
+                        <a href="<?= Url::to(['/admin/posts/create-image','id'=>$model->id]); ?>" data-toggle="modal" data-target=".modal" class="btn btn-primary btn-xs pull-right"><?= Yii::t('admin','Add image'); ?></a>
+                        <div style="clear: both;"></div>
+                    <?php endif; ?>
 
-                    <hr>
+                    <?php if($model->content_type_id == Constants::CONTENT_TYPE_VOTING): ?>
+                        <hr>
+                        <label><?= Yii::t('admin','Voting answers'); ?></label>
+                        <table class="table table-hover table-bordered ajax-reloadable-answers" data-reload-url="<?= Url::to(['/admin/posts/list-answers','id'=>$model->id]); ?>">
+                            <?= $this->render('_answers',['post' => $model]); ?>
+                        </table>
+                        <br>
+                        <a href="<?= Url::to(['/admin/posts/update-answer','post_id' => $model->id]); ?>" data-toggle="modal" data-target=".modal" class="btn btn-primary btn-xs pull-right"><?= Yii::t('admin','Add answer'); ?></a>
+                        <div style="clear: both;"></div>
 
-                    <label><?= Yii::t('admin','Voting answers'); ?></label>
-                    <table class="table table-hover table-bordered ajax-reloadable-answers" data-reload-url="<?= Url::to(['/admin/posts/list-answers','id'=>$model->id]); ?>">
-                        <?= $this->render('_answers',['post' => $model]); ?>
-                    </table>
-                    <br>
-                    <a href="<?= Url::to(['/admin/posts/update-answer','post_id' => $model->id]); ?>" data-toggle="modal" data-target=".modal" class="btn btn-primary btn-xs pull-right"><?= Yii::t('admin','Add answer'); ?></a>
-                    <div style="clear: both;"></div>
+                        <?= $form->field($model,'votes_only_authorized')->checkbox(); ?>
+
+                        <?= $form->field($model,'stats_after_vote')->checkbox(); ?>
+                    <?php endif; ?>
+
                 </div>
 
                 <div class="box-footer">

@@ -212,6 +212,35 @@ class PostsController extends Controller
         return $this->render('edit',compact('model'));
     }
 
+    /**
+     * Delete post
+     * @param $id
+     * @return Response
+     * @throws NotFoundHttpException
+     * @throws \Exception
+     */
+    public function actionDelete($id)
+    {
+        /* @var $post Post */
+        $post = Post::findOne((int)$id);
+
+        if(empty($post)){
+            throw new NotFoundHttpException(Yii::t('admin','Post not found'),404);
+        }
+
+        //delete all related image's files
+        if(!empty($post->postImages)){
+            foreach($post->postImages as $image){
+                $image->deleteFile();
+            }
+        }
+        
+        //delete post itself
+        $post->delete();
+
+        //back to previous page
+        return $this->redirect(Yii::$app->request->referrer);
+    }
 
     /**
      * Listing all images related with post

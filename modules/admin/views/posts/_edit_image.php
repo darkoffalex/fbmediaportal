@@ -54,30 +54,28 @@ $languages = \app\models\Language::find()->all();
 
         <hr>
 
-        <div class="nav-tabs-custom">
-            <ul class="nav nav-tabs">
-                <?php foreach($languages as $index => $lng): ?>
-                    <li class="<?= $index == 0 ? 'active' : '' ?>">
-                        <a href="#tab_image_<?= $index; ?>" data-toggle="tab" aria-expanded="true"><?= $lng->self_name.' ('.$lng->prefix.')'; ?></a>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-            <div class="tab-content">
-                <?php foreach($languages as $index => $lng): ?>
-                    <div class="tab-pane <?= $index == 0 ? 'active' : '' ?>" id="tab_image_<?= $index; ?>">
-                        <div class="form-group field-post_image_trl-name">
-                            <label class="control-label" for="post_image_trl-name_<?= $lng->prefix; ?>"><?= Yii::t('admin','Name'); ?></label>
-                            <input id="post_image_trl-name_<?= $lng->prefix; ?>" value="<?= $model->getATrl($lng->prefix)->name; ?>" class="form-control" name="PostImage[translations][<?= $lng->prefix; ?>][name]" type="text">
-                        </div>
+        <ul class="nav nav-tabs">
+            <?php foreach($languages as $index => $lng): ?>
+                <li class="<?= $index == 0 ? 'active' : '' ?>">
+                    <a href="#tab_image_<?= $index; ?>" data-toggle="tab" aria-expanded="true"><?= $lng->self_name.' ('.$lng->prefix.')'; ?></a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+        <div class="tab-content inner-block">
+            <?php foreach($languages as $index => $lng): ?>
+                <div class="tab-pane <?= $index == 0 ? 'active' : '' ?>" id="tab_image_<?= $index; ?>">
+                    <div class="form-group field-post_image_trl-name">
+                        <label class="control-label" for="post_image_trl-name_<?= $lng->prefix; ?>"><?= Yii::t('admin','Name'); ?></label>
+                        <input id="post_image_trl-name_<?= $lng->prefix; ?>" value="<?= $model->getATrl($lng->prefix)->name; ?>" class="form-control" name="PostImage[translations][<?= $lng->prefix; ?>][name]" type="text">
+                    </div>
 
-                        <div class="form-group field-post_image_trl-meta_small_text">
-                            <label class="control-label" for="post_image_trl-meta_small_text_<?= $lng->prefix; ?>"><?= Yii::t('admin','Signature (under image)'); ?></label>
-                            <textarea id="post_image_trl-meta_small_text_<?= $lng->prefix; ?>" class="form-control" name="PostImage[translations][<?= $lng->prefix; ?>][signature]"><?= $model->getATrl($lng->prefix)->signature; ?></textarea>
-                        </div>
-                    </div><!-- /.tab-pane -->
-                <?php endforeach; ?>
-            </div><!-- /.tab-content -->
-        </div><!-- nav-tabs-custom -->
+                    <div class="form-group field-post_image_trl-meta_small_text">
+                        <label class="control-label" for="post_image_trl-meta_small_text_<?= $lng->prefix; ?>"><?= Yii::t('admin','Signature (under image)'); ?></label>
+                        <textarea id="post_image_trl-meta_small_text_<?= $lng->prefix; ?>" class="form-control" name="PostImage[translations][<?= $lng->prefix; ?>][signature]"><?= $model->getATrl($lng->prefix)->signature; ?></textarea>
+                    </div>
+                </div><!-- /.tab-pane -->
+            <?php endforeach; ?>
+        </div><!-- /.tab-content -->
     </div>
 
     <div class="modal-footer">
