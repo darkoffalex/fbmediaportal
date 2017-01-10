@@ -8,6 +8,7 @@ use app\models\Category;
 use app\models\Language;
 use app\models\Post;
 use app\models\PostCategory;
+use app\models\PostGroup;
 use app\models\PostImage;
 use app\models\PostSearch;
 use app\models\PostSources;
@@ -593,5 +594,48 @@ class PostsController extends Controller
         $answer->delete();
 
         return $this->actionListAnswers($postId);
+    }
+
+
+    /**
+     * Update group selection field (after new item adding)
+     * @throws NotFoundHttpException
+     */
+    public function actionGroupIdUpdate()
+    {
+        /* @var $groups PostGroup[] */
+        $groups = PostGroup::find()->all();
+
+        $noneLabel = Yii::t('admin','[NONE]');
+        $result = "<option value=''>{$noneLabel}</option>";
+
+        foreach($groups as $group){
+            $result.="<option value='{$group->id}'>{$group->name}</option>";
+        }
+
+        return $result;
+    }
+
+    /**
+     * Creating new group via modal window
+     * @return string
+     */
+    public function actionCreateGroup()
+    {
+        $model = new PostGroup();
+
+        if(Yii::$app->request->isPost && $model->load(Yii::$app->request->post())){
+            if($model->validate()){
+                $model->created_at = date('Y-m-d H:i:s', time());
+                $model->updated_at = date('Y-m-d H:i:s', time());
+                $model->created_by_id = Yii::$app->user->id;
+                $model->updated_by_id = Yii::$app->user->id;
+                $model->save();
+
+                return 'OK';
+            }
+        }
+
+        return $this->renderAjax('_edit_group',compact('model'));
     }
 }

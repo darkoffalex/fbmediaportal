@@ -11,7 +11,7 @@ use app\models\Category;
 use kartik\dropdown\DropdownX;
 use kartik\typeahead\Typeahead;
 use yii\helpers\ArrayHelper;
-use app\models\PostSources;
+use app\models\PostGroup;
 
 $this->title = Yii::t('admin',$model->isNewRecord ? 'Create post' : 'Update post');
 $this->params['breadcrumbs'][] = ['label' => Yii::t('admin','Posts'), 'url' => Url::to(['/admin/posts/index'])];
@@ -159,6 +159,12 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                     </div><!-- /.tab-content -->
 
                     <hr>
+
+                    <?php $reload = Url::to(['/admin/posts/group-id-update']); ?>
+                    <?php $link = Html::a(Yii::t('admin','Add new group'),['/admin/posts/create-group'],['data-toggle'=>'modal','data-target'=>'.modal']); ?>
+                    <?php $data = ArrayHelper::merge(['' => Yii::t('admin','[NONE]')],ArrayHelper::map(PostGroup::find()->all(),'id','name')); ?>
+                    <?= $form->field($model,'group_id',['template' => "{label}\n{input}\n{$link}\n{error}\n"])->dropDownList($data,['class' => 'form-control reload-ids', 'data-reload-url' => $reload]); ?>
+
 
                     <div class="form-group dropdown inactive-links">
                         <label class="control-label"><?= Yii::t('admin','Categories'); ?></label>

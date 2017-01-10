@@ -34,6 +34,7 @@ class PostGroup extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            [['name'], 'required'],
             [['url', 'fb_sync_id'], 'string'],
             [['created_by_id', 'updated_by_id'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
