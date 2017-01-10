@@ -29,6 +29,7 @@ use Yii;
  * @property integer $counter_comments
  * @property integer $counter_posts
  *
+ * @property Comment[] $comments
  * @property Post[] $posts
  */
 class UserDB extends \yii\db\ActiveRecord
@@ -82,6 +83,14 @@ class UserDB extends \yii\db\ActiveRecord
             'counter_comments' => 'Counter Comments',
             'counter_posts' => 'Counter Posts',
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getComments()
+    {
+        return $this->hasMany(Comment::className(), ['author_id' => 'id']);
     }
 
     /**

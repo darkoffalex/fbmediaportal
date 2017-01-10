@@ -16,7 +16,6 @@ use Yii;
  * @property string $name
  * @property integer $author_id
  * @property string $author_custom_name
- * @property string $source_url
  * @property integer $sticky_position_main
  * @property integer $stats_after_vote
  * @property integer $votes_only_authorized
@@ -28,11 +27,19 @@ use Yii;
  * @property integer $created_by_id
  * @property integer $updated_by_id
  * @property string $voted_ips
+ * @property integer $group_id
+ * @property integer $kind_id
+ * @property string $offer_category_tag
+ * @property string $offer_author_tag
+ * @property string $offer_group_fb_id
  *
+ * @property Comment[] $comments
  * @property User $author
+ * @property PostGroup $group
  * @property PostCategory[] $postCategories
  * @property Category[] $categories
  * @property PostImage[] $postImages
+ * @property PostSearchIndex[] $postSearchIndices
  * @property PostTrl[] $postTrls
  * @property PostVoteAnswer[] $postVoteAnswers
  */
@@ -52,12 +59,13 @@ class PostDB extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['fb_sync_id', 'fb_sync_token', 'source_url', 'video_key_yt', 'video_key_fb', 'voted_ips'], 'string'],
-            [['content_type_id', 'status_id', 'type_id', 'author_id', 'sticky_position_main', 'stats_after_vote', 'votes_only_authorized', 'created_by_id', 'updated_by_id'], 'integer'],
+            [['fb_sync_id', 'fb_sync_token', 'video_key_yt', 'video_key_fb', 'voted_ips', 'offer_group_fb_id'], 'string'],
+            [['content_type_id', 'status_id', 'type_id', 'author_id', 'sticky_position_main', 'stats_after_vote', 'votes_only_authorized', 'created_by_id', 'updated_by_id', 'group_id', 'kind_id'], 'integer'],
             [['name'], 'required'],
             [['published_at', 'created_at', 'updated_at'], 'safe'],
-            [['name', 'author_custom_name'], 'string', 'max' => 255],
+            [['name', 'author_custom_name', 'offer_category_tag', 'offer_author_tag'], 'string', 'max' => 255],
             [['author_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['author_id' => 'id']],
+            [['group_id'], 'exist', 'skipOnError' => true, 'targetClass' => PostGroup::className(), 'targetAttribute' => ['group_id' => 'id']],
         ];
     }
 
@@ -76,7 +84,6 @@ class PostDB extends \yii\db\ActiveRecord
             'name' => 'Name',
             'author_id' => 'Author ID',
             'author_custom_name' => 'Author Custom Name',
-            'source_url' => 'Source Url',
             'sticky_position_main' => 'Sticky Position Main',
             'stats_after_vote' => 'Stats After Vote',
             'votes_only_authorized' => 'Votes Only Authorized',
@@ -88,7 +95,20 @@ class PostDB extends \yii\db\ActiveRecord
             'created_by_id' => 'Created By ID',
             'updated_by_id' => 'Updated By ID',
             'voted_ips' => 'Voted Ips',
+            'group_id' => 'Group ID',
+            'kind_id' => 'Kind ID',
+            'offer_category_tag' => 'Offer Category Tag',
+            'offer_author_tag' => 'Offer Author Tag',
+            'offer_group_fb_id' => 'Offer Group Fb ID',
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getComments()
+    {
+        return $this->hasMany(Comment::className(), ['post_id' => 'id']);
     }
 
     /**
@@ -97,6 +117,14 @@ class PostDB extends \yii\db\ActiveRecord
     public function getAuthor()
     {
         return $this->hasOne(User::className(), ['id' => 'author_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getGroup()
+    {
+        return $this->hasOne(PostGroup::className(), ['id' => 'group_id']);
     }
 
     /**
@@ -121,6 +149,14 @@ class PostDB extends \yii\db\ActiveRecord
     public function getPostImages()
     {
         return $this->hasMany(PostImage::className(), ['post_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPostSearchIndices()
+    {
+        return $this->hasMany(PostSearchIndex::className(), ['post_id' => 'id']);
     }
 
     /**

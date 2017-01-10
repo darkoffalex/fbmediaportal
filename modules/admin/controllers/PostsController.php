@@ -234,7 +234,7 @@ class PostsController extends Controller
                 $image->deleteFile();
             }
         }
-        
+
         //delete post itself
         $post->delete();
 

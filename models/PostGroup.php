@@ -5,7 +5,7 @@ namespace app\models;
 use Yii;
 
 /**
- * This is the model class for table "post_sources".
+ * This is the model class for table "post_group".
  *
  * @property integer $id
  * @property string $name
@@ -14,15 +14,18 @@ use Yii;
  * @property integer $updated_by_id
  * @property string $created_at
  * @property string $updated_at
+ * @property string $fb_sync_id
+ *
+ * @property Post[] $posts
  */
-class PostSources extends \yii\db\ActiveRecord
+class PostGroup extends \yii\db\ActiveRecord
 {
     /**
      * @inheritdoc
      */
     public static function tableName()
     {
-        return 'post_sources';
+        return 'post_group';
     }
 
     /**
@@ -31,7 +34,7 @@ class PostSources extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['url'], 'string'],
+            [['url', 'fb_sync_id'], 'string'],
             [['created_by_id', 'updated_by_id'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['name'], 'string', 'max' => 255],
@@ -51,6 +54,15 @@ class PostSources extends \yii\db\ActiveRecord
             'updated_by_id' => 'Updated By ID',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
+            'fb_sync_id' => 'Fb Sync ID',
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPosts()
+    {
+        return $this->hasMany(Post::className(), ['group_id' => 'id']);
     }
 }
