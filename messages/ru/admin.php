@@ -130,5 +130,7 @@ return [
     'Kind ID' => 'Флаг сортировки',
     'View comments' => 'Просмотр комментариев',
     'No comments found for this post' => 'Нет комментариев к этому материалу',
-    'Comments for' => 'Комментарии для'
+    'Comments for' => 'Комментарии для',
+    'Banners' => 'Банеры',
+    'Places' => 'Места'
 ];

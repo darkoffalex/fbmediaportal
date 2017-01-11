@@ -39,7 +39,33 @@
                         'url' => ['/admin/posts/index'],
                     ],
 
+                    [
+                        'label' => Yii::t('admin','Banners'),
+                        'icon' => 'fa fa-square-o',
+                        'url' => [''],
+                        'active' => $c == 'banners',
+                        'visible' => true,
+                        'items' => [
+                            [
+                                'label' => Yii::t('admin','List'),
+                                'icon' => 'fa fa-circle-o',
+                                'url' => ['/admin/languages/index'],
+                                'active' => $c == 'banners' && in_array($a,['index']),
+                                'visible' => true
+                            ],
+                            [
+                                'label' => Yii::t('admin','Places'),
+                                'icon' => 'fa fa-circle-o',
+                                'url' => ['/admin/labels/index'],
+                                'active' => $c == 'banners' && in_array($a,['places']),
+                                'visible' => true
+                            ]
+                        ]
+                    ],
+
+
                     ['label' => Yii::t('admin','Common config'), 'options' => ['class' => 'header']],
+
                     [
                         'label' => Yii::t('admin','Translations'),
                         'icon' => 'fa fa-globe',
