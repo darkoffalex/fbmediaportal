@@ -43,21 +43,21 @@
                         'label' => Yii::t('admin','Banners'),
                         'icon' => 'fa fa-square-o',
                         'url' => [''],
-                        'active' => $c == 'banners',
+                        'active' => $c == 'banner',
                         'visible' => true,
                         'items' => [
                             [
                                 'label' => Yii::t('admin','List'),
                                 'icon' => 'fa fa-circle-o',
-                                'url' => ['/admin/banners/index'],
-                                'active' => $c == 'banners' && in_array($a,['index','create','update','delete']),
+                                'url' => ['/admin/banner/index'],
+                                'active' => $c == 'banner' && in_array($a,['index','create','update','delete']),
                                 'visible' => true
                             ],
                             [
                                 'label' => Yii::t('admin','Places'),
                                 'icon' => 'fa fa-circle-o',
-                                'url' => ['/admin/banners/places'],
-                                'active' => $c == 'banners' && in_array($a,['places']),
+                                'url' => ['/admin/banner/places'],
+                                'active' => $c == 'banner' && in_array($a,['places']),
                                 'visible' => true
                             ]
                         ]

@@ -139,5 +139,10 @@ return [
     'Banner list' => 'Список банеров',
     'Link' => 'Ссылка',
     'Create banner' => 'Создать баннер',
-    'Update banner' => 'Редактирвоать баннер'
+    'Update banner' => 'Редактирвоать баннер',
+    'Alias' => 'Псевдоним',
+    'Alias (used in page code)' => 'Псевдоним (используется в коде страниц)',
+    'Banner place list' => 'Список мест для баннеров',
+    'Banner place configuration' => 'Натрйоки баннерного места',
+    'Manage banner display schedule' => 'Расписние отображения баннеров'
 ];

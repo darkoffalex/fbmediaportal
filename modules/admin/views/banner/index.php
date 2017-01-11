@@ -6,10 +6,10 @@ use yii\helpers\Url;
 use app\helpers\Constants;
 use app\helpers\Help;
 
-/* @var $searchModel \app\models\UserSearch */
+/* @var $searchModel \app\models\BannerSearch */
 /* @var $dataProvider \yii\data\ActiveDataProvider */
 /* @var $this \yii\web\View */
-/* @var $controller \app\modules\admin\controllers\UsersController */
+/* @var $controller \app\modules\admin\controllers\BannerController */
 /* @var $user \app\models\User */
 
 $controller = $this->context;
@@ -73,7 +73,7 @@ $gridColumns = [
                 ]); ?>
             </div>
             <div class="box-footer">
-                <a href="<?php echo Url::to(['/admin/banners/create']); ?>" class="btn btn-primary"><?= Yii::t('admin','Create'); ?></a>
+                <a href="<?php echo Url::to(['/admin/banner/create']); ?>" class="btn btn-primary"><?= Yii::t('admin','Create'); ?></a>
             </div>
         </div>
     </div>

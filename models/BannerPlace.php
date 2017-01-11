@@ -4,6 +4,9 @@ namespace app\models;
 
 use Yii;
 
+/**
+ * @property Banner[] $banners
+ */
 class BannerPlace extends BannerPlaceDB
 {
 
@@ -26,5 +29,13 @@ class BannerPlace extends BannerPlaceDB
     {
         $baseRules = parent::rules();
         return $baseRules;
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getBanners()
+    {
+        return $this->hasMany(Banner::className(), ['id' => 'banner_id'])->viaTable('banner_display', ['place_id' => 'id']);
     }
 }

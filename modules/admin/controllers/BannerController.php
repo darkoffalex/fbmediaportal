@@ -4,17 +4,21 @@ namespace app\modules\admin\controllers;
 
 use app\helpers\Help;
 use app\models\Banner;
+use app\models\BannerPlace;
+use app\models\BannerPlaceDB;
+use app\models\BannerPlaceSearch;
 use app\models\BannerSearch;
 use Yii;
 use app\helpers\Sort;
 use app\helpers\Constants;
+use yii\bootstrap\ActiveForm;
 use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\UploadedFile;
 
-class BannersController extends Controller
+class BannerController extends Controller
 {
     /**
      * Listing all banners
@@ -72,7 +76,7 @@ class BannersController extends Controller
                     $model->image = null;
                     $model->save();
 
-                    return $this->redirect(Url::to(['/admin/banners/index']));
+                    return $this->redirect(Url::to(['/admin/banner/index']));
                 }
             }
         }
@@ -165,8 +169,103 @@ class BannersController extends Controller
     }
 
 
-    public function actionPlaces()
+    /******************************************** P L A C E S *********************************************************/
+
+    /**
+     * Listing all banners
+     * @return string
+     */
+    function actionPlaces()
     {
-        return $this->renderContent('There will be list of places');
+        $searchModel = new BannerPlaceSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        return $this->render('places', compact('searchModel','dataProvider'));
+    }
+
+    /**
+     * Creating banner place
+     * @return string
+     */
+    public function actionCreatePlace()
+    {
+        $model = new BannerPlace();
+
+        //ajax validation
+        if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+
+        if(Yii::$app->request->isPost && $model->load(Yii::$app->request->post())){
+            if($model->validate()){
+
+                $model->created_at = date('Y-m-d H:i:s', time());
+                $model->updated_at = date('Y-m-d H:i:s', time());
+                $model->created_by_id = Yii::$app->user->id;
+                $model->updated_by_id = Yii::$app->user->id;
+                $model->save();
+
+                return $this->redirect(Url::to(['/admin/banner/places']));
+            }
+        }
+
+        return $this->renderAjax('_edit_place',compact('model'));
+    }
+
+    /**
+     * Update banner place
+     * @param $id
+     * @return string
+     * @throws NotFoundHttpException
+     * @throws \Exception
+     */
+    public function actionUpdatePlace($id)
+    {
+        /* @var $model BannerPlace */
+        $model = BannerPlace::findOne((int)$id);
+
+        if(empty($model)){
+            throw new NotFoundHttpException(Yii::t('admin','Banner not found'),404);
+        }
+
+        //ajax validation
+        if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+
+        if(Yii::$app->request->isPost && $model->load(Yii::$app->request->post())){
+            if($model->validate()){
+
+                $model->updated_at = date('Y-m-d H:i:s', time());
+                $model->updated_by_id = Yii::$app->user->id;
+                $model->update();
+
+                return $this->redirect(Url::to(['/admin/banner/places']));
+            }
+        }
+
+        return $this->renderAjax('_edit_place',compact('model'));
+    }
+
+    /**
+     * Deleting banner place
+     * @param $id
+     * @return Response
+     * @throws NotFoundHttpException
+     * @throws \Exception
+     */
+    public function actionDeletePlace($id)
+    {
+        /* @var $model BannerPlace */
+        $model = BannerPlace::findOne((int)$id);
+
+        if(empty($model)){
+            throw new NotFoundHttpException(Yii::t('admin','Banner not found'),404);
+        }
+
+        $model->delete();
+
+        return $this->redirect(Yii::$app->request->referrer);
     }
 }
