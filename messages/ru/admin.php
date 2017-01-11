@@ -144,5 +144,11 @@ return [
     'Alias (used in page code)' => 'Псевдоним (используется в коде страниц)',
     'Banner place list' => 'Список мест для баннеров',
     'Banner place configuration' => 'Натрйоки баннерного места',
-    'Manage banner display schedule' => 'Расписние отображения баннеров'
+    'Manage banner display schedule' => 'Расписние отображения баннеров',
+    'Manage schedule' => 'Управление расписанием',
+    'No banners found. You can add new banner in banner list' => 'Не найдено баннеров. Вы можете добавить баннер в списке',
+    'today' => 'сегодня',
+    'month' => 'месяц',
+    'week' => 'неделя',
+    'day' => 'день'
 ];

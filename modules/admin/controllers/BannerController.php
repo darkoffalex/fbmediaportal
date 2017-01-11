@@ -268,4 +268,25 @@ class BannerController extends Controller
 
         return $this->redirect(Yii::$app->request->referrer);
     }
+
+    /**
+     * Display schedule for banner place (select which banner should be shown at specified time)
+     * @param $id
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionPlaceScheduler($id)
+    {
+        /* @var $model BannerPlace */
+        $model = BannerPlace::findOne((int)$id);
+
+        if(empty($model)){
+            throw new NotFoundHttpException(Yii::t('admin','Banner not found'),404);
+        }
+
+        /* @var $banners Banner[] */
+        $banners = Banner::find()->all();
+
+        return $this->render('schedule',compact('model','banners'));
+    }
 }

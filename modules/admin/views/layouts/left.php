@@ -57,7 +57,7 @@
                                 'label' => Yii::t('admin','Places'),
                                 'icon' => 'fa fa-circle-o',
                                 'url' => ['/admin/banner/places'],
-                                'active' => $c == 'banner' && in_array($a,['places']),
+                                'active' => $c == 'banner' && in_array($a,['places','place-scheduler']),
                                 'visible' => true
                             ]
                         ]
