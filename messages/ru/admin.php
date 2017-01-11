@@ -132,5 +132,12 @@ return [
     'No comments found for this post' => 'Нет комментариев к этому материалу',
     'Comments for' => 'Комментарии для',
     'Banners' => 'Банеры',
-    'Places' => 'Места'
+    'Places' => 'Места',
+    'Clicks' => 'Кликов',
+    'Image' => 'Изображение',
+    'Code' => 'Код',
+    'Banner list' => 'Список банеров',
+    'Link' => 'Ссылка',
+    'Create banner' => 'Создать баннер',
+    'Update banner' => 'Редактирвоать баннер'
 ];

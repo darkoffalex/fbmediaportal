@@ -49,14 +49,14 @@
                             [
                                 'label' => Yii::t('admin','List'),
                                 'icon' => 'fa fa-circle-o',
-                                'url' => ['/admin/languages/index'],
-                                'active' => $c == 'banners' && in_array($a,['index']),
+                                'url' => ['/admin/banners/index'],
+                                'active' => $c == 'banners' && in_array($a,['index','create','update','delete']),
                                 'visible' => true
                             ],
                             [
                                 'label' => Yii::t('admin','Places'),
                                 'icon' => 'fa fa-circle-o',
-                                'url' => ['/admin/labels/index'],
+                                'url' => ['/admin/banners/places'],
                                 'active' => $c == 'banners' && in_array($a,['places']),
                                 'visible' => true
                             ]
