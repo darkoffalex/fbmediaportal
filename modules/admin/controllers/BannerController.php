@@ -4,6 +4,7 @@ namespace app\modules\admin\controllers;
 
 use app\helpers\Help;
 use app\models\Banner;
+use app\models\BannerDisplay;
 use app\models\BannerPlace;
 use app\models\BannerPlaceDB;
 use app\models\BannerPlaceSearch;
@@ -287,6 +288,136 @@ class BannerController extends Controller
         /* @var $banners Banner[] */
         $banners = Banner::find()->all();
 
-        return $this->render('schedule',compact('model','banners'));
+        /* @var $calendarConfig array[] config to display on schedule added elements */
+        $calendarConfig = [];
+
+        if(!empty($model->bannerDisplays)){
+            foreach($model->bannerDisplays as $display){
+                $calendarConfig[] = [
+                    'item_id' => $display->id,
+                    'title' => $display->banner->name,
+                    'start' => $display->start_at,
+                    'end' => $display->end_at,
+                    'backgroundColor' => '#3c8dbc',
+                    'borderColor' => '#3c8dbc'
+                ];
+            }
+        }
+
+        $calendarConfig = json_encode($calendarConfig);
+
+        return $this->render('schedule',compact('model','banners','calendarConfig'));
+    }
+
+    /**
+     * Adding new item to schedule
+     * @param $id
+     * @return array|string
+     * @throws NotFoundHttpException
+     */
+    public function actionAddTime($id)
+    {
+        /* @var $model BannerPlace */
+        $model = BannerPlace::findOne((int)$id);
+
+        if(empty($model)){
+            return 'FAILED';
+        }
+
+        //If incoming request has ajax type
+        if(Yii::$app->request->isAjax){
+
+            //get necessary information
+            $bannerId = Yii::$app->request->post('banner_id');
+            $startAt = Yii::$app->request->post('start_date');
+            $endAt = Yii::$app->request->post('end_date');
+            $duration = Yii::$app->request->post('duration_time',3600);
+
+            /* @var $banner Banner */
+            $banner = Banner::findOne((int)$bannerId);
+
+            if(!empty($banner)){
+
+                //get start time (timestamp)
+                $time_start = !empty($startAt) ? strtotime($startAt) : time();
+                //calculate end time (using duration) or get from request if set
+                $time_end = !empty($endAt) ? strtotime($endAt) : $time_start + $duration;
+
+                //create schedule item
+                $display = new BannerDisplay();
+                $display->place_id = $id;
+                $display->banner_id = $banner->id;
+                $display->start_at = date('Y-m-d H:i:s', $time_start);
+                $display->end_at = date('Y-m-d H:i:s', $time_end);
+
+                $display->created_at = date('Y-m-d H:i:s', time());
+                $display->updated_at = date('Y-m-d H:i:s', time());
+                $display->created_by_id = Yii::$app->user->id;
+                $display->updated_by_id = Yii::$app->user->id;
+                $display->save();
+
+                //response (json)
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return [
+                    'id' => $display->id,
+                    'start_date' => $display->start_at,
+                    'end_date' => $display->end_at
+                ];
+            }
+        }
+
+        //failure response
+        return 'FAILED';
+    }
+
+    /**
+     * Editing schedule item
+     * @return array|string
+     * @throws \Exception
+     */
+    public function actionEditTime()
+    {
+        /* @var $model BannerDisplay */
+        $display = BannerDisplay::findOne((int)Yii::$app->request->post('id'));
+
+        if(empty($display)){
+            return 'FAILED';
+        }
+
+        $startAt = Yii::$app->request->post('start_date');
+        $endAt = Yii::$app->request->post('end_date');
+
+        $display->start_at = $startAt;
+        $display->end_at = $endAt;
+
+        $display->updated_at = date('Y-m-d H:i:s', time());
+        $display->updated_by_id = Yii::$app->user->id;
+        $display->update();
+
+        //response (json)
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        return [
+            'id' => $display->id,
+            'start_date' => $display->start_at,
+            'end_date' => $display->end_at
+        ];
+    }
+
+    /**
+     * Delete schedule item
+     * @param $id
+     * @return string
+     * @throws \Exception
+     */
+    public function actionDeleteTime($id)
+    {
+        /* @var $model BannerDisplay */
+        $display = BannerDisplay::findOne((int)$id);
+
+        if(empty($display)){
+            return 'FAILED';
+        }
+
+        return $display->delete() ? 'OK' : 'FAILED';
     }
 }

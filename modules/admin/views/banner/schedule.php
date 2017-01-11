@@ -14,12 +14,13 @@ $this->params['breadcrumbs'][] = $this->title;
 /* @var $this \yii\web\View */
 /* @var $model \app\models\BannerPlace */
 /* @var $banners \app\models\Banner[] */
+/* @var $calendarConfig string */
 
 $controller = $this->context;
 $lng = Yii::$app->language;
 
 $this->registerCssFile("@web/js/fullcalendar/fullcalendar.min.css");
-
+$this->registerJsFile("@web/js/jQueryUI/jquery-ui.js",['position' => \yii\web\View::POS_BEGIN]);
 $this->registerJsFile("@web/js/moment/moment.js",['position' => \yii\web\View::POS_BEGIN]);
 $this->registerJsFile("@web/js/fullcalendar/fullcalendar.min.js",['position' => \yii\web\View::POS_BEGIN]);
 $this->registerJsFile("@web/js/fullcalendar/lang/{$lng}.js",['position' => \yii\web\View::POS_BEGIN]);
@@ -40,9 +41,11 @@ $this->registerJsFile("@web/js/fullcalendar/lang/{$lng}.js",['position' => \yii\
                             </div>
                             <div class="box-body">
                                 <?php if(!empty($banners)): ?>
-                                    <?php foreach($banners as $banner): ?>
-                                        <div data-id="<?php echo $banner->id; ?>" class="external-event bg-light-blue"><?php echo $banner->name; ?></div>
-                                    <?php endforeach; ?>
+                                    <div id="external-events">
+                                        <?php foreach($banners as $banner): ?>
+                                            <div data-id="<?php echo $banner->id; ?>" class="external-event bg-light-blue"><?php echo $banner->name; ?></div>
+                                        <?php endforeach; ?>
+                                    </div>
                                 <?php else: ?>
                                     <p><?= Yii::t('admin','No banners found. You can add new banner in banner list'); ?></p>
                                 <?php endif; ?>
@@ -67,7 +70,6 @@ $this->registerJsFile("@web/js/fullcalendar/lang/{$lng}.js",['position' => \yii\
         </div>
     </div>
 </div>
-
 
 <script type="text/javascript">
     $(function () {
@@ -95,7 +97,7 @@ $this->registerJsFile("@web/js/fullcalendar/lang/{$lng}.js",['position' => \yii\
         initEvents($('#external-events div.external-event'));
 
         //Get calendar DIV
-        var calendarElement = $("#callendar");
+        var calendarElement = $("#calendar");
 
         
         //Init calendar
@@ -104,7 +106,7 @@ $this->registerJsFile("@web/js/fullcalendar/lang/{$lng}.js",['position' => \yii\
             allDaySlot: false,
             defaultView : 'agendaWeek',
             scrollTime : '00:00:00',
-            slotDuration : '00:05:00',
+            slotDuration : '00:30:00',
             defaultDate : '<?= date('Y-m-d H:i:s',time()); ?>',
 
             header: {
@@ -120,7 +122,7 @@ $this->registerJsFile("@web/js/fullcalendar/lang/{$lng}.js",['position' => \yii\
                 day: '<?= Yii::t('admin','day'); ?>'
             },
 
-            events: [],
+            events: <?= $calendarConfig ?>,
 
             editable: true,
             droppable: true,
@@ -131,27 +133,25 @@ $this->registerJsFile("@web/js/fullcalendar/lang/{$lng}.js",['position' => \yii\
                 var copiedEventObject = $.extend({}, originalEventObject);
 
                 copiedEventObject.start = date;
-                copiedEventObject.backgroundColor = '#d9d9d9';
-                copiedEventObject.borderColor = '#d9d9d9';
+                copiedEventObject.backgroundColor = '#3c8dbc';
+                copiedEventObject.borderColor = '#3c8dbc';
 
                 $.ajax({
-                    url: "<?= Url::to(['/admin/banner/add-time','id' => $model->id]); ?>",
-                    data: {
+                    url:'<?= Url::to(['/admin/banner/add-time','id' => $model->id]); ?>',
+                    method:"POST",
+                    data:{
                         banner_id: copiedEventObject.banner_id,
                         start_date: date.format('YYYY-MM-DD HH:mm:ss')
                     }
                 }).done(function(response) {
                     if(response !== 'FAILED'){
-                        var responseObject = JSON.parse(response);
 
-                        copiedEventObject.start = responseObject.start_date;
-                        copiedEventObject.end = responseObject.end_date;
-                        copiedEventObject.item_id = responseObject.item_id;
-
+                        copiedEventObject.start = response.start_date;
+                        copiedEventObject.end = response.end_date;
+                        copiedEventObject.item_id = response.id;
 
                         calendarElement.fullCalendar('renderEvent', copiedEventObject, true);
                     }
-
                 });
             },
 
@@ -159,33 +159,14 @@ $this->registerJsFile("@web/js/fullcalendar/lang/{$lng}.js",['position' => \yii\
             eventResize:function(event, jsEvent, ui, view){
                 $.ajax({
                     url: "<?php echo Url::to(['/admin/banner/edit-time']); ?>",
+                    method:"POST",
                     data: {
                         id: event.item_id,
-                        date_start: event.start.format('YYYY-MM-DD HH:mm:ss'),
-                        date_end: event.end.format('YYYY-MM-DD HH:mm:ss')
+                        start_date: event.start.format('YYYY-MM-DD HH:mm:ss'),
+                        end_date: event.end.format('YYYY-MM-DD HH:mm:ss')
                     }
                 }).done(function(data){
-                    if(data != 'FAILED'){
-
-                        var items = $.parseJSON(data);
-                        calendarElement.fullCalendar('removeEvents',event._id);
-
-                        $.each(items, function(index, item) {
-                            var eventObject = {
-                                title: item.banner_name,
-                                item_id: item.id,
-                                banner_id: item.banner_id,
-                                start: item.date_start,
-                                end: item.date_end
-//                                backgroundColor: item.color,
-//                                borderColor: item.color
-                            };
-
-                            $('#calendar').fullCalendar('renderEvent', eventObject, true);
-                        });
-
-
-                    }
+                    //TODO: handle success
                 }).fail(function(){
                     //TODO: handle failure
                 });
@@ -195,11 +176,16 @@ $this->registerJsFile("@web/js/fullcalendar/lang/{$lng}.js",['position' => \yii\
             eventDrop:function(event, delta, revertFunc, jsEvent, ui, view ){
                 $.ajax({
                     url: "<?php echo Url::to(['/admin/banner/edit-time']); ?>",
+                    method:"POST",
                     data: {
                         id: event.item_id,
-                        date_start: event.start.format('YYYY-MM-DD HH:mm:ss'),
-                        date_end: event.end.format('YYYY-MM-DD HH:mm:ss')
+                        start_date: event.start.format('YYYY-MM-DD HH:mm:ss'),
+                        end_date: event.end.format('YYYY-MM-DD HH:mm:ss')
                     }
+                }).done(function(data){
+                    //TODO: handle success
+                }).fail(function(){
+                    //TODO: handle failure
                 });
             },
 
