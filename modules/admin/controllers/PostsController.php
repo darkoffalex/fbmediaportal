@@ -134,20 +134,6 @@ class PostsController extends Controller
                 //update
                 $model->update();
 
-                //if URL of source not empty - add it to auto-complete list next time
-                if(!empty($model->source_url)){
-                    /* @var $source PostSources */
-                    if(PostSources::find()->where(['url' => $model->source_url])->count() == 0){
-                        $sourceUrl = new PostSources();
-                        $sourceUrl->url = $model->source_url;
-                        $sourceUrl->created_at = date('Y-m-d H:i:s',time());
-                        $sourceUrl->updated_at = date('Y-m-d H:i:s',time());
-                        $sourceUrl->created_by_id = Yii::$app->user->id;
-                        $sourceUrl->updated_by_id = Yii::$app->user->id;
-                        $sourceUrl->save();
-                    }
-                }
-
                 //save translations
                 foreach($model->translations as $lng => $attributes){
                     $trl = $model->getATrl($lng);
@@ -183,6 +169,9 @@ class PostsController extends Controller
                         $pc->update();
                     }
                 }
+
+                //update search indexes
+                $model->updateSearchIndices([Constants::IND_R_CONTENT,Constants::IND_R_CATEGORIES]);
 
                 //load all related stuff again
                 $model->refresh();
@@ -271,6 +260,7 @@ class PostsController extends Controller
     {
         /* @var $image PostImage */
         $image = PostImage::findOne((int)$id);
+        $post = $image->post;
         $postId = $image->post_id;
 
         if(empty($image)){
@@ -280,6 +270,9 @@ class PostsController extends Controller
         //delete
         $image->deleteFile();
         $image->delete();
+
+        //update search index
+        $post->updateSearchIndices([Constants::IND_R_IMAGES]);
 
         return $this->actionListImages($postId);
     }
@@ -373,10 +366,10 @@ class PostsController extends Controller
                     $model->updated_at = date('Y-m-d H:i:s', time());
                     $model->updated_by_id = Yii::$app->user->id;
                     $model->image = null;
-                    $saved = $model->update();
+                    $model->update();
 
                     //save translations if base object was saved
-                    if($saved){
+                    if(!$model->hasErrors()){
                         foreach($model->translations as $lng => $attributes){
                             $trl = $model->getATrl($lng);
                             $trl->setAttributes($attributes);
@@ -386,6 +379,9 @@ class PostsController extends Controller
 
                     //refresh post
                     $post->refresh();
+
+                    //update search index
+                    $post->updateSearchIndices([Constants::IND_R_IMAGES]);
 
                     //It's ok, can reload table
                     return 'OK';
@@ -472,6 +468,9 @@ class PostsController extends Controller
                     //refresh post
                     $post->refresh();
 
+                    //update search index
+                    $post->updateSearchIndices([Constants::IND_R_IMAGES]);
+
                     //It's ok, can reload table
                     return 'OK';
                 }
@@ -544,6 +543,9 @@ class PostsController extends Controller
                     }
                 }
 
+                //update search index
+                $post->updateSearchIndices([Constants::IND_R_ANSWERS]);
+
                 //OK message (to reload container)
                 return 'OK';
 
@@ -584,6 +586,7 @@ class PostsController extends Controller
     {
         /* @var $answer PostImage */
         $answer = PostVoteAnswer::findOne((int)$id);
+        $post = $answer->post;
         $postId = $answer->post_id;
 
         if(empty($answer)){
@@ -592,6 +595,9 @@ class PostsController extends Controller
 
         //delete
         $answer->delete();
+
+        //update search index
+        $post->updateSearchIndices([Constants::IND_R_ANSWERS]);
 
         return $this->actionListAnswers($postId);
     }
@@ -637,5 +643,23 @@ class PostsController extends Controller
         }
 
         return $this->renderAjax('_edit_group',compact('model'));
+    }
+
+    /**
+     * View post's comments
+     * @param $id
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionComments($id)
+    {
+        /* @var $post Post */
+        $post = Post::findOne((int)$id);
+
+        if(empty($post)){
+            throw new NotFoundHttpException(Yii::t('admin','Post not found'),404);
+        }
+
+        return $this->renderAjax('_comments',compact('post'));
     }
 }

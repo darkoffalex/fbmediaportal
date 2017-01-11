@@ -4,6 +4,7 @@ namespace app\models;
 
 use Yii;
 use yii\base\NotSupportedException;
+use yii\helpers\Url;
 use yii\web\IdentityInterface;
 use app\helpers\Constants;
 
@@ -166,5 +167,14 @@ class User extends UserDB implements IdentityInterface
             Constants::ROLE_ADMIN,
             Constants::ROLE_REDACTOR
         ]);
+    }
+
+    /**
+     * Returns URL path to user avatar
+     * @return string
+     */
+    public function getAvatar()
+    {
+        return Url::to('@web/img/no_user.png');
     }
 }

@@ -41,7 +41,7 @@ $controller = $this->context;
             </div>
             <div class="col-xs-12 col-sm-4 text-center">
                 <figure>
-                    <img src="<?= Url::to('@web/img/no_user.png'); ?>" alt="" class="img-circle img-responsive">
+                    <img src="<?= $model->getAvatar(); ?>" alt="" class="img-circle img-responsive">
                 </figure>
             </div>
         </div>
@@ -49,7 +49,7 @@ $controller = $this->context;
             <div class="col-xs-12 col-sm-6 emphasis">
                 <h2><strong> <?= (int)$model->counter_posts; ?> </strong></h2>
                 <p><small><?= Yii::t('admin','Posts'); ?></small></p>
-                <a href="#" class="btn btn-success btn-block"><span class="fa fa-eye"></span> <?= Yii::t('admin','View'); ?></a>
+                <a href="<?= Url::to(['/admin/posts/index','PostSearch' => ['author_id' => $model->id]]); ?>" class="btn btn-success btn-block"><span class="fa fa-eye"></span> <?= Yii::t('admin','View'); ?></a>
             </div>
             <div class="col-xs-12 col-sm-6 emphasis">
                 <h2><strong> <?= (int)$model->counter_comments; ?></strong></h2>

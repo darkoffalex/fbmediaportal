@@ -162,7 +162,7 @@ $gridColumns = [
         'class' => 'yii\grid\ActionColumn',
         'contentOptions'=>['style'=>'width: 100px; text-align: center;'],
         'header' => Yii::t('admin','Actions'),
-        'template' => '{delete} &nbsp; {update} &nbsp; {change_status} &nbsp; {accounts}',
+        'template' => '{delete} &nbsp; {update} &nbsp; {change_status}',
         'buttons' => [
             'change_status' => function ($url,$model,$key) {
                 /* @var $model \app\models\User */

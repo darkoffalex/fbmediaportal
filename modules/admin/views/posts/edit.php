@@ -165,6 +165,10 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                     <?php $data = ArrayHelper::merge(['' => Yii::t('admin','[NONE]')],ArrayHelper::map(PostGroup::find()->all(),'id','name')); ?>
                     <?= $form->field($model,'group_id',['template' => "{label}\n{input}\n{$link}\n{error}\n"])->dropDownList($data,['class' => 'form-control reload-ids', 'data-reload-url' => $reload]); ?>
 
+                    <?= $form->field($model, 'kind_id')->dropDownList([
+                        Constants::KIND_INTERESTING_CONTENT => Yii::t('admin','Интересное содержимое'),
+                        Constants::KIND_INTERESTING_COMMENTS => Yii::t('admin','Интересное обсуждение'),
+                    ]); ?>
 
                     <div class="form-group dropdown inactive-links">
                         <label class="control-label"><?= Yii::t('admin','Categories'); ?></label>
@@ -215,6 +219,9 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                             'allowClear' => true,
                             'minimumInputLength' => 2,
                             'language' => [
+                                'noResults' => new JsExpression("function () { return '".Yii::t('admin','No results found')."'; }"),
+                                'searching' => new JsExpression("function () { return '".Yii::t('admin','Searching...')."'; }"),
+                                'inputTooShort' => new JsExpression("function(args) {return '".Yii::t('admin','Type more characters')."'}"),
                                 'errorLoading' => new JsExpression("function () { return '".Yii::t('admin','Waiting for results')."'; }"),
                             ],
                             'ajax' => [

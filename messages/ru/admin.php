@@ -123,5 +123,12 @@ return [
     'Add new group' => 'Добавить новую группу',
     'Group settings' => 'Настрйоки группы',
     'Group page URL' => 'URL страницы группы',
-    'FB group ID' => 'FB ID группы'
+    'FB group ID' => 'FB ID группы',
+    'Type more characters' => 'Введите больше символов',
+    'No results found' => 'Ничего не найдено',
+    'Searching...' => 'Поиск...',
+    'Kind ID' => 'Флаг сортировки',
+    'View comments' => 'Просмотр комментариев',
+    'No comments found for this post' => 'Нет комментариев к этому материалу',
+    'Comments for' => 'Комментарии для'
 ];

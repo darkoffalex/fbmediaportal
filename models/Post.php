@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\Constants;
 use Yii;
 use yii\web\UploadedFile;
 
@@ -77,6 +78,7 @@ class Post extends PostDB
         return $this->hasOne(LabelTrl::className(), ['post_id' => 'id'])->where(['lng' => $lng]);
     }
 
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -84,5 +86,150 @@ class Post extends PostDB
     {
         $relation = parent::getPostImages();
         return $relation->orderBy('priority ASC');
+    }
+
+    /**
+     * Updating indexes
+     * @param array $type
+     * @return bool
+     * @throws \yii\db\Exception
+     */
+    public function updateSearchIndices($type = [Constants::IND_R_ALL])
+    {
+        if(!is_array($type) || empty($type)){
+            return false;
+        }
+
+        if(in_array(Constants::IND_R_ALL,$type)){
+            PostSearchIndex::deleteAll(['post_id' => $this->id]);
+        }else{
+            PostSearchIndex::deleteAll(['type_id' => $type, 'post_id' => $this->id]);
+        }
+
+        $preparedValues = [];
+
+        /* @var $languages Language[] */
+        $languages = Language::find()->all();
+
+        //if languages not empty (for confidence)
+        if(!empty($languages)){
+            foreach($languages as $lng){
+
+                //get TRL object
+                $postTrl = $this->getATrl($lng->prefix);
+
+                if(in_array(Constants::IND_R_ALL,$type) || in_array(Constants::IND_R_CONTENT,$type)){
+                    if(!empty($postTrl->name)){
+                        $preparedValues[] = [
+                            $postTrl->name,
+                            $this->id,
+                            Constants::IND_R_CONTENT
+                        ];
+                    }
+
+                    if(!empty($postTrl->small_text)){
+                        $preparedValues[] = [
+                            $postTrl->small_text,
+                            $this->id,
+                            Constants::IND_R_CONTENT
+                        ];
+                    }
+
+                    if(!empty($postTrl->text)){
+                        $preparedValues[] = [
+                            strip_tags($postTrl->text),
+                            $this->id,
+                            Constants::IND_R_CONTENT
+                        ];
+                    }
+
+                    if(!empty($postTrl->question)){
+                        $preparedValues[] = [
+                            $postTrl->question,
+                            $this->id,
+                            Constants::IND_R_CONTENT
+                        ];
+                    }
+                }
+
+                if(in_array(Constants::IND_R_ALL,$type) || in_array(Constants::IND_R_IMAGES,$type)){
+                    if(!empty($this->postImages)){
+                        foreach($this->postImages as $img){
+                            $imgTrl = $img->getATrl($lng->prefix);
+
+                            if(!empty($imgTrl->name)){
+                                $preparedValues[] = [
+                                    $imgTrl->name,
+                                    $this->id,
+                                    Constants::IND_R_IMAGES
+                                ];
+                            }
+
+                            if(!empty($imgTrl->signature)){
+                                $preparedValues[] = [
+                                    $imgTrl->signature,
+                                    $this->id,
+                                    Constants::IND_R_IMAGES
+                                ];
+                            }
+                        }
+                    }
+                }
+
+                if(in_array(Constants::IND_R_ALL,$type) || in_array(Constants::IND_R_ANSWERS,$type)){
+                    if(!empty($this->postVoteAnswers)){
+                        foreach($this->postVoteAnswers as $answer){
+                            $answerTrl = $answer->getATrl($lng->prefix);
+
+                            if(!empty($answerTrl->text)){
+                                $preparedValues[] = [
+                                    $answerTrl->text,
+                                    $this->id,
+                                    Constants::IND_R_ANSWERS
+                                ];
+                            }
+                        }
+                    }
+                }
+
+                if(in_array(Constants::IND_R_ALL,$type) || in_array(Constants::IND_R_CATEGORIES,$type)){
+                    if(!empty($this->categories)){
+                        foreach($this->categories as $cat){
+                            $catTrl = $cat->getATrl($lng->prefix);
+
+                            if(!empty($catTrl->name)){
+                                $preparedValues[] = [
+                                    $catTrl->name,
+                                    $this->id,
+                                    Constants::IND_R_CATEGORIES
+                                ];
+                            }
+                        }
+                    }
+                }
+
+                if(in_array(Constants::IND_R_ALL,$type) || in_array(Constants::IND_R_COMMENTS,$type)){
+                    if(!empty($this->comments)){
+                        foreach($this->comments as $comment){
+
+                            if(!empty($comment->text)){
+                                $preparedValues[] = [
+                                    $comment->text,
+                                    $this->id,
+                                    Constants::IND_R_COMMENTS
+                                ];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        $affectedRows = 0;
+        if(!empty($preparedValues)){
+            $affectedRows = Yii::$app->db->createCommand()->batchInsert(PostSearchIndex::tableName(), ['text', 'post_id', 'type_id'],$preparedValues)->execute();
+        }
+
+        return !empty($affectedRows);
     }
 }

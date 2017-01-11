@@ -31,4 +31,16 @@ class Constants
     const STATUS_ENABLED = 2;
     const STATUS_DELETED = -1;
     const STATUS_IN_STOCK = 4;
+
+    //Types of refreshing indexes
+    const IND_R_CONTENT = 1;
+    const IND_R_IMAGES = 2;
+    const IND_R_ANSWERS = 3;
+    const IND_R_CATEGORIES = 4;
+    const IND_R_COMMENTS = 5;
+    const IND_R_ALL = 6;
+
+    //Types of placement
+    const KIND_INTERESTING_CONTENT = 1;
+    const KIND_INTERESTING_COMMENTS = 2;
 }

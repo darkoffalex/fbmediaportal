@@ -5,11 +5,12 @@ namespace app\models;
 use app\helpers\Constants;
 use Yii;
 use yii\data\ActiveDataProvider;
+use app\models\User;
 
 class PostSearch extends Post
 {
 
-    public $trl_name, $content;
+    public $content, $category_id;
 
     /**
      * Validation rules for search
@@ -18,8 +19,8 @@ class PostSearch extends Post
     public function rules()
     {
         return [
-            [['trl_name', 'name', 'content', 'author_id'], 'string', 'max' => 255],
-            [['content_type_id', 'type_id'], 'integer'],
+            [['name', 'content', 'created_at'], 'string', 'max' => 255],
+            [['content_type_id', 'type_id', 'category_id', 'author_id'], 'integer'],
         ];
     }
 
@@ -31,11 +32,26 @@ class PostSearch extends Post
         $baseLabels = parent::attributeLabels();
 
         $newLabels = [
-            'trl_name' => Yii::t('admin','Name'),
             'content' => Yii::t('admin','Content'),
         ];
 
         return array_merge($baseLabels,$newLabels);
+    }
+
+    /**
+     * Returns selected author name
+     * @return null|string
+     */
+    public function actionGetAuthorName()
+    {
+        if(!empty($this->author_id)){
+            $user = User::findOne(['id' => $this->author_id]);
+            if(!empty($user)){
+                return $user->name.' '.$user->surname;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -54,24 +70,15 @@ class PostSearch extends Post
         if($this->validate()){
 
             if(!empty($this->author_id)){
-                $q->joinWith('author aut');
+                $q->andWhere(['post.author_id' => $this->author_id]);
+            }
 
-                $words = explode(' ',$this->author_id,2);
-
-                if(count($words) > 1){
-                    $q->andWhere(['like','aut.name',$words[0]])
-                        ->andWhere(['like','aut.surname',$words[1]]);
-                }else{
-                    $q->andWhere(['like','aut.name', $this->author_id])
-                        ->orWhere(['like','aut.surname',$this->author_id]);
-//                        ->orWhere(['like','aut.username', $q])
-                }
-
-                $q->orWhere(['like','author_custom_name',$this->author_id]);
+            if(!empty($this->category_id)){
+                $q->joinWith('categories as cat')->andWhere(['cat.id' => $this->category_id]);
             }
 
             if(!empty($this->name)){
-                $q->andWhere(['like','name', $this->name]);
+                $q->andWhere(['like','post.name', $this->name]);
             }
 
             if(!empty($this->content_type_id)){
@@ -79,11 +86,18 @@ class PostSearch extends Post
             }
 
             if(!empty($this->type_id)){
-                $q->andWhere(['type_id' => $this->content_type_id]);
+                $q->andWhere(['post.type_id' => $this->type_id]);
             }
 
-            if(!empty($this->trl_name)){
-                $q->joinWith('postTrls as trl')->andWhere(['lng' => $lng, 'trl.name' => $this->trl_name]);
+            if(!empty($this->content)){
+                $q->joinWith('postSearchIndices as psi')->andWhere(['like','psi.text',$this->content]);
+            }
+
+            if(!empty($this->created_at)){
+                $range = explode(' - ',$this->created_at);
+                $date_from = $range[0];
+                $date_to = $range[1];
+                $q->andWhere('post.created_at >= :from AND post.created_at <= :to',['from' => $date_from, 'to' => $date_to]);
             }
         }
 

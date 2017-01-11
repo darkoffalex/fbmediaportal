@@ -5,7 +5,10 @@ use yii\bootstrap\Html;
 use yii\helpers\Url;
 use app\helpers\Constants;
 use app\helpers\Help;
+use app\models\Category;
 use yii\helpers\ArrayHelper;
+use kartik\select2\Select2;
+use yii\web\JsExpression;
 
 /* @var $searchModel \app\models\PostSearch */
 /* @var $dataProvider \yii\data\ActiveDataProvider */
@@ -27,13 +30,71 @@ $currentView = $this;
 $gridColumns = [
     ['class' => 'yii\grid\SerialColumn'],
 
+//    [
+//        'attribute' => 'name',
+//        'label' => Yii::t('admin','Internal name')
+//    ],
+
     [
-        'attribute' => 'name',
-        'label' => Yii::t('admin','Internal name')
+        'attribute' => 'content',
+        'format' => 'raw',
+        'contentOptions'=>['style'=>'font-size:12px; width: 300px;'],
+        'value' => function ($model, $key, $index, $column) use ($lng, $currentView){
+            /* @var $model \app\models\Post */
+            return $currentView->render('_cell_preview',compact('model','lng'));
+        },
+    ],
+
+    [
+        'attribute' => 'category_id',
+        'label' => Yii::t('admin','Categories'),
+        'enableSorting' => false,
+        'filter' => ArrayHelper::map(Category::getRecursiveItems(),'id',function($model,$defaultValue){
+            /* @var $model Category */
+            $result = "";
+            for($i=1;$i<$model->getDepth();$i++){$result.= "-";}
+            $result.= $model->name;
+            return $result;
+        }),
+        'format' => 'raw',
+        'value' => function ($model, $key, $index, $column) use ($lng){
+            /* @var $model \app\models\Post */
+            $resultString = "";
+            foreach($model->categories as $category){
+                $resultString.="<span class='label label-primary'>{$category->name}</span><br><br>";
+            }
+            return $resultString;
+        },
     ],
 
     [
         'attribute' => 'author_id',
+        'filter' => Select2::widget([
+            'model' => $searchModel,
+            'attribute' => 'author_id',
+            'initValueText' => !empty($searchModel->author) ? $searchModel->author->name.' '.$searchModel->author->surname : '',
+            'options' => ['placeholder' => Yii::t('admin','Search for a user...')],
+            'language' => Yii::$app->language,
+            'theme' => Select2::THEME_DEFAULT,
+            'pluginOptions' => [
+                'allowClear' => true,
+                'minimumInputLength' => 2,
+                'language' => [
+                    'noResults' => new JsExpression("function () { return '".Yii::t('admin','No results found')."'; }"),
+                    'searching' => new JsExpression("function () { return '".Yii::t('admin','Searching...')."'; }"),
+                    'inputTooShort' => new JsExpression("function(args) {return '".Yii::t('admin','Type more characters')."'}"),
+                    'errorLoading' => new JsExpression("function () { return '".Yii::t('admin','Waiting for results')."'; }"),
+                ],
+                'ajax' => [
+                    'url' => Url::to(['/admin/users/ajax-search']),
+                    'dataType' => 'json',
+                    'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                ],
+                'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                'templateResult' => new JsExpression('function(user) { return user.text; }'),
+                'templateSelection' => new JsExpression('function (user) { return user.text; }'),
+            ],
+        ]),
         'format' => 'raw',
         'value' => function ($model, $key, $index, $column){
             /* @var $model \app\models\Post */
@@ -87,36 +148,23 @@ $gridColumns = [
     ],
 
     [
-        'label' => Yii::t('admin','Categories'),
-        'enableSorting' => false,
+        'attribute' => 'created_at',
+        'filter' => \kartik\daterange\DateRangePicker::widget([
+            'model' => $searchModel,
+            'convertFormat' => true,
+            'attribute' => 'created_at',
+            'pluginOptions' => [
+                'locale' => [
+                    'format'=>'Y-m-d',
+                    'separator'=>' - ',
+                ],
+            ],
+        ]),
+        'enableSorting' => true,
         'format' => 'raw',
-        'value' => function ($model, $key, $index, $column) use ($lng){
-            /* @var $model \app\models\Post */
-            $resultString = "";
-            foreach($model->categories as $category){
-                $resultString.="<span class='label label-primary'>{$category->name}</span><br><br>";
-            }
-            return $resultString;
-        },
-    ],
-
-//    [
-//        'attribute' => 'trl_name',
-//        'enableSorting' => false,
-//        'format' => 'raw',
-//        'value' => function ($model, $key, $index, $column) use ($lng){
-//            /* @var $model \app\models\Post */
-//            return $model->getATrl($lng)->name;
-//        },
-//    ],
-
-    [
-        'attribute' => 'content',
-        'format' => 'raw',
-        'contentOptions'=>['style'=>'font-size:12px; width: 360px;'],
-        'value' => function ($model, $key, $index, $column) use ($lng, $currentView){
-            /* @var $model \app\models\Post */
-            return $currentView->render('_cell_preview',compact('model','lng'));
+        'value' => function ($model, $key, $index, $column){
+            /* @var $model \app\models\Post*/
+            return !empty($model->created_at) ? $model->created_at : Yii::t('admin','No data');
         },
     ],
 
@@ -124,7 +172,13 @@ $gridColumns = [
         'class' => 'yii\grid\ActionColumn',
         'contentOptions'=>['style'=>'width: 100px; text-align: center;'],
         'header' => Yii::t('admin','Actions'),
-        'template' => '{delete} &nbsp; {update}',
+        'template' => '{delete} &nbsp; {update} &nbsp {comments}',
+        'buttons' => [
+            'comments' => function ($url,$model,$key) {
+                /* @var $model \app\models\Post */
+                return Html::a('<span class="glyphicon glyphicon-comment"></span>', ['/admin/posts/comments', 'id' => $model->id], ['title' => Yii::t('admin','View comments'), 'data-toggle'=>'modal', 'data-target'=>'.modal']);
+            },
+        ],
         'visibleButtons' => [
             'delete' => function ($model, $key, $index) {return true;},
             'update' => function ($model, $key, $index) {return true;},
@@ -146,7 +200,7 @@ $gridColumns = [
                         </li>
                     <?php endforeach; ?>
 
-                    <li class="pull-right"><a href="#" class="text-muted"><i class="fa fa-globe"></i></a></li>
+                    <li class="pull-right"><a href="<?= Url::to(['/admin/posts/index', 'lng' => $lng]) ?>" class="text-muted"><i class="fa fa-refresh"></i></a></li>
                 </ul>
 
 <!--                <h3 class="box-title">--><?//= Yii::t('admin','List'); ?><!--</h3>-->
