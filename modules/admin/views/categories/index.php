@@ -18,6 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 ?>
 
+
 <div class="row">
     <div class="col-xs-12">
         <div class="box">
@@ -52,15 +53,20 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?php foreach($categories as $category): ?>
                             <tr>
                                 <td><?= $category->id; ?></td>
-                                <td>
-                                    <?php for($i=1; $i < $category->getDepth(); $i++): ?> - <?php endfor; ?>
+
+                                <td class="build-branches" data-id="<?= $category->id; ?>" data-parent="<?= $category->parent_category_id; ?>" style="padding-left: <?= ($category->getDepth()-1)*10; ?>px">
+<!--                                    --><?php //for($i=1; $i < $category->getDepth(); $i++): ?><!-- - --><?php //endfor; ?>
                                     <?php if($category->getDepth() == 1): ?>
+                                        <i class="connector-categories bold"></i>
                                         <strong><?= $category->name; ?></strong>
                                     <?php else: ?>
-                                        <?= $category->name; ?>
+                                        <i class="connector-categories"></i>
+                                        <span><?= $category->name; ?></span>
                                     <?php endif; ?>
                                 </td>
-                                <td><?= 0; ?></td>
+
+                                <td><?= count($category->posts); ?></td>
+
                                 <td>
                                     <a href="<?= Url::to(['/admin/users/preview', 'id' => $category->createdBy->id]); ?>" data-toggle="modal" data-target=".modal"><?= $category->createdBy->name.' '.$category->createdBy->surname; ?></a><br>
                                 </td>

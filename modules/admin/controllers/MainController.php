@@ -33,7 +33,7 @@ class MainController extends Controller
 
         /* @var $identity User */
         $identity = Yii::$app->user->identity;
-        if (!Yii::$app->user->isGuest) {
+        if (!empty($identity) && $identity->hasAdminAccess()) {
             return $this->redirect(Url::to(['/admin/main/index']));
         }
         $model = new LoginForm();

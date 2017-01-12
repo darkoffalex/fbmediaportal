@@ -1,3 +1,20 @@
+/**
+ * Rebuilds branches for category table (to show nesting levels)
+ */
+var rebuildBranches = function(){
+    $(".branch-line-root").remove();
+    $(".build-branches").each(function(){
+        var parent = $('[data-id="'+$(this).data('parent')+'"]');
+
+        if(parent.length > 0){
+            var calcHeight = ($(this).offset().top - parent.offset().top);
+
+            var connectorHtml = "<i class='branch-line-root' style='height: "+calcHeight+"px;'>";
+            $(this).find(".connector-categories").append(connectorHtml);
+        }
+    })
+};
+
 $(document).ready(function () {
 
     /************************* N E S T E D  C A T E G O R Y  M U L T I P L E  S E L E C T O R *************************/
@@ -77,7 +94,7 @@ $(document).ready(function () {
 
     },1);
 
-    /********************************** I M A G E  M A N A G E M E N T  W I N D O W ***********************************/
+    /********************************** M O D A L  M A N A G E M E N T  W I N D O W ***********************************/
 
     /**
      * Toggle fields depending on image source type
@@ -151,4 +168,21 @@ $(document).ready(function () {
 
         return false;
     });
+
+    /******************************************* B U I L D  B R A N C H E S *******************************************/
+
+    rebuildBranches();
+
+    $(window).resize(function(){
+        rebuildBranches();
+    });
+
+    $(document).on('collapsed.pushMenu',function(){
+        setTimeout(function(){rebuildBranches(); console.log('rebuilt');},350);
+    });
+
+    $(document).on('expanded.pushMenu',function(){
+        setTimeout(function(){rebuildBranches(); console.log('rebuilt');},350);
+    });
 });
+
