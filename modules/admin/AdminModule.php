@@ -2,10 +2,12 @@
 
 namespace app\modules\admin;
 
+use app\helpers\Constants;
 use app\helpers\Help;
 use app\models\User;
 use Yii;
 use yii\helpers\Url;
+use yii\web\NotFoundHttpException;
 
 /**
  * admin module definition class
@@ -46,6 +48,12 @@ class AdminModule extends \yii\base\Module
         if(!empty($user)){
             $user->last_online_at = date('Y-m-d H:i:s', time());
             $user->update();
+
+            //if redactor trying to access users controller - sent to categories
+            if($action->controller->id == 'users' && $user->role_id == Constants::ROLE_REDACTOR){
+                Yii::$app->response->redirect(Url::to(['/admin/categories/index']));
+                return false;
+            }
         }
 
         //Redirect to login page if not authenticated
