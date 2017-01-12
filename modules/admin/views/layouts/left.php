@@ -91,6 +91,13 @@
                     ],
 
                     [
+                        'active' => $c == 'common-settings',
+                        'label' => Yii::t('admin','Common settings'),
+                        'icon' => 'fa fa-gear',
+                        'url' => ['/admin/common-settings/index']
+                    ],
+
+                    [
                         'label' => Yii::t('admin','Exit'),
                         'icon' => 'fa fa-sign-out',
                         'url' => ['/admin/main/logout']

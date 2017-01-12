@@ -150,5 +150,8 @@ return [
     'today' => 'сегодня',
     'month' => 'месяц',
     'week' => 'неделя',
-    'day' => 'день'
+    'day' => 'день',
+    'Common settings' => 'Общие настройки',
+    'Footer Content' => 'Содержимое футера',
+    'Header logo image' => 'Изображение логотипа'
 ];

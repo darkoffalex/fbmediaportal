@@ -162,13 +162,17 @@ $gridColumns = [
         'class' => 'yii\grid\ActionColumn',
         'contentOptions'=>['style'=>'width: 100px; text-align: center;'],
         'header' => Yii::t('admin','Actions'),
-        'template' => '{delete} &nbsp; {update} &nbsp; {change_status}',
+        'template' => '{delete} &nbsp; {update} &nbsp; {change_status} &nbsp; {preview}',
         'buttons' => [
             'change_status' => function ($url,$model,$key) {
                 /* @var $model \app\models\User */
                 $icon = $model->status_id == Constants::STATUS_ENABLED ? 'glyphicon glyphicon-check' : 'glyphicon glyphicon-unchecked';
                 $message = $model->status_id == Constants::STATUS_ENABLED ? Yii::t('admin','Enable') : Yii::t('admin','Disable');
                 return Html::a('<span class="'.$icon.'"></span>', Url::to(['/admin/users/status', 'id' => $model->id]), ['title' => $message]);
+            },
+            'preview' => function ($url,$model,$key) {
+                /* @var $model \app\models\User */
+                return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', ['/admin/users/preview', 'id' => $model->id], ['title' => Yii::t('admin','View comments'), 'data-toggle'=>'modal', 'data-target'=>'.modal']);
             },
         ],
         'visibleButtons' => [
