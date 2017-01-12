@@ -41,7 +41,7 @@ $controller = $this->context;
             </div>
             <div class="col-xs-12 col-sm-4 text-center">
                 <figure>
-                    <img src="<?= $model->getAvatar(); ?>" alt="" class="img-circle img-responsive">
+                    <img src="<?= $model->getAvatar(); ?>" alt="" class="img-circle img-responsive pull-right">
                 </figure>
             </div>
         </div>

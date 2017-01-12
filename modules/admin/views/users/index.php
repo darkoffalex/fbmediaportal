@@ -114,7 +114,7 @@ $gridColumns = [
         'format' => 'raw',
         'value' => function ($model, $key, $index, $column){
             /* @var $model \app\models\User */
-            return !empty($model->counter_posts) ? Html::a($model->counter_posts,['/admin/users/posts','id' => $model->id]) : 0;
+            return !empty($model->counter_posts) ? Html::a($model->counter_posts,['/admin/posts/index','PostSearch' => ['author_id' => $model->id]]) : 0;
         },
     ],
 

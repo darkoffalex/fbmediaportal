@@ -7,6 +7,13 @@
 $this->title = 'Главная страница сайта';
 $controller = $this->context;
 $user = Yii::$app->user->identity;
+
+use yii\helpers\Url;
+
+/* @var $social kartik\social\Module */
+/* @var $user \app\models\User */
+$social = Yii::$app->getModule('social');
+$callback = Url::to(['/site/fb-login'],true);
 ?>
 
 <div class="site-index">
@@ -14,6 +21,14 @@ $user = Yii::$app->user->identity;
     <div class="jumbotron">
         <h1>Новостной FB портал</h1>
         <p class="lead">Проект в разработке</p>
+
+        <?php if(Yii::$app->user->isGuest): ?>
+            <?= $social->getFbLoginLink($callback,['class'=>'btn btn-primary'],['email']); ?>
+        <?php else: ?>
+            <?php $user = Yii::$app->user->identity; ?>
+            <p>Вы вошли как: <strong><?= $user->name.' '.$user->surname; ?></strong> &nbsp; <img class="img-circle" width="50" src="<?= $user->getAvatar(); ?>"></p>
+            <a href="<?= Url::to(['/site/logout']); ?>">Выход</a>
+        <?php endif; ?>
     </div>
 
     <div class="body-content">

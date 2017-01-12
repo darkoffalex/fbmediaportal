@@ -97,7 +97,7 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                     </p>
 
                     <p>
-                        <strong><?= Yii::t('admin','Comments') ?></strong> : 0 <a href="#">(<?= Yii::t('admin','View'); ?>)</a>
+                        <strong><?= Yii::t('admin','Comments') ?></strong> : <?= count($model->comments); ?> <a data-toggle="modal" data-target=".modal" href="<?= Url::to(['/admin/posts/comments', 'id' => $model->id]); ?>">(<?= Yii::t('admin','View'); ?>)</a>
                     </p>
                 </div>
             </div>

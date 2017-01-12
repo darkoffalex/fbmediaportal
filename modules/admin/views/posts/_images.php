@@ -23,7 +23,7 @@ $controller = $this->context;
     <?php foreach($post->postImages as $image): ?>
         <tr>
             <td>
-                <img class="img-thumbnail" height="150px" src="<?= $image->getFullUrl(); ?>">
+                <img class="img-thumbnail" width="300" src="<?= $image->getFullUrl(); ?>">
             </td>
             <td>
                 <?php if($image->status_id == Constants::STATUS_ENABLED): ?>
