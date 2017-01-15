@@ -65,7 +65,9 @@ return [
     'Labels list' => 'Список надписей',
     'Internal name' => 'Внутр. имя',
     'META description' => 'META описание',
+    'Meta Description' => 'META описание',
     'META keywords' => 'META ключевые слова',
+    'Meta Keywords' => 'META ключевые слова',
     'Update category' => 'Редактировать рубрику',
     'You have no categories' => 'Нет созданных рубрик',
     'Basic' => 'Основное',
@@ -119,7 +121,7 @@ return [
     'Information' => 'Информация',
     'Votes Only Authorized' => 'Голосовать могут только авторизованные',
     'Stats After Vote' => 'Статистика отображается только после голосования',
-    'Group ID' => 'Источник (группа FB)',
+    'Group ID' => 'Источник',
     'Add new group' => 'Добавить новую группу',
     'Group settings' => 'Настрйоки группы',
     'Group page URL' => 'URL страницы группы',
@@ -153,5 +155,8 @@ return [
     'day' => 'день',
     'Common settings' => 'Общие настройки',
     'Footer Content' => 'Содержимое футера',
-    'Header logo image' => 'Изображение логотипа'
+    'Header logo image' => 'Изображение логотипа',
+    'Add new source' => 'Добавить новый источник',
+    'Source settings' => 'Настройки источника',
+    'Page URL' => 'URL страницы источника'
 ];

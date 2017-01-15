@@ -60,6 +60,11 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                     </div>
                 <?php endif; ?>
 
+                <?= $form->field($model, 'meta_description')->textarea(); ?>
+                <?= $form->field($model, 'meta_keywords')->textarea(); ?>
+
+                <hr>
+
                 <?= $form->field($model, 'footer_content')->textarea(['class' => 'form-control editor-area']); ?>
                 <?= $form->field($model, 'image')->fileInput()->label(Yii::t('admin','Header logo image')); ?>
 

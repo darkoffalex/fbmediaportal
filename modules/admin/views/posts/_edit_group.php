@@ -17,7 +17,7 @@ $languages = \app\models\Language::find()->all();
 ?>
 
     <div class="modal-header">
-        <h4 class="modal-title"><?= Yii::t('admin','Group settings'); ?></h4>
+        <h4 class="modal-title"><?= Yii::t('admin','Source settings'); ?></h4>
     </div>
 
 <?php $form = ActiveForm::begin([
@@ -31,7 +31,7 @@ $languages = \app\models\Language::find()->all();
 
     <div class="modal-body">
         <?= $form->field($model, 'name')->textInput()->label(Yii::t('admin','Name')); ?>
-        <?= $form->field($model, 'url')->textInput()->label(Yii::t('admin','Group page URL')); ?>
+        <?= $form->field($model, 'url')->textInput()->label(Yii::t('admin','Page URL')); ?>
         <?= $form->field($model, 'fb_sync_id')->textInput()->label(Yii::t('admin','FB group ID')); ?>
     </div>
 

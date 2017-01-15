@@ -161,7 +161,7 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                     <hr>
 
                     <?php $reload = Url::to(['/admin/posts/group-id-update']); ?>
-                    <?php $link = Html::a(Yii::t('admin','Add new group'),['/admin/posts/create-group'],['data-toggle'=>'modal','data-target'=>'.modal']); ?>
+                    <?php $link = Html::a(Yii::t('admin','Add new source'),['/admin/posts/create-group'],['data-toggle'=>'modal','data-target'=>'.modal']); ?>
                     <?php $data = ArrayHelper::merge(['' => Yii::t('admin','[NONE]')],ArrayHelper::map(PostGroup::find()->all(),'id','name')); ?>
                     <?= $form->field($model,'group_id',['template' => "{label}\n{input}\n{$link}\n{error}\n"])->dropDownList($data,['class' => 'form-control reload-ids', 'data-reload-url' => $reload]); ?>
 
