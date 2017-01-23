@@ -28,6 +28,8 @@ use Yii;
  * @property integer $updated_by_id
  * @property integer $counter_comments
  * @property integer $counter_posts
+ * @property string $api_key
+ * @property integer $is_basic
  *
  * @property Comment[] $comments
  * @property Post[] $posts
@@ -49,9 +51,9 @@ class UserDB extends \yii\db\ActiveRecord
     {
         return [
             [['auth_key', 'password_hash', 'password_reset_token', 'fb_user_id', 'fb_avatar_url'], 'string'],
-            [['role_id', 'type_id', 'status_id', 'created_by_id', 'updated_by_id', 'counter_comments', 'counter_posts'], 'integer'],
+            [['role_id', 'type_id', 'status_id', 'created_by_id', 'updated_by_id', 'counter_comments', 'counter_posts', 'is_basic'], 'integer'],
             [['created_at', 'updated_at', 'last_online_at'], 'safe'],
-            [['username', 'name', 'surname', 'email', 'avatar_file'], 'string', 'max' => 255],
+            [['username', 'name', 'surname', 'email', 'avatar_file', 'api_key'], 'string', 'max' => 255],
         ];
     }
 
@@ -82,6 +84,8 @@ class UserDB extends \yii\db\ActiveRecord
             'updated_by_id' => 'Updated By ID',
             'counter_comments' => 'Counter Comments',
             'counter_posts' => 'Counter Posts',
+            'api_key' => 'Api Key',
+            'is_basic' => 'Is Basic',
         ];
     }
 
