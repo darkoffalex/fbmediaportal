@@ -4,8 +4,12 @@ namespace app\controllers;
 
 use app\helpers\Constants;
 use app\helpers\Help;
+use app\helpers\Sort;
+use app\models\Comment;
 use app\models\Language;
 use app\models\Post;
+use app\models\PostImage;
+use app\models\PostSearchIndex;
 use app\models\User;
 use yii\base\Action;
 use yii\helpers\ArrayHelper;
@@ -237,6 +241,72 @@ class ApiController extends Controller
             $trl->name = ArrayHelper::getValue($data,'name');
             $trl->small_text = ArrayHelper::getValue($data,'content');
             $trl->isNewRecord ? $trl->save() : $trl->update();
+
+            //images
+            $imagesData = ArrayHelper::getValue($data,'images');
+            if(!empty($imagesData)){
+                foreach($imagesData as $url){
+                    $image = new PostImage();
+                    $image -> post_id = $post->id;
+                    $image -> file_url = $url;
+                    $image -> is_external = true;
+                    $image -> status_id = Constants::STATUS_ENABLED;
+                    $image -> priority = Sort::GetNextPriority(PostImage::className(),['post_id' => $post->id]);
+                    $image -> created_by_id = $this->getBasicAdmin()->id;
+                    $image -> updated_by_id = $this->getBasicAdmin()->id;
+                    $image -> created_at = date('Y-m-d H:i:s',time());
+                    $image -> updated_at = date('Y-m-d H:i:s',time());
+                    $image -> save();
+                }
+            }
+
+            //comments
+            $commentsCreated = [];
+            $commentsData = ArrayHelper::getValue($data, 'comments');
+            if(!empty($commentsData)){
+                foreach($commentsData as $cd){
+                    $comment = new Comment();
+                    $comment -> text = strip_tags(ArrayHelper::getValue($cd,'content'));
+                    $comment -> post_id = $post->id;
+                    $comment -> fb_sync_id = ArrayHelper::getValue($cd,'fb_id');
+                    $comment -> answer_to_fb_id = ArrayHelper::getValue($cd,'answer_to_fb_id');
+                    $comment -> created_at = date('Y-m-d H:i:s',time());
+                    $comment -> updated_at = date('Y-m-d H:i:s',time());
+                    $comment -> created_by_id = $this->getBasicAdmin()->id;
+                    $comment -> updated_by_id = $this->getBasicAdmin()->id;
+
+                    //author
+                    $dataAuthor = ArrayHelper::getValue($cd,'author');
+                    $uFbId = ArrayHelper::getValue($dataAuthor,'fb_id');
+                    $uName = ArrayHelper::getValue($dataAuthor,'name');
+                    $uSurname = ArrayHelper::getValue($dataAuthor,'surname');
+                    $uAvatar = ArrayHelper::getValue($dataAuthor,'avatar_url');
+                    $uEmail = ArrayHelper::getValue($dataAuthor,'email');
+                    $cAuthor = $this->getOrCreateUser($uFbId,$uName,$uSurname,$uAvatar,$uEmail);
+                    $cAuthor->isNewRecord ? $author->save() : $author->update();
+
+                    $comment->author_id = $cAuthor->id;
+                    $ok = $comment->save();
+
+                    if($ok){
+                        $commentsCreated[$comment->fb_sync_id] = $comment;
+                    }
+                }
+            }
+
+            /* @var $commentsCreated Comment[] */
+            if(!empty($commentsCreated)){
+                foreach($commentsCreated as $comment){
+                    if(!empty($comment->answer_to_fb_id) && !empty($commentsCreated[$comment->answer_to_fb_id])){
+                        $comment->answer_to_id = $commentsCreated[$comment->answer_to_fb_id]->id;
+                        $comment->update();
+                    }
+                }
+            }
+
+            //update search indices
+            $post->refresh();
+            $post->updateSearchIndices();
 
             //apply changes
             $transaction->commit();

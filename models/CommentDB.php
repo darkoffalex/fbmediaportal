@@ -18,6 +18,7 @@ use Yii;
  * @property string $updated_at
  * @property integer $created_by_id
  * @property integer $updated_by_id
+ * @property string $answer_to_fb_id
  *
  * @property User $author
  * @property Post $post
@@ -41,6 +42,7 @@ class CommentDB extends \yii\db\ActiveRecord
             [['post_id', 'author_id', 'answer_to_id', 'created_by_id', 'updated_by_id'], 'integer'],
             [['text', 'fb_sync_id', 'fb_sync_token'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
+            [['answer_to_fb_id'], 'string', 'max' => 255],
             [['author_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['author_id' => 'id']],
             [['post_id'], 'exist', 'skipOnError' => true, 'targetClass' => Post::className(), 'targetAttribute' => ['post_id' => 'id']],
         ];
@@ -63,6 +65,7 @@ class CommentDB extends \yii\db\ActiveRecord
             'updated_at' => 'Updated At',
             'created_by_id' => 'Created By ID',
             'updated_by_id' => 'Updated By ID',
+            'answer_to_fb_id' => 'Answer To Fb ID',
         ];
     }
 
