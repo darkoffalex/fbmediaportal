@@ -20,14 +20,23 @@ use yii\web\Response;
 class ApiController extends Controller
 {
     /**
-     * Get basic admin
+     * @var User
+     */
+    private $_basicAdmin = null;
+
+    /**
+     * Get basic admin (singleton style)
      * @return User
      */
     private function getBasicAdmin()
     {
         /* @var $basicAdmin User */
-        $basicAdmin = User::find()->where(['role_id' => Constants::ROLE_ADMIN, 'is_basic' => 1])->one();
-        return !empty($basicAdmin) ? $basicAdmin : new User();
+        if(empty($this->_basicAdmin)){
+            $this->_basicAdmin = User::find()->where(['role_id' => Constants::ROLE_ADMIN, 'is_basic' => 1])->one();
+            $this->_basicAdmin = !empty($this->_basicAdmin) ? $this->_basicAdmin : new User();
+        }
+
+        return $this->_basicAdmin;
     }
 
     /**
@@ -200,6 +209,15 @@ class ApiController extends Controller
             ];
         }
 
+        //check if exist
+        $qnt = Post::find()->where(['fb_sync_id' => ArrayHelper::getValue($data,'fb_id')])->count();
+        if($qnt > 0){
+            return [
+                'status' => 'WARNING',
+                'message' => 'Item already added.'
+            ];
+        }
+
         //transaction
         $transaction = Yii::$app->db->beginTransaction();
 
@@ -209,6 +227,7 @@ class ApiController extends Controller
             $post->fb_sync_id = ArrayHelper::getValue($data,'fb_id');
             $post->name = ArrayHelper::getValue($data,'name');
             $post->content_type_id = Constants::CONTENT_TYPE_NEWS;
+            $post->status_id = Constants::STATUS_IN_STOCK;
             $post->created_by_id = $this->getBasicAdmin()->id;
             $post->updated_by_id = $this->getBasicAdmin()->id;
             $post->created_at = date('Y-m-d H:i:s',time());
@@ -320,6 +339,58 @@ class ApiController extends Controller
             ];
         }
 
+
+        //in case of success
+        return [
+            'status' => 'OK',
+            'message' => 'All data imported successfully'
+        ];
+    }
+
+
+    public function actionAddComments($id)
+    {
+        //check the key
+        if(!$this->isCorrectApiKey($id)){
+            return [
+                'status' => 'ERROR',
+                'message' => 'Authentication failed, check your key'
+            ];
+        }
+
+        //get data from request
+        $data = $this->getRequest();
+
+        //error message (first error)
+        $errorMsg = null;
+
+        //required fields (for validation)
+        $required = [
+            'comments',
+        ];
+
+        //if wrong format (lack of required fields)
+        if(!$this->validateRequest($data,$required,$errorMsg)){
+            return [
+                'status' => 'ERROR',
+                'message' => 'Wrong request. '.$errorMsg,
+            ];
+        }
+
+        $commentsInTask = [];
+        $commentsData = ArrayHelper::getValue($data, 'comments');
+        if(!empty($commentsData)) {
+            foreach ($commentsData as $cd) {
+
+                $postFBId = ArrayHelper::getValue($cd,'fb_id');
+                if(!empty($postFBId)){
+                    $post = Post::find()->where(['fb_sync_id' => $postFBId])->one();
+
+                    //TODO: import posts
+                }
+
+            }
+        }
 
         //in case of success
         return [
