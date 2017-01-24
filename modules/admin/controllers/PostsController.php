@@ -11,7 +11,6 @@ use app\models\PostCategory;
 use app\models\PostGroup;
 use app\models\PostImage;
 use app\models\PostSearch;
-use app\models\PostSources;
 use app\models\PostVoteAnswer;
 use app\models\User;
 use kartik\form\ActiveForm;

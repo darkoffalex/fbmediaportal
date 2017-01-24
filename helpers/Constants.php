@@ -47,4 +47,9 @@ class Constants
     //Types of banners
     const BANNER_TYPE_IMAGE = 1;
     const BANNER_TYPE_CODE = 2;
+
+    //Recommendations reason types
+    const OFFER_REASON_AUTHOR = 1;
+    const OFFER_REASON_GROUP = 2;
+    const OFFER_REASON_CAT_TAG = 3;
 }

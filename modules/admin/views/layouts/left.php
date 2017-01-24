@@ -24,6 +24,14 @@
                     ],
 
                     [
+                        'label' => Yii::t('admin','Stock'),
+                        'icon' => 'fa fa-cloud-download',
+                        'active' => $c == 'stock',
+                        'visible' => true,
+                        'url' => ['/admin/stock/index'],
+                    ],
+
+                    [
                         'label' => Yii::t('admin','Categories'),
                         'icon' => 'fa fa-folder',
                         'active' => $c == 'categories',

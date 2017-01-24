@@ -33,6 +33,7 @@ use Yii;
  *
  * @property Comment[] $comments
  * @property Post[] $posts
+ * @property StockRecommendation[] $stockRecommendations
  */
 class UserDB extends \yii\db\ActiveRecord
 {
@@ -103,5 +104,13 @@ class UserDB extends \yii\db\ActiveRecord
     public function getPosts()
     {
         return $this->hasMany(Post::className(), ['author_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getStockRecommendations()
+    {
+        return $this->hasMany(StockRecommendation::className(), ['author_id' => 'id']);
     }
 }

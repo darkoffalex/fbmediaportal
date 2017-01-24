@@ -158,5 +158,22 @@ return [
     'Header logo image' => 'Изображение логотипа',
     'Add new source' => 'Добавить новый источник',
     'Source settings' => 'Настройки источника',
-    'Page URL' => 'URL страницы источника'
+    'Page URL' => 'URL страницы источника',
+    'Stock' => 'Поток',
+    'Group' => 'Группа',
+    'Recommendations' => 'Рекомендации',
+    'Stock recommendations' => 'Настройки рекомедаций потока',
+    'Reason Type ID' => 'Предлогать на основании',
+    'Author matching' => 'совпадения автора',
+    'Group matching' => 'совпадения группы',
+    'Category tag matching' => 'совпадения тега категории',
+    'Category ID' => 'Рубрика',
+    'Offer this category' => 'Предлагать эту рубрику',
+    'This field is required' => 'Это поле обязательно для заполнения',
+    'Recommend settings' => 'Настройки рекоммендаций',
+    'List settings' => 'Настройки списка',
+    'Add rule' => 'Добавить правило',
+    'Category Tag' => 'Тег категории',
+    'Reason' => 'Причина',
+    'Category' => 'Рубрика'
 ];

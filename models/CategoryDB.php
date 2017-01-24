@@ -21,6 +21,7 @@ use Yii;
  * @property CategoryTrl[] $categoryTrls
  * @property PostCategory[] $postCategories
  * @property Post[] $posts
+ * @property StockRecommendation[] $stockRecommendations
  */
 class CategoryDB extends \yii\db\ActiveRecord
 {
@@ -85,5 +86,13 @@ class CategoryDB extends \yii\db\ActiveRecord
     public function getPosts()
     {
         return $this->hasMany(Post::className(), ['id' => 'post_id'])->viaTable('post_category', ['category_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getStockRecommendations()
+    {
+        return $this->hasMany(StockRecommendation::className(), ['category_id' => 'id']);
     }
 }

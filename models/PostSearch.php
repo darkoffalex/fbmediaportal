@@ -20,7 +20,7 @@ class PostSearch extends Post
     {
         return [
             [['name', 'content', 'created_at'], 'string', 'max' => 255],
-            [['content_type_id', 'type_id', 'category_id', 'author_id'], 'integer'],
+            [['content_type_id', 'type_id', 'category_id', 'author_id', 'group_id'], 'integer'],
         ];
     }
 
@@ -58,12 +58,13 @@ class PostSearch extends Post
      * Build search query and return as result data provider
      * @param array $params
      * @param string $lng
+     * @param bool $stock
      * @return ActiveDataProvider
      */
-    public function search($params, $lng)
+    public function search($params, $lng, $stock = false)
     {
         //all posts that aren't in stock
-        $q = parent::find()->where('post.status_id != :st', ['st' => Constants::STATUS_IN_STOCK]);
+        $q = parent::find()->where($stock ? 'post.status_id = :st' : 'post.status_id != :st', ['st' => Constants::STATUS_IN_STOCK]);
 
         $this->load($params);
 
@@ -87,6 +88,10 @@ class PostSearch extends Post
 
             if(!empty($this->type_id)){
                 $q->andWhere(['post.type_id' => $this->type_id]);
+            }
+
+            if(!empty($this->group_id)){
+                $q->andWhere(['post.group_id' => $this->group_id]);
             }
 
             if(!empty($this->content)){
