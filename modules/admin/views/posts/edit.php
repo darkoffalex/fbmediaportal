@@ -112,6 +112,24 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
 
                     <?= $form->field($model, 'name')->textInput()->label(Yii::t('admin','Internal name')); ?>
 
+                    <div class="form-group dropdown inactive-links">
+                        <label class="control-label"><?= Yii::t('admin','Categories'); ?></label>
+
+                        <div class="form-control categories-tags" data-toggle="dropdown">
+                            <?php foreach($model->categories as $cat): ?>
+                                <span class="label label-primary margin-r-5">
+                                    <?= $cat->name; ?>
+                                    <span class="fa fa-close icon-pointer" data-remove data-category-id="<?= $cat->id; ?>"></span>
+                                    <input type="hidden" name="Post[categoriesChecked][]" value="<?= $cat->id; ?>">
+                                </span>
+                            <?php endforeach; ?>
+                        </div>
+
+                        <?php echo DropdownX::widget([
+                            'items' => Category::buildRecursiveArrayForDropDown(),
+                        ]);  ?>
+                    </div>
+
                     <?= $form->field($model, 'status_id')->dropDownList([
                         Constants::STATUS_ENABLED => Yii::t('admin','Enabled'),
                         Constants::STATUS_DISABLED => Yii::t('admin','Disabled'),
@@ -170,23 +188,6 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                         Constants::KIND_INTERESTING_COMMENTS => Yii::t('admin','Интересное обсуждение'),
                     ]); ?>
 
-                    <div class="form-group dropdown inactive-links">
-                        <label class="control-label"><?= Yii::t('admin','Categories'); ?></label>
-
-                        <div class="form-control categories-tags" data-toggle="dropdown">
-                            <?php foreach($model->categories as $cat): ?>
-                                <span class="label label-primary margin-r-5">
-                                    <?= $cat->name; ?>
-                                    <span class="fa fa-close icon-pointer" data-remove data-category-id="<?= $cat->id; ?>"></span>
-                                    <input type="hidden" name="Post[categoriesChecked][]" value="<?= $cat->id; ?>">
-                                </span>
-                            <?php endforeach; ?>
-                        </div>
-
-                        <?php echo DropdownX::widget([
-                            'items' => Category::buildRecursiveArrayForDropDown(),
-                        ]);  ?>
-                    </div>
 
                     <?= $form->field($model,'sticky_position_main')->dropDownList([
                         0 => Yii::t('admin','[NON STICKY]'),

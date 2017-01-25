@@ -54,7 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <tr>
                                 <td><?= $category->id; ?></td>
 
-                                <td class="build-branches" data-id="<?= $category->id; ?>" data-parent="<?= $category->parent_category_id; ?>" style="padding-left: <?= ($category->getDepth()-1)*10; ?>px">
+                                <td class="build-branches branches" data-is-last="<?= $category->isLast() ? 'yes': 'no'; ?>" data-id="<?= $category->id; ?>" data-parent="<?= $category->parent_category_id; ?>" style="padding-left: <?= ($category->getDepth()-1)*10; ?>px">
 <!--                                    --><?php //for($i=1; $i < $category->getDepth(); $i++): ?><!-- - --><?php //endfor; ?>
                                     <?php if($category->getDepth() == 1): ?>
                                         <i class="connector-categories bold"></i>

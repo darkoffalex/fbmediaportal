@@ -57,7 +57,7 @@ class Category extends CategoryDB
      */
     public function getChildren()
     {
-        return $this->hasMany(Category::className(),['parent_category_id' => 'id']);
+        return $this->hasMany(Category::className(),['parent_category_id' => 'id'])->orderBy('priority ASC');
     }
 
     /**
@@ -128,6 +128,16 @@ class Category extends CategoryDB
     public function getDepth()
     {
         return count($this->getBreadCrumbs(false));
+    }
+
+    /**
+     * Checks if this item is last on it's level
+     * @return bool
+     */
+    public function isLast()
+    {
+        $last = !empty($this->parent->children) ? $this->parent->children[count($this->parent->children)-1] : $this;
+        return $last->id == $this->id;
     }
 
     /**

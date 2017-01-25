@@ -5,8 +5,9 @@ var rebuildBranches = function(){
     $(".branch-line-root").remove();
     $(".build-branches").each(function(){
         var parent = $('[data-id="'+$(this).data('parent')+'"]');
+        var isLast = $(this).data('is-last');
 
-        if(parent.length > 0){
+        if(parent.length > 0 && isLast == 'yes'){
             var calcHeight = ($(this).offset().top - parent.offset().top);
 
             var connectorHtml = "<i class='branch-line-root' style='height: "+calcHeight+"px;'>";
@@ -170,6 +171,7 @@ $(document).ready(function () {
     });
 
     /******************************************* B U I L D  B R A N C H E S *******************************************/
+
 
     rebuildBranches();
 
