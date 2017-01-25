@@ -63,3 +63,13 @@
 {
     font-size: 13px;
 }
+
+.no-margin-tbl > table.table
+{
+    margin: 0 !important;
+}
+
+.kv-expanded-row .hidden-in-sub
+{
+    display: none !important;
+}

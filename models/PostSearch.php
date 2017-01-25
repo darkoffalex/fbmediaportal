@@ -109,7 +109,7 @@ class PostSearch extends Post
         return new ActiveDataProvider([
             'query' => $q,
             'pagination' => [
-                'pageSize' => 50,
+                'pageSize' => 25,
             ],
         ]);
     }

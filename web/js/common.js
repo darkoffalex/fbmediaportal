@@ -156,6 +156,10 @@ $(document).ready(function () {
         }
 
         var container = $($(this).data('ajax-reloader'));
+        if($(this).data('load-parent') == 'yes'){
+            container = container.parent();
+        }
+
         var link = $(this);
 
         $.ajax({
@@ -172,7 +176,7 @@ $(document).ready(function () {
 
     /******************************************* B U I L D  B R A N C H E S *******************************************/
 
-
+    /*
     rebuildBranches();
 
     $(window).resize(function(){
@@ -186,5 +190,6 @@ $(document).ready(function () {
     $(document).on('expanded.pushMenu',function(){
         setTimeout(function(){rebuildBranches(); console.log('rebuilt');},350);
     });
+    */
 });
 

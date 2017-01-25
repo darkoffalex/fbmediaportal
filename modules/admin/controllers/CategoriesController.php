@@ -5,6 +5,7 @@ namespace app\modules\admin\controllers;
 use app\helpers\Sort;
 use app\helpers\Help;
 use app\models\Category;
+use app\models\CategorySearch;
 use kartik\form\ActiveForm;
 use Yii;
 use app\helpers\Constants;
@@ -17,13 +18,21 @@ class CategoriesController extends Controller
 {
     /**
      * Render category list
-     * @param int $parent
+     * @param int $root
      * @return string
      */
-    public function actionIndex($parent = 0)
+    public function actionIndex($root = 0)
     {
-        $categories = Category::getRecursiveItems($parent);
-        return $this->render('index',compact('categories'));
+        $root = Yii::$app->request->post('expandRowKey',$root);
+
+        $searchModel = new CategorySearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$root);
+
+        if(Yii::$app->request->isAjax){
+            return $this->renderAjax('_index', compact('searchModel','dataProvider','root'));
+        }
+
+        return $this->render('index', compact('searchModel','dataProvider','root'));
     }
 
     /**
@@ -44,6 +53,10 @@ class CategoriesController extends Controller
 
         Sort::Move($model,$dir,Category::className(),['parent_category_id' => $model->parent_category_id]);
 
+        if(Yii::$app->request->isAjax){
+            return $this->actionIndex($model->parent_category_id);
+        }
+
         return $this->redirect(Yii::$app->request->referrer);
     }
 
@@ -62,7 +75,12 @@ class CategoriesController extends Controller
             throw new NotFoundHttpException(Yii::t('admin','Category not found'),404);
         }
 
+        $parentId = $model->parent_category_id;
         $model->recursiveDelete();
+
+        if(Yii::$app->request->isAjax){
+            return $this->actionIndex($parentId);
+        }
 
         return $this->redirect(Yii::$app->request->referrer);
     }
