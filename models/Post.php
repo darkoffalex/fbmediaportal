@@ -75,7 +75,7 @@ class Post extends PostDB
     public function getTrl()
     {
         $lng = Yii::$app->language;
-        return $this->hasOne(LabelTrl::className(), ['post_id' => 'id'])->where(['lng' => $lng]);
+        return $this->hasOne(PostTrl::className(), ['post_id' => 'id'])->where(['lng' => $lng]);
     }
 
 

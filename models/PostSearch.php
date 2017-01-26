@@ -65,6 +65,10 @@ class PostSearch extends Post
     {
         //all posts that aren't in stock
         $q = parent::find()->where($stock ? 'post.status_id = :st' : 'post.status_id != :st', ['st' => Constants::STATUS_IN_STOCK]);
+        $q -> with('categories');
+        $q -> with('author');
+        $q -> with('postSearchIndices');
+        $q -> with('comments');
 
         $this->load($params);
 
@@ -109,7 +113,7 @@ class PostSearch extends Post
         return new ActiveDataProvider([
             'query' => $q,
             'pagination' => [
-                'pageSize' => 25,
+                'pageSize' => 10,
             ],
         ]);
     }

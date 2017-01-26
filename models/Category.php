@@ -17,6 +17,11 @@ use yii\helpers\ArrayHelper;
 class Category extends CategoryDB
 {
     /**
+     * @var null
+     */
+    private $_depth = null;
+
+    /**
      * @var array for loading translations from POST
      */
     public $translations = [];
@@ -127,7 +132,11 @@ class Category extends CategoryDB
      */
     public function getDepth()
     {
-        return count($this->getBreadCrumbs(false));
+        if(empty($this->_depth)){
+            $this->_depth = count($this->getBreadCrumbs(false));
+        }
+
+        return $this->_depth;
     }
 
     /**
@@ -146,7 +155,7 @@ class Category extends CategoryDB
      * @param bool|true $useTrl
      * @return array
      */
-    public function getBreadCrumbs($useTrl = true, $attributeName = 'name')
+    public function getBreadCrumbs($useTrl = false, $attributeName = 'name')
     {
         $result = [];
 
@@ -166,9 +175,10 @@ class Category extends CategoryDB
      * Get recursive listed categories
      * @param int $rootId
      * @param bool|false $justEnabled
+     * @param int $depth
      * @return Category[]
      */
-    public static function getRecursiveItems($rootId = 0, $justEnabled = false)
+    public static function getRecursiveItems($rootId = 0, $justEnabled = false, $depth = 0)
     {
         /* @var $result self[] */
         $result = [];
@@ -179,14 +189,51 @@ class Category extends CategoryDB
         $items = $q->all();
 
         foreach($items as $category){
+            $category->_depth = $depth+1;
             $result[] = $category;
 
             if(!empty($category->children)){
-                $result = array_merge($result,self::getRecursiveItems($category->id,$justEnabled));
+                $result = array_merge($result,self::getRecursiveItems($category->id,$justEnabled, $category->_depth));
             }
         }
 
         return $result;
+    }
+
+    /**
+     * Get recursive listed categories (experimental style, retrieving tree by single query to increase performance)
+     * @param bool|false $justEnabled
+     * @return array|Category[]
+     */
+    public static function getRecursiveItemsEx($justEnabled = false)
+    {
+        $q = self::findBySql('SELECT * FROM `category` ORDER BY IF(parent_category_id, parent_category_id, id), parent_category_id, priority ASC');
+        if($justEnabled) $q->where(['status_id' => Constants::STATUS_ENABLED]);
+
+        /* @var $all Category[] */
+        /* @var $identified Category[] */
+        $all = $q->all();
+        $identified = [];
+
+        //obtain a depth level after items sorted (increases performance)
+        foreach($all as $category){
+            $identified[$category->id] = $category;
+        }
+        foreach($identified as $id => $cat){
+            $currentChecking = $cat;
+            $depth = 1;
+            if(empty($currentChecking->parent_category_id)){
+                $identified[$id]->_depth = $depth;
+            }else{
+                while(!empty($currentChecking->parent_category_id)){
+                    $currentChecking = $identified[$currentChecking->parent_category_id];
+                    $depth++;
+                }
+                $identified[$id]->_depth = $depth;
+            }
+        }
+
+        return array_values($identified);
     }
 
     /**

@@ -49,7 +49,7 @@ $gridColumns = [
         'attribute' => 'category_id',
         'label' => Yii::t('admin','Categories'),
         'enableSorting' => false,
-        'filter' => ArrayHelper::map(Category::getRecursiveItems(),'id',function($model,$defaultValue){
+        'filter' => ArrayHelper::map(Category::getRecursiveItemsEx(),'id',function($model,$defaultValue){
             /* @var $model Category */
             $result = "";
             for($i=1;$i<$model->getDepth();$i++){$result.= "-";}

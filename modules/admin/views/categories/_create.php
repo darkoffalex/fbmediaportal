@@ -37,7 +37,7 @@ $controller = $this->context;
 
         <?= $form->field($model, 'parent_category_id')->dropDownList(
             [0 => Yii::t('admin','[NONE]')] +
-            ArrayHelper::map(Category::getRecursiveItems(),'id',function($model,$defaultValue){
+            ArrayHelper::map(Category::getRecursiveItemsEx(),'id',function($model,$defaultValue){
                 /* @var $model Category */
                 $result = "";
                 for($i=1;$i<$model->getDepth();$i++){$result.= "-";}

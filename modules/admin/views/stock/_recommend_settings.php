@@ -78,7 +78,7 @@ $languages = \app\models\Language::find()->all();
         <?= $form->field($model,'category_tag')->textInput(); ?>
     </div>
 
-    <?= $form->field($model,'category_id')->dropDownList(ArrayHelper::map(Category::getRecursiveItems(),'id',function($model,$defaultValue){
+    <?= $form->field($model,'category_id')->dropDownList(ArrayHelper::map(Category::getRecursiveItemsEx(),'id',function($model,$defaultValue){
         /* @var $model Category */
         $result = "";
         for($i=1;$i<$model->getDepth();$i++){$result.= "-";}
