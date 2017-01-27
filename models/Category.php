@@ -13,6 +13,7 @@ use yii\helpers\ArrayHelper;
  * @property Category[] $children
  * @property User $createdBy
  * @property User $updatedBy
+ * @property Post[] $postsActive
  */
 class Category extends CategoryDB
 {
@@ -237,6 +238,43 @@ class Category extends CategoryDB
     }
 
     /**
+     * Get posts ordered by time
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPosts()
+    {
+        $q = parent::getPosts();
+        return $q->orderBy('created_at DESC');
+    }
+
+    /**
+     * Returns only active posts
+     * @return $this
+     */
+    public function getPostsActive()
+    {
+        return $this->getPosts()->where(['status_id' => Constants::STATUS_ENABLED]);
+    }
+
+    /**
+     * Recursively get all related posts (in current category and on children)
+     * @param bool|false $onlyActive
+     * @return Post[]|array
+     */
+    public function getPostsRecursive($onlyActive = false)
+    {
+        $posts = $onlyActive ? $this->postsActive : $this->posts;
+
+        if(!empty($this->children)){
+            foreach($this->children as $child){
+                $posts = ArrayHelper::merge($posts,$child->getPostsRecursive($onlyActive));
+            }
+        }
+
+        return $posts;
+    }
+
+    /**
      * Build a recursive array for drop-down controls in forms
      * @param int $rootId
      * @param bool|false $justEnabled
@@ -249,6 +287,8 @@ class Category extends CategoryDB
 
         /* @var $items self[] */
         $q = self::find()->orderBy('priority ASC')->where(['parent_category_id' => $rootId]);
+        $q->with(['trl','children','children.trl']);
+
         if($justEnabled) $q->where(['status_id' => Constants::STATUS_ENABLED]);
         $items = $q->all();
 

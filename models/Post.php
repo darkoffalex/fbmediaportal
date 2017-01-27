@@ -3,7 +3,11 @@
 namespace app\models;
 
 use app\helpers\Constants;
+use app\helpers\Help;
+use himiklab\thumbnail\EasyThumbnailImage;
 use Yii;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Url;
 use yii\web\UploadedFile;
 
 /**
@@ -86,6 +90,35 @@ class Post extends PostDB
     {
         $relation = parent::getPostImages();
         return $relation->orderBy('priority ASC');
+    }
+
+    /**
+     * Thumbnail URL
+     * @param int $w
+     * @param int $h
+     * @return string
+     */
+    public function getThumbnailUrl($w = 90, $h = 70)
+    {
+        if(empty($this->postImages[0]->file_path) && empty($this->postImages[0]->file_url)){
+            return EasyThumbnailImage::thumbnailFileUrl(Yii::getAlias('@webroot/img/no_image.jpg'),$w,$h);
+        }elseif(!empty($this->postImages[0]->file_path)){
+            return EasyThumbnailImage::thumbnailFileUrl(Yii::getAlias('@webroot/uploads/img/'.$this->postImages[0]->file_path),$w,$h);
+        }else{
+            return EasyThumbnailImage::thumbnailFileUrl($this->postImages[0]->file_url,$w,$h);
+        }
+    }
+
+    /**
+     * Returns
+     * @param bool|true $title
+     * @param bool|false $abs
+     * @return string
+     */
+    public function getUrl($title = true, $abs = false)
+    {
+        $slugTitle = $title ? ArrayHelper::getValue($this->trl,'name',$this->name) : null;
+        return Url::to(['posts/show', 'id' => $this->id, 'title' => $title ? Help::slug($slugTitle) : null],$abs);
     }
 
     /**

@@ -6,7 +6,7 @@ $config = [
     'id' => 'FB Media Portal',
     'name' => 'FB Media Portal',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
+    'bootstrap' => ['log','thumbnail'],
     'language' => 'ru',
 
     'modules' => [
@@ -37,6 +37,11 @@ $config = [
                     'sourceLanguage' => 'en-US',
                 ],
             ],
+        ],
+
+        'thumbnail' => [
+            'class' => 'himiklab\thumbnail\EasyThumbnail',
+            'cacheAlias' => 'assets/thumbnails',
         ],
 
         'assetManager' => [
@@ -101,9 +106,10 @@ $config = [
 
                 '/' => 'site/index',
                 '<controller>' => '<controller>/index',
-                '<controller>/<action>' => '<controller>/<action>',
-                '<controller>/<action>/<id:\d+>' => '<controller>/<action>',
+                '<controller>/<action>/<id:\d+>/<title:\w+(-\w+)*>' => '<controller>/<action>',
                 '<controller>/<action>/<id:\d+>/<status:\d+>' => '<controller>/<action>',
+                '<controller>/<action>/<id:\d+>' => '<controller>/<action>',
+                '<controller>/<action>' => '<controller>/<action>',
                 '<controller:\w+>/<action:\w+>/*' => '<controller>/<action>',
             ],
         ],

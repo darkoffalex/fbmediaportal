@@ -4,6 +4,8 @@ namespace app\controllers;
 
 use app\helpers\Constants;
 use app\helpers\Help;
+use app\models\Category;
+use app\models\Post;
 use Facebook\Exceptions\FacebookSDKException;
 use Facebook\GraphNodes\GraphPicture;
 use Yii;
@@ -33,7 +35,49 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        //get sticky posts
+        $stickyPosts = Post::find()
+            ->with('trl')
+            ->where(['status_id' => Constants::STATUS_ENABLED])
+            ->where('sticky_position_main IS NOT NULL')
+            ->andWhere('sticky_position_main > 0')
+            ->orderBy('sticky_position_main ASC')
+            ->limit(4)
+            ->all();
+
+        //check how many left
+        $left = 4 - count($stickyPosts);
+
+        //if left some "empty places" - append regularly sorted posts
+        if($left > 0){
+            $append = Post::find()
+                ->with('trl')
+                ->where(['status_id' => Constants::STATUS_ENABLED])
+                ->orderBy('created_at DESC')
+                ->limit($left)
+                ->all();
+            $stickyPosts = ArrayHelper::merge($stickyPosts,$append);
+        }
+
+        $categories = Category::find()
+            ->with([
+                'trl',
+                'postsActive',
+                'postsActive.trl',
+                'postsActive.postImages',
+                'children.postsActive',
+                'children.postsActive.trl',
+                'children.postsActive.postImages',
+                'children.children.postsActive',
+                'children.children.postsActive.trl',
+                'children.children.postsActive.postImages'
+            ])
+            ->where(['status_id' => Constants::STATUS_ENABLED, 'parent_category_id' => 0])
+            ->orderBy('priority ASC')
+            ->limit(6)
+            ->all();
+
+        return $this->render('index',compact('stickyPosts','categories'));
     }
 
     /**
