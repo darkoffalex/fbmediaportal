@@ -19,6 +19,8 @@ use Yii;
  * @property integer $created_by_id
  * @property integer $updated_by_id
  * @property string $answer_to_fb_id
+ * @property integer $adm_id
+ * @property integer $answer_to_adm_id
  *
  * @property User $author
  * @property Post $post
@@ -39,7 +41,7 @@ class CommentDB extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['post_id', 'author_id', 'answer_to_id', 'created_by_id', 'updated_by_id'], 'integer'],
+            [['post_id', 'author_id', 'answer_to_id', 'created_by_id', 'updated_by_id', 'adm_id', 'answer_to_adm_id'], 'integer'],
             [['text', 'fb_sync_id', 'fb_sync_token'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
             [['answer_to_fb_id'], 'string', 'max' => 255],
@@ -66,6 +68,8 @@ class CommentDB extends \yii\db\ActiveRecord
             'created_by_id' => 'Created By ID',
             'updated_by_id' => 'Updated By ID',
             'answer_to_fb_id' => 'Answer To Fb ID',
+            'adm_id' => 'Adm ID',
+            'answer_to_adm_id' => 'Answer To Adm ID',
         ];
     }
 

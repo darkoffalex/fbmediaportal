@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "2d14f576f96e03c3d2cbfd25466242d9",
-    "content-hash": "c0daa8fd7b06c2ffcdabf0248fc074c3",
+    "hash": "6acbfedfe36beb8f21282666c2a380f1",
+    "content-hash": "9237dd3208f9a652fd5169a0d257c6d6",
     "packages": [
         {
             "name": "almasaeed2010/adminlte",
@@ -1666,6 +1666,49 @@
                 "yii2"
             ],
             "time": "2015-06-28 18:05:41"
+        },
+        {
+            "name": "linslin/yii2-curl",
+            "version": "1.0.11",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/linslin/Yii2-Curl.git",
+                "reference": "0384d175c594a6b76c4eeb91eb3804e24eb867b3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/linslin/Yii2-Curl/zipball/0384d175c594a6b76c4eeb91eb3804e24eb867b3",
+                "reference": "0384d175c594a6b76c4eeb91eb3804e24eb867b3",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "yiisoft/yii2": "*"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "linslin\\yii2\\curl\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nils Gajsek",
+                    "email": "info@linslin.org"
+                }
+            ],
+            "description": "Easy and nice cURL extension with RESTful support for Yii2",
+            "keywords": [
+                " curl",
+                "extension",
+                "restful",
+                "yii2"
+            ],
+            "time": "2017-01-17 11:11:37"
         },
         {
             "name": "mpdf/mpdf",

@@ -32,6 +32,9 @@ use Yii;
  * @property string $offer_category_tag
  * @property string $offer_author_tag
  * @property string $offer_group_fb_id
+ * @property string $video_preview_fb
+ * @property string $video_preview_yt
+ * @property string $video_attachment_id_fb
  *
  * @property Comment[] $comments
  * @property User $author
@@ -63,7 +66,7 @@ class PostDB extends \yii\db\ActiveRecord
             [['content_type_id', 'status_id', 'type_id', 'author_id', 'sticky_position_main', 'stats_after_vote', 'votes_only_authorized', 'created_by_id', 'updated_by_id', 'group_id', 'kind_id'], 'integer'],
             [['name'], 'required'],
             [['published_at', 'created_at', 'updated_at'], 'safe'],
-            [['name', 'author_custom_name', 'offer_category_tag', 'offer_author_tag'], 'string', 'max' => 255],
+            [['name', 'author_custom_name', 'offer_category_tag', 'offer_author_tag', 'video_preview_fb', 'video_preview_yt', 'video_attachment_id_fb'], 'string', 'max' => 255],
             [['author_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['author_id' => 'id']],
             [['group_id'], 'exist', 'skipOnError' => true, 'targetClass' => PostGroup::className(), 'targetAttribute' => ['group_id' => 'id']],
         ];
@@ -100,6 +103,9 @@ class PostDB extends \yii\db\ActiveRecord
             'offer_category_tag' => 'Offer Category Tag',
             'offer_author_tag' => 'Offer Author Tag',
             'offer_group_fb_id' => 'Offer Group Fb ID',
+            'video_preview_fb' => 'Video Preview Fb',
+            'video_preview_yt' => 'Video Preview Yt',
+            'video_attachment_id_fb' => 'Video Attachment Id Fb',
         ];
     }
 

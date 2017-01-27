@@ -18,6 +18,7 @@ use Yii;
  * @property string $updated_at
  * @property integer $created_by_id
  * @property integer $updated_by_id
+ * @property string $fb_sync_id
  *
  * @property Post $post
  * @property PostImageTrl[] $postImageTrls
@@ -41,7 +42,7 @@ class PostImageDB extends \yii\db\ActiveRecord
             [['post_id', 'is_external', 'status_id', 'priority', 'created_by_id', 'updated_by_id'], 'integer'],
             [['file_url'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
-            [['file_path'], 'string', 'max' => 255],
+            [['file_path', 'fb_sync_id'], 'string', 'max' => 255],
             [['post_id'], 'exist', 'skipOnError' => true, 'targetClass' => Post::className(), 'targetAttribute' => ['post_id' => 'id']],
         ];
     }
@@ -63,6 +64,7 @@ class PostImageDB extends \yii\db\ActiveRecord
             'updated_at' => 'Updated At',
             'created_by_id' => 'Created By ID',
             'updated_by_id' => 'Updated By ID',
+            'fb_sync_id' => 'Fb Sync ID',
         ];
     }
 

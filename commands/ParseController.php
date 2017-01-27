@@ -194,7 +194,7 @@ class ParseController extends Controller
                         $subCat->status_id = Constants::STATUS_ENABLED;
 
                         if($subCat->save()){
-                            echo "Sub-category {$subCat->id} with added to database \n";
+                            echo "Sub-category {$subCat->id} added to database \n";
                             $trl = $subCat->getATrl($this->getFirstLanguage()->prefix);
                             $trl -> name = $subCat->name;
                             $trl -> isNewRecord ? $trl->save() : $trl->update();

@@ -6,9 +6,9 @@ use Yii;
 
 /**
  * @property Comment $parent
- * @property Comment $fbParent
+ * @property Comment $adbParent
  * @property Comment[] $children
- * @property Comment[] $fbChildren
+ * @property Comment[] $adbChildren
  */
 class Comment extends CommentDB
 {
@@ -39,15 +39,15 @@ class Comment extends CommentDB
      */
     public function getParent()
     {
-        return $this->hasOne(Category::className(),['id' => 'answer_to_id']);
+        return $this->hasOne(Category::className(),['id' => 'answer_to_id'])->orderBy('created_at ASC');
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getFbParent()
+    public function getAdmParent()
     {
-        return $this->hasOne(Category::className(),['fb_sync_id' => 'answer_to_fb_id']);
+        return $this->hasOne(Category::className(),['adm_id' => 'answer_to_adm_id'])->orderBy('created_at ASC');
     }
 
     /**
@@ -61,9 +61,9 @@ class Comment extends CommentDB
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getFbChildren()
+    public function getAdmChildren()
     {
-        return $this->hasMany(Category::className(),['answer_to_fb_id' => 'fb_sync_id'])->orderBy('created_at ASC');
+        return $this->hasMany(Category::className(),['answer_to_adm_id' => 'adm_id'])->orderBy('created_at ASC');
     }
 
 

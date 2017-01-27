@@ -1,5 +1,5 @@
 <?php
 return [
-    'Login with Facebook' => 'Зайти через Facebook'
+    'Login with Facebook' => 'Авторизация при помощи Facebook'
 ];
 ?>

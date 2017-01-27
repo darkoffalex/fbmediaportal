@@ -52,4 +52,11 @@ class Constants
     const OFFER_REASON_AUTHOR = 1;
     const OFFER_REASON_GROUP = 2;
     const OFFER_REASON_CAT_TAG = 3;
+
+    //Post FB types
+    const FB_POST_PHOTO = "photo";
+    const FB_POST_VIDEO = "video";
+    const FB_POST_STATUS = "status";
+    const FB_POST_LINK = "link";
+    const FB_POST_EVENT = "event";
 }
