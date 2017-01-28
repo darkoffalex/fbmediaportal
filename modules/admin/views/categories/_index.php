@@ -50,7 +50,7 @@ $gridColumns = [
         'format' => 'raw',
         'value' => function ($model, $key, $index, $column){
             /* @var $model \app\models\Category */
-            return count($model->posts);
+            return count($model->postsActive);
         },
     ],
 

@@ -6,9 +6,9 @@ use Yii;
 
 /**
  * @property Comment $parent
- * @property Comment $adbParent
+ * @property Comment $admParent
  * @property Comment[] $children
- * @property Comment[] $adbChildren
+ * @property Comment[] $admChildren
  */
 class Comment extends CommentDB
 {
@@ -39,7 +39,7 @@ class Comment extends CommentDB
      */
     public function getParent()
     {
-        return $this->hasOne(Category::className(),['id' => 'answer_to_id'])->orderBy('created_at ASC');
+        return $this->hasOne(Comment::className(),['id' => 'answer_to_id'])->orderBy('created_at ASC');
     }
 
     /**
@@ -47,7 +47,7 @@ class Comment extends CommentDB
      */
     public function getAdmParent()
     {
-        return $this->hasOne(Category::className(),['adm_id' => 'answer_to_adm_id'])->orderBy('created_at ASC');
+        return $this->hasOne(Comment::className(),['adm_id' => 'answer_to_adm_id'])->orderBy('created_at ASC');
     }
 
     /**
@@ -55,7 +55,7 @@ class Comment extends CommentDB
      */
     public function getChildren()
     {
-        return $this->hasMany(Category::className(),['answer_to_id' => 'id'])->orderBy('created_at ASC');
+        return $this->hasMany(Comment::className(),['answer_to_id' => 'id'])->orderBy('created_at ASC');
     }
 
     /**
@@ -63,7 +63,7 @@ class Comment extends CommentDB
      */
     public function getAdmChildren()
     {
-        return $this->hasMany(Category::className(),['answer_to_adm_id' => 'adm_id'])->orderBy('created_at ASC');
+        return $this->hasMany(Comment::className(),['answer_to_adm_id' => 'adm_id'])->orderBy('created_at ASC');
     }
 
 

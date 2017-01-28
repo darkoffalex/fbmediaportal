@@ -175,5 +175,7 @@ return [
     'Add rule' => 'Добавить правило',
     'Category Tag' => 'Тег категории',
     'Reason' => 'Причина',
-    'Category' => 'Рубрика'
+    'Category' => 'Рубрика',
+    'Move post to main list' => 'Отправить в основной список',
+    'Move to list' => 'Отправить'
 ];

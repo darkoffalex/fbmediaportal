@@ -42,7 +42,7 @@ $gridColumns = [
         'contentOptions'=>['style'=>'font-size:12px; width: 300px;'],
         'value' => function ($model, $key, $index, $column) use ($lng, $currentView){
             /* @var $model \app\models\Post */
-            return $currentView->render('_cell_preview',compact('model','lng'));
+            return $currentView->render('/posts/_cell_preview',compact('model','lng'));
         },
     ],
 
@@ -137,7 +137,7 @@ $gridColumns = [
                 }
             }
 
-            return !empty($recommendation) ? implode(', ',$recommendations) : Yii::t('admin','อๅ๒');
+            return !empty($recommendation) ? implode(', ',$recommendations) : Yii::t('admin','ะะตั');
         },
     ],
 

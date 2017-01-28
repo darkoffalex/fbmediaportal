@@ -52,7 +52,7 @@ class m170105_180807_create_post_table extends Migration
             'author_id',
             'user',
             'id',
-            'CASCADE',
+            'SET NULL',
             'NO ACTION'
         );
     }

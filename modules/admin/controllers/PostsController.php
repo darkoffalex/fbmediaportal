@@ -92,6 +92,7 @@ class PostsController extends Controller
     }
 
     /**
+     * Update post
      * @param $id
      * @return array|string|Response
      * @throws \Exception

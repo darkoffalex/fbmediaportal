@@ -20,15 +20,14 @@ use linslin\yii2\curl\Curl;
 class SyncController extends Controller
 {
 
-    /**
-     * @var int
-     */
+
     public $limit = null;
     public $api = "https://adminizator.com/api/";
     public $timeout = 15;
+    public $type = 'stock'; //available values : stock, non stock
     public function options($actionID)
     {
-        return ['limit','api', 'timeout'];
+        return ['limit','api', 'timeout', 'type'];
     }
 
     /**
@@ -150,15 +149,14 @@ class SyncController extends Controller
             $user = User::find()->where(['fb_user_id' => $fbId])->one();
 
             if(empty($user)){
-                echo "Creating new author-user with FB ID (app context) {$fbId} for post \n";
+                echo "Creating new author-user with FB ID (app context) {$fbId} \n";
 
                 try{
                     $user = new User();
                     $user->fb_user_id = $fbId;
                     $user->name = $name;
                     $user->username = $fbId;
-                    $user->password = Yii::$app->security->generateRandomString(6);
-                    $user->password_hash = Yii::$app->security->generatePasswordHash($user->password);
+                    $user->password = 'dummy_string';
                     $user->surname = $surname;
                     $user->avatar_file = $avatar_url;
                     $user->fb_avatar_url = $avatar_url;
@@ -254,11 +252,11 @@ class SyncController extends Controller
                 }
             }
 
-            if($pageProcessing >= $currentPage){
+            if($pageProcessing >= $lastPage){
                 $post->refresh();
                 $added = count($post->comments);
 
-                echo "Comments adding done. Added {$added} comments \n";
+                echo "Comments adding done. Post has {$added} comments \n";
                 break;
             }
 
@@ -268,8 +266,8 @@ class SyncController extends Controller
         if(!empty($post->comments)){
             echo "Building nested relations, updating... \n";
             foreach($post->comments as $comment){
-                if(!empty($comment->adbParent)){
-                    $comment->answer_to_id = $comment->adbParent->id;
+                if(!empty($comment->admParent)){
+                    $comment->answer_to_id = $comment->admParent->id;
                     $comment->update();
                 }
             }
@@ -281,10 +279,11 @@ class SyncController extends Controller
 
     /**
      * Updates all post which has facebook relation. Retrieves data, comments, images from adminizator
+     * @param string $lng
      * @throws Exception
      * @throws \Exception
      */
-    public function actionIndex()
+    public function actionIndex($lng = 'ru')
     {
         if(!is_numeric($this->timeout)){
             throw new Exception("Timeout should be numeric value");
@@ -298,8 +297,15 @@ class SyncController extends Controller
             $q->limit($this->limit);
         }
 
+        if($this->type != 'stock'){
+            $q->where('status_id != :status',['status' => Constants::STATUS_IN_STOCK]);
+        }else{
+            $q->where(['status_id' => Constants::STATUS_IN_STOCK]);
+        }
+
         //get all posts related with facebook
-        echo "Getting all posts related with facebook \n";
+        $searchIn = $this->type == 'stock' ? 'STOCK' : 'NON STOCK';
+        echo "Getting all posts related with facebook ({$searchIn}) \n";
         /* @var $posts Post[] */
 
         $posts = $q->all();
@@ -318,6 +324,7 @@ class SyncController extends Controller
 
                 if(empty($data)){
                     echo "Not found data for post {$post->id} \n";
+                    echo "\n\n\n";
                     continue;
                 }
 
@@ -340,8 +347,9 @@ class SyncController extends Controller
                 $post->content_type_id = ArrayHelper::getValue($typeMatches,$type,Constants::CONTENT_TYPE_NEWS);
                 $post->updated_at = date('Y-m-d H:i:s',time());
                 $post->published_at = $time;
+                $post->status_id = $post->status_id == Constants::STATUS_IN_STOCK ? Constants::STATUS_ENABLED : $post->status_id;
 
-                $trl = $post->getATrl($this->getFirstLanguage()->prefix);
+                $trl = $post->getATrl($lng);
                 $trl -> text = strip_tags($content);
                 $trl -> small_text = StringHelper::truncateWords($trl->text,20);
                 $trl -> isNewRecord ? $trl->save() : $trl->update();
@@ -423,11 +431,11 @@ class SyncController extends Controller
 
             //should recalculate all user's counters
             /* @var $users User[] */
-            echo "Updating users's counters \n...";
+            echo "Updating users's counters... \n";
             $users = User::find()->all();
             foreach($users as $u){
                 $postCount = Post::find()->where(['author_id' => $u->id])->count();
-                $commentCount = Post::find()->where(['author_id' => $u->id])->count();
+                $commentCount = Comment::find()->where(['author_id' => $u->id])->count();
                 $u->counter_comments = $commentCount;
                 $u->counter_posts = $postCount;
                 $u->update();
@@ -439,6 +447,116 @@ class SyncController extends Controller
         }
 
 
-        echo "Finished!";
+        echo "Finished! \n";
+    }
+
+    /**
+     * Updates users's counters
+     * @throws \Exception
+     */
+    public function actionUpdateCounters()
+    {
+        echo "Updating users's counters... \n";
+        /* @var $users User[] */
+        $users = User::find()->all();
+        foreach($users as $u){
+            $postCount = Post::find()->where(['author_id' => $u->id])->count();
+            $commentCount = Comment::find()->where(['author_id' => $u->id])->count();
+            $u->counter_comments = $commentCount;
+            $u->counter_posts = $postCount;
+            $u->update();
+            echo "User {$u->id} done. \n";
+        }
+        echo "Counters updated. \n";
+    }
+
+    /**
+     * Updates search indices for active (non stock) posts
+     */
+    public function actionUpdateSearchIndices()
+    {
+        /* @var $all Post[] */
+        echo "Querying all non-stock posts. Please wait...";
+
+        $q = Post::find()->where('status_id != :status',['status' => Constants::STATUS_IN_STOCK]);
+        $q ->with(['categories','comments']);
+        $count = $q->count();
+        $all = $q->all();
+
+        echo "Found ({$count}) posts. Updating search indices... \n";
+
+        foreach($all as $post){
+            $post->updateSearchIndices();
+            echo "Post {$post->id} with FB ID {$post->fb_sync_id} done. \n";
+        }
+
+        echo "Finished! \n";
+    }
+
+    /**
+     * Updates comments's nesting relations
+     * @throws \Exception
+     */
+    public function actionReRelateComments()
+    {
+        echo "Querying comments. Please wait... \n";
+        /* @var $comments Comment[] */
+        $comments = Comment::find()->with('admParent')->all();
+        $count = count($comments);
+
+        echo "Found ({$count}) comments. Processing... \n";
+
+        foreach($comments as $index => $comment){
+            if(!empty($comment->admParent)){
+                echo "Set prent. ";
+                $comment->answer_to_id = $comment->admParent->id;
+            }else{
+                echo "Set no parents. ";
+                $comment->answer_to_id = 0;
+            }
+            $comment->update();
+            $nr = $index+1;
+            echo "Done {$nr} of {$count} \n";
+        }
+
+        echo "Finished! \n";
+    }
+
+    /**
+     * Clean posts's names from custom dates in commas
+     * @param string $lngPrefix
+     * @throws \Exception
+     */
+    public function actionCleanNames($lngPrefix = 'ru')
+    {
+        /* @var $all Post[] */
+        echo "Querying posts. Please wait...";
+        $q = Post::find();
+        $count = $q->count();
+        $all = $q->all();
+
+        echo "Found ({$count}) posts. Cleaning names... \n";
+
+        foreach($all as $index => $post){
+            $trl = $post->getATrl($lngPrefix);
+            $name = $trl->name;
+            $parts = explode('(',$name);
+
+            if(count($parts) > 1){
+                $lastIndex = count($parts)-1;
+                if(!empty($parts[$lastIndex])){
+                    $name = str_replace('('.$parts[$lastIndex],'',$name);
+                    $trl->name = $name;
+                    $trl->update();
+                    echo "Date in commas removed. ";
+                }
+            }
+
+
+            $nr = $index + 1;
+            echo "Post {$nr} of {$count} done. \n";
+        }
+
+        echo "Finished! \n";
     }
 }

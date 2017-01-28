@@ -11,6 +11,7 @@ use app\models\Category;
 /* @var $controller \app\modules\admin\controllers\PostsController */
 
 $controller = $this->context;
+$comments = $post->getNestedOrderedComments();
 ?>
 
 <div class="modal-header">
@@ -19,9 +20,9 @@ $controller = $this->context;
 
 <div class="modal-body box-comments" style="max-height: 500px; overflow-y: scroll;">
 
-    <?php if(!empty($post->comments)): ?>
-        <?php foreach($post->comments as $comment): ?>
-            <div class="box-comment">
+    <?php if(!empty($comments)): ?>
+        <?php foreach($comments as $comment): ?>
+            <div class="box-comment" <?php if(!empty($comment->parent)): ?> style="padding-left: 20px; font-size: 12px;" <?php endif; ?>>
                 <img class="img-circle img-sm" src="<?= $comment->author->getAvatar(); ?>" alt="user image">
                 <div class="comment-text">
                     <span class="username"><?= $comment->author->name.' '.$comment->author->surname; ?><span class="text-muted pull-right"><?= $comment->created_at; ?></span></span>

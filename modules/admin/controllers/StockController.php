@@ -3,11 +3,17 @@
 namespace app\modules\admin\controllers;
 
 use app\helpers\Constants;
+use app\models\Post;
+use app\models\PostCategory;
 use app\models\StockRecommendation;
 use app\models\Language;
 use app\models\PostSearch;
+use yii\bootstrap\ActiveForm;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use Yii;
+use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 
 class StockController extends Controller
@@ -78,5 +84,58 @@ class StockController extends Controller
         }
 
         return $this->actionRecommendSettings();
+    }
+
+    /**
+     * Moving post from stock to main list
+     * @param $id
+     * @return string|\yii\web\Response
+     * @throws NotFoundHttpException
+     * @throws \Exception
+     */
+    public function actionMove($id)
+    {
+        $model = Post::findOne((int)$id);
+
+        if(empty($model)){
+            throw new NotFoundHttpException(Yii::t('admin','Not found'),404);
+        }
+
+        //ajax validation
+        if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+
+        if($model->load(Yii::$app->request->post())){
+            if($model->validate()){
+
+                //update categories (delete ignored)
+                foreach($model->categories as $category){
+                    if(!in_array($category->id,$model->categoriesChecked)){
+                        PostCategory::deleteAll(['post_id' => $model->id, 'category_id' => $category->id]);
+                    }
+                }
+
+                //update categories (add checked)
+                $current = ArrayHelper::map($model->categories,'id','id');
+                foreach($model->categoriesChecked as $catID){
+                    if(!in_array($catID,$current)){
+                        $pc = new PostCategory();
+                        $pc->category_id = $catID;
+                        $pc->post_id = $model->id;
+                        $pc->save();
+                    }
+                }
+
+                $model->updated_at = date('Y-m-d H:i:s',time());
+                $model->updated_by_id = Yii::$app->user->id;
+                $model->update();
+
+                return $this->redirect(Yii::$app->request->referrer);
+            }
+        }
+
+        return $this->renderAjax('_move',compact('model'));
     }
 }

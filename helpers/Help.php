@@ -159,4 +159,24 @@ class Help
 
         return $options['lowercase'] ? mb_strtolower($str, 'UTF-8') : $str;
     }
+
+    /**
+     * Generates random string
+     * @param int $length
+     * @param bool|false $numbersOnly
+     * @return string
+     */
+    public static function rds($length = 10,$numbersOnly = false) {
+
+        $charactersNr = '0123456789';
+        $charactersChar = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $characters = $numbersOnly ? $charactersNr : $charactersNr.$charactersChar;
+
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
+    }
 }

@@ -105,9 +105,26 @@ class Post extends PostDB
         }elseif(!empty($this->postImages[0]->file_path)){
             return EasyThumbnailImage::thumbnailFileUrl(Yii::getAlias('@webroot/uploads/img/'.$this->postImages[0]->file_path),$w,$h);
         }else{
-            return EasyThumbnailImage::thumbnailFileUrl($this->postImages[0]->file_url,$w,$h);
+            return $this->postImages[0]->file_url;
+//            return EasyThumbnailImage::thumbnailFileUrl($this->postImages[0]->file_url,$w,$h);
         }
     }
+
+    /**
+     * First's image URL
+     * @return string
+     */
+    public function getFirstImageUrl()
+    {
+        if(empty($this->postImages[0]->file_path) && empty($this->postImages[0]->file_url)){
+            return Url::to('@web/img/no_image.jpg');
+        }elseif(!empty($this->postImages[0]->file_path)){
+            return Url::to('@web/uploads/img/'.$this->postImages[0]->file_path);
+        }else{
+            return $this->postImages[0]->file_url;
+        }
+    }
+
 
     /**
      * Returns
@@ -119,6 +136,21 @@ class Post extends PostDB
     {
         $slugTitle = $title ? ArrayHelper::getValue($this->trl,'name',$this->name) : null;
         return Url::to(['posts/show', 'id' => $this->id, 'title' => $title ? Help::slug($slugTitle) : null],$abs);
+    }
+
+    /**
+     * Returns nested ordered comments
+     * @param bool|false $justEnabled
+     * @return array|\yii\db\ActiveRecord[]|Comment[]
+     */
+    public function getNestedOrderedComments($justEnabled = false)
+    {
+        $q = Comment::findBySql('SELECT * FROM '.Comment::tableName().' WHERE post_id = :post ORDER BY IF(answer_to_id, answer_to_id, id), answer_to_id, created_at ASC',['post' => $this->id]);
+        if($justEnabled) $q->where(['status_id' => Constants::STATUS_ENABLED]);
+        $q->with('children');
+        $comments = $q->all();
+
+        return $comments;
     }
 
     /**
