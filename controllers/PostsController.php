@@ -114,6 +114,10 @@ class PostsController extends Controller
                     $post->updated_by_id = Yii::$app->user->id;
                     $post->update();
 
+                    $user->refresh();
+                    $user->counter_comments = count($user->comments);
+                    $user->update();
+
                     if(!empty($user->fb_user_id)){
                         //TODO: Apply changes in FB
                     }
