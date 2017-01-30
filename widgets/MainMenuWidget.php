@@ -15,9 +15,7 @@ class MainMenuWidget extends Widget
     {
         $this->categories = Category::find()
             ->where(['parent_category_id' => (int)$this->root, 'status_id' => Constants::STATUS_ENABLED])
-            ->with('trl')
-            ->with('children')
-            ->with('children.trl')
+            ->with(['trl','children','children.trl'])
             ->orderBy('priority ASC')
             ->all();
     }

@@ -17,6 +17,11 @@ use yii\web\UploadedFile;
 class Post extends PostDB
 {
     /**
+     * @var int sort flag
+     */
+    public $stickyFlag = null;
+
+    /**
      * @var array for loading translations from POST
      */
     public $translations = [];

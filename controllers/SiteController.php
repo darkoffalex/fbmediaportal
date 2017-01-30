@@ -10,6 +10,7 @@ use Facebook\Exceptions\FacebookSDKException;
 use Facebook\GraphNodes\GraphPicture;
 use Yii;
 use app\components\Controller;
+use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\web\NotAcceptableHttpException;
@@ -35,29 +36,13 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        //get sticky posts
         $stickyPosts = Post::find()
-            ->with('trl')
+            ->with(['trl','postImages'])
             ->where(['status_id' => Constants::STATUS_ENABLED])
-            ->where('sticky_position_main IS NOT NULL')
-            ->andWhere('sticky_position_main > 0')
-            ->orderBy('sticky_position_main ASC')
+            ->orderBy(new Expression('IF(sticky_position_main, sticky_position_main, 2147483647) ASC, created_at DESC'))
             ->limit(4)
             ->all();
 
-        //check how many left
-        $left = 4 - count($stickyPosts);
-
-        //if left some "empty places" - append regularly sorted posts
-        if($left > 0){
-            $append = Post::find()
-                ->with('trl')
-                ->where(['status_id' => Constants::STATUS_ENABLED])
-                ->orderBy('created_at DESC')
-                ->limit($left)
-                ->all();
-            $stickyPosts = ArrayHelper::merge($stickyPosts,$append);
-        }
 
         $categories = Category::find()
             ->with([
