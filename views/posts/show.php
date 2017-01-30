@@ -5,16 +5,20 @@ use app\widgets\LatestPostsWidget;
 use app\widgets\BannersWidget;
 use app\helpers\Help;
 use yii\helpers\ArrayHelper;
+use app\widgets\RelatedPostsWidget;
 
 /* @var $this yii\web\View */
 /* @var $controller \app\controllers\PostsController */
 /* @var $user \app\models\User */
 /* @var $post \app\models\Post */
+/* @var $comments \app\models\Comment[] */
+/* @var $pages \yii\data\Pagination */
 
 $this->title = $post->trl->name;
 $controller = $this->context;
 $user = Yii::$app->user->identity;
 
+$this->registerCssFile('@web/frontend/css/comments.css');
 use yii\helpers\Url;
 ?>
 
@@ -54,8 +58,51 @@ use yii\helpers\Url;
                         <?= !empty($post->trl->text) ? $post->trl->text : ''; ?>
                     </div>
 
-                    <div class="social_link">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h2>Комментарии <i class="fa fa-comments"></i></h2>
+                            <section class="comment-list">
+                                <!-- First Comment -->
+                                <?php foreach($comments as $comment): ?>
+                                    <article class="row">
+                                        <div class="col-md-2 col-sm-2 <?php if(!empty($comment->parent)): ?> col-md-offset-1 <?php endif; ?> hidden-xs">
+                                            <figure class="thumbnail">
+                                                <img class="img-responsive" src="<?= $comment->author->getAvatar(); ?>" />
+                                                <figcaption class="text-center"><?= $comment->author->name.' '.$comment->author->surname; ?></figcaption>
+                                            </figure>
+                                        </div>
+                                        <?php $size = !empty($comment->parent) ? '9' : '10';  ?>
+                                        <div class="col-md-<?= $size; ?> col-sm-<?= $size; ?>">
+                                            <div class="panel panel-default arrow left">
+                                                <div class="panel-body">
+                                                    <header class="text-left">
+                                                        <div class="comment-user"><i class="fa fa-user"></i> <?= $comment->author->name.''.$comment->author->surname; ?></div>
+                                                        <time class="comment-date" datetime="<?= $comment->created_at; ?>"><i class="fa fa-clock-o"></i> <?= substr($comment->created_at,0,16); ?></time>
+                                                    </header>
+                                                    <div class="comment-post">
+                                                        <p>
+                                                            <?= $comment->text; ?>
+                                                        </p>
+                                                    </div>
+                                                    <?php if(empty($comment->parent)): ?>
+                                                        <p class="text-right"><a href="<?= Url::to(['/posts/add-comment','cid' => $comment->id]); ?>" data-toggle="modal" data-target=".modal" class="btn btn-default btn-sm"><i class="fa fa-reply"></i> ответить</a></p>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </article>
+                                <?php endforeach; ?>
+                            </section>
 
+                            <div class="row clearfix">
+                                <div class="col-md-9 col-sm-12">
+                                    <?= \yii\widgets\LinkPager::widget(['pagination' => $pages]); ?>
+                                </div>
+                                <div class="col-md-3 col-sm-12">
+                                    <a href="<?= Url::to(['/posts/add-comment','pid' => $post->id]); ?>" data-toggle="modal" data-target=".modal" class="btn btn-default pull-right" style="margin: 20px 0;"><i class="fa fa-comment"></i> добавть</a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <?php if(!empty($post->categories[0]->posts) && count($post->categories[0]->posts) > 1): ?>
@@ -65,22 +112,7 @@ use yii\helpers\Url;
 
                             <h2>Возможно вас заинтересует <i class="fa fa-thumbs-o-up"></i></h2>
 
-                            <ul class="spost_nav wow fadeInDown animated animated" style="visibility: visible; animation-name: fadeInDown;">
-
-                                <?php foreach($related as $rp): ?>
-                                    <?php if($rp->id == $post->id): continue; endif; ?>
-                                    <li>
-                                        <div class="media">
-                                            <a class="media-left" href="<?= $rp->getUrl(); ?>">
-                                                <img src="<?= $rp->getThumbnailUrl(); ?>" alt="">
-                                            </a>
-                                            <div class="media-body">
-                                                <a class="catg_title" href="<?= $rp->getUrl(); ?>"><?= $rp->trl->name; ?></a>
-                                            </div>
-                                        </div>
-                                    </li>
-                                <?php endforeach; ?>
-                            </ul>
+                            <?= RelatedPostsWidget::widget(['post' => $post]); ?>
                         </div>
                     <?php endif; ?>
                 </div>

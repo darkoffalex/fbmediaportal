@@ -14,13 +14,18 @@ class Comment extends CommentDB
 {
 
     /**
+     * @var bool
+     */
+    public $isFrontend = false;
+
+    /**
      * @inheritdoc
      */
     public function attributeLabels()
     {
         $baseLabels = parent::attributeLabels();
         foreach($baseLabels as $attribute => $label){
-            $baseLabels[$attribute] = Yii::t('admin',$label);
+            $baseLabels[$attribute] = !$this->isFrontend ? Yii::t('admin',$label) : $label;
         }
         return $baseLabels;
     }
@@ -31,6 +36,9 @@ class Comment extends CommentDB
     public function rules()
     {
         $baseRules = parent::rules();
+        if($this->isFrontend){
+            $baseRules[] = [['text'], 'required'];
+        }
         return $baseRules;
     }
 

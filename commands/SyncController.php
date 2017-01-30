@@ -219,7 +219,7 @@ class SyncController extends Controller
                 $authorData = ArrayHelper::getValue($itemData,'author');
 
                 /* @var $comment Comment */
-                $comment = Comment::find()->where(['fb_sync_id' => $fbId, 'post_id' => $post->id, 'adm_id' => $sysId])->one();
+                $comment = Comment::find()->where(['fb_sync_id' => $fbId, 'post_id' => $post->id])->one();
                 if(empty($comment)){
                     echo "Creating comment with FB ID {$fbId} for post {$post->id} \n";
                     $comment = new Comment();
@@ -429,18 +429,20 @@ class SyncController extends Controller
 
             }
 
-            //should recalculate all user's counters
-            /* @var $users User[] */
-            echo "Updating users's counters... \n";
-            $users = User::find()->all();
-            foreach($users as $u){
-                $postCount = Post::find()->where(['author_id' => $u->id])->count();
-                $commentCount = Comment::find()->where(['author_id' => $u->id])->count();
-                $u->counter_comments = $commentCount;
-                $u->counter_posts = $postCount;
-                $u->update();
+            if($this->confirm("Would you like to update user's counters (this can take some time) ?")){
+                //should recalculate all user's counters
+                /* @var $users User[] */
+                echo "Updating users's counters... \n";
+                $users = User::find()->all();
+                foreach($users as $u){
+                    $postCount = Post::find()->where(['author_id' => $u->id])->count();
+                    $commentCount = Comment::find()->where(['author_id' => $u->id])->count();
+                    $u->counter_comments = $commentCount;
+                    $u->counter_posts = $postCount;
+                    $u->update();
+                }
+                echo "Counters updated. \n";
             }
-            echo "Counters updated. \n";
 
         }else{
             echo "Can't find any posts related with facebook \n";

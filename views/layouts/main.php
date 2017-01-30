@@ -48,7 +48,7 @@ $social = Yii::$app->getModule('social');
                         <ul class="top_nav">
                             <?php if(Yii::$app->user->isGuest): ?>
                                 <?php $callback = Url::to(['/site/fb-login'],true); ?>
-                                <li><?= $social->getFbLoginLink($callback,['email']); ?></li>
+                                <li><?= $social->getFbLoginLink($callback,[],['email']); ?></li>
                             <?php else: ?>
                                 <li><a href="<?= Url::to(['/site/logout']); ?>">Выход</a></li>
                                 <li><a href="#">Личный кабинет</a></li>
@@ -114,6 +114,20 @@ $social = Yii::$app->getModule('social');
     </footer>
 </div>
 <?php $this->endBody() ?>
+
+<div class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $('.modal').on('hide.bs.modal', function() {
+        $(this).removeData();
+    });
+</script>
+
 </body>
 </html>
 <?php $this->endPage() ?>
