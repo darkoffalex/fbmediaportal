@@ -40,6 +40,10 @@ use yii\helpers\Url;
                     </ol>
 
                     <h1><?= $category->trl->name; ?></h1>
+                    <?php if(!empty($posts)): ?>
+                        <br>
+                        <span>Всего материалов : <?= $pages->totalCount; ?></span>
+                    <?php endif; ?>
 
                     <?php if(!empty($category->children)): ?>
                         <div class="post_commentbox">
@@ -55,7 +59,7 @@ use yii\helpers\Url;
                     <?php endif; ?>
 
                     <div class="row">
-
+                        <?php if(!empty($posts)): ?>
                         <?php foreach($posts as $post): ?>
                             <div class="col-md-12 col-sm-12">
                                 <ul class="business_catgnav wow fadeInDown animated" style="visibility: visible; animation-name: fadeInDown; border-bottom: 1px solid #ddd;">
@@ -75,6 +79,11 @@ use yii\helpers\Url;
                                                 <?php else: ?>
                                                     <span><i class="fa fa-user"></i><?= $post->author_custom_name; ?></span>
                                                 <?php endif; ?>
+
+                                                <?php foreach($post->categories as $c): ?>
+                                                    <?php $name = ArrayHelper::getValue($c->trl,'name',$c->name); ?>
+                                                    <a href="<?= Url::to(['category/show','id' => $c->id, 'title' => Help::slug($name)]); ?>"><i class="fa fa-folder"></i><?= $c->trl->name; ?></a>
+                                                <?php endforeach; ?>
                                             </div>
 
                                             <div class="row">
@@ -96,7 +105,13 @@ use yii\helpers\Url;
                                 </ul>
                             </div>
                         <?php endforeach; ?>
+                        <?php else: ?>
+                            <p>Нет материалов</p>
+                        <?php endif; ?>
+                    </div>
 
+                    <div class="row">
+                        <?= \yii\widgets\LinkPager::widget(['pagination' => $pages]); ?>
                     </div>
                 </div>
             </div>

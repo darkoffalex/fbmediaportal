@@ -11,6 +11,7 @@ use yii\helpers\ArrayHelper;
  * @property CategoryTrl $aTrl
  * @property Category $parent
  * @property Category[] $children
+ * @property Category[] $childrenActive
  * @property User $createdBy
  * @property User $updatedBy
  * @property Post[] $postsActive
@@ -64,6 +65,14 @@ class Category extends CategoryDB
     public function getChildren()
     {
         return $this->hasMany(Category::className(),['parent_category_id' => 'id'])->orderBy('priority ASC');
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getChildrenActive()
+    {
+        return $this->hasMany(Category::className(),['parent_category_id' => 'id'])->where(['status_id' => Constants::STATUS_ENABLED])->orderBy('priority ASC');
     }
 
     /**
@@ -272,6 +281,24 @@ class Category extends CategoryDB
         }
 
         return $posts;
+    }
+
+    /**
+     * Recursively get all children categories
+     * @param bool|false $onlyActive
+     * @return Category[]|array
+     */
+    public function getChildrenRecursive($onlyActive = false)
+    {
+        $children = $onlyActive ? $this->childrenActive : $this->children;
+
+        if(!empty($children)){
+            foreach($children as $child){
+                $children = ArrayHelper::merge($children,$child->getChildrenRecursive($onlyActive));
+            }
+        }
+
+        return $children;
     }
 
     /**
