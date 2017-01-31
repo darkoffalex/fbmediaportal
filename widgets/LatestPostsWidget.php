@@ -1,6 +1,7 @@
 <?php
 namespace app\widgets;
 
+use app\helpers\Constants;
 use app\models\Category;
 use app\models\Post;
 use yii\base\Widget;
@@ -13,7 +14,12 @@ class LatestPostsWidget extends Widget
 
     public function init()
     {
-        $this->posts = Post::find()->with('postImages')->orderBy('created_at DESC')->limit(5)->all();
+        $this->posts = Post::find()
+            ->where(['status_id' => Constants::STATUS_ENABLED])
+            ->with('postImages')
+            ->orderBy('created_at DESC')
+            ->limit(5)
+            ->all();
     }
 
     public function run()

@@ -285,6 +285,8 @@ class SyncController extends Controller
      */
     public function actionIndex($lng = 'ru')
     {
+        Yii::$app->db->createCommand('SET SESSION wait_timeout = 28800;')->execute();
+
         if(!is_numeric($this->timeout)){
             throw new Exception("Timeout should be numeric value");
         }
@@ -547,8 +549,10 @@ class SyncController extends Controller
             if(count($parts) > 1){
                 $lastIndex = count($parts)-1;
                 if(!empty($parts[$lastIndex])){
-                    $name = str_replace('('.$parts[$lastIndex],'',$name);
+                    $name = str_replace(' ('.$parts[$lastIndex],'',$name);
                     $trl->name = $name;
+                    $post->name = $name;
+                    $post->update();
                     $trl->update();
                     echo "Date in commas removed. ";
                 }

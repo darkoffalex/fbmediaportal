@@ -106,6 +106,10 @@ $config = [
 
                 '/' => 'site/index',
                 '<controller>' => '<controller>/index',
+
+                'post/<id:\d+>/<title:\w+(-\w+)*>' => 'posts/show',
+                'category/<id:\d+>/<title:\w+(-\w+)*>' => 'category/show',
+
                 '<controller>/<action>/<id:\d+>/<title:\w+(-\w+)*>' => '<controller>/<action>',
                 '<controller>/<action>/<id:\d+>/<status:\d+>' => '<controller>/<action>',
                 '<controller>/<action>/<id:\d+>' => '<controller>/<action>',

@@ -253,7 +253,7 @@ class Category extends CategoryDB
     public function getPosts()
     {
         $q = parent::getPosts();
-        return $q->orderBy('created_at DESC');
+        return $q->orderBy('published_at DESC');
     }
 
     /**

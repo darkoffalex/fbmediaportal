@@ -201,32 +201,36 @@ class ParseController extends Controller
 
                             echo "Importing posts... \n";
                             foreach($p as $postInfo){
-                                $post = new Post();
-                                $post->name = $postInfo['title'];
-                                $post->fb_sync_id = $postInfo['key'];
-                                $post->content_type_id = Constants::CONTENT_TYPE_NEWS;
-                                $post->status_id = Constants::STATUS_ENABLED;
-                                $post->type_id = Constants::POST_TYPE_IMPORTED;
-                                $post->created_at = date('Y-m-d H:i:s',time());
-                                $post->updated_at = date('Y-m-d H:i:s',time());
-                                $post->created_by_id = $this->getBasicAdmin()->id;
-                                $post->updated_by_id = $this->getBasicAdmin()->id;
+                                if(Post::find()->where(['fb_sync_id' => $postInfo['key']])->count() == 0){
+                                    $post = new Post();
+                                    $post->name = $postInfo['title'];
+                                    $post->fb_sync_id = $postInfo['key'];
+                                    $post->content_type_id = Constants::CONTENT_TYPE_NEWS;
+                                    $post->status_id = Constants::STATUS_IN_STOCK;
+                                    $post->type_id = Constants::POST_TYPE_IMPORTED;
+                                    $post->created_at = date('Y-m-d H:i:s',time());
+                                    $post->updated_at = date('Y-m-d H:i:s',time());
+                                    $post->created_by_id = $this->getBasicAdmin()->id;
+                                    $post->updated_by_id = $this->getBasicAdmin()->id;
 
-                                if($post->save()){
-                                    echo "Post {$post->id} added to database \n";
+                                    if($post->save()){
+                                        echo "Post {$post->id} added to database \n";
 
-                                    $cp = new PostCategory();
-                                    $cp -> post_id = $post->id;
-                                    $cp -> category_id = $subCat->id;
-                                    $cp -> created_at = date('Y-m-d H:i:s',time());
-                                    $cp -> updated_at = date('Y-m-d H:i:s',time());
-                                    $cp -> created_by_id = $this->getBasicAdmin()->id;
-                                    $cp -> updated_by_id = $this->getBasicAdmin()->id;
-                                    $cp -> save();
+                                        $cp = new PostCategory();
+                                        $cp -> post_id = $post->id;
+                                        $cp -> category_id = $subCat->id;
+                                        $cp -> created_at = date('Y-m-d H:i:s',time());
+                                        $cp -> updated_at = date('Y-m-d H:i:s',time());
+                                        $cp -> created_by_id = $this->getBasicAdmin()->id;
+                                        $cp -> updated_by_id = $this->getBasicAdmin()->id;
+                                        $cp -> save();
 
-                                    $trl = $post->getATrl($this->getFirstLanguage()->prefix);
-                                    $trl -> name = $post->name;
-                                    $trl -> isNewRecord ? $trl->save() : $trl->update();
+                                        $trl = $post->getATrl($this->getFirstLanguage()->prefix);
+                                        $trl -> name = $post->name;
+                                        $trl -> isNewRecord ? $trl->save() : $trl->update();
+                                    }
+                                }else{
+                                    echo "Post already added \n";
                                 }
                             }
                         }
@@ -234,33 +238,37 @@ class ParseController extends Controller
                 }else{
                     echo "Importing posts... \n";
                     if(!empty($pFirstLevelPosts)){
-                        foreach($pFirstLevelPosts AS $postInfo){
-                            $post = new Post();
-                            $post->name = $postInfo['title'];
-                            $post->fb_sync_id = $postInfo['key'];
-                            $post->content_type_id = Constants::CONTENT_TYPE_NEWS;
-                            $post->status_id = Constants::STATUS_ENABLED;
-                            $post->type_id = Constants::POST_TYPE_IMPORTED;
-                            $post->created_at = date('Y-m-d H:i:s',time());
-                            $post->updated_at = date('Y-m-d H:i:s',time());
-                            $post->created_by_id = $this->getBasicAdmin()->id;
-                            $post->updated_by_id = $this->getBasicAdmin()->id;
+                        foreach($pFirstLevelPosts AS $postInfo) {
+                            if (Post::find()->where(['fb_sync_id' => $postInfo['key']])->count() == 0) {
+                                $post = new Post();
+                                $post->name = $postInfo['title'];
+                                $post->fb_sync_id = $postInfo['key'];
+                                $post->content_type_id = Constants::CONTENT_TYPE_NEWS;
+                                $post->status_id = Constants::STATUS_IN_STOCK;
+                                $post->type_id = Constants::POST_TYPE_IMPORTED;
+                                $post->created_at = date('Y-m-d H:i:s', time());
+                                $post->updated_at = date('Y-m-d H:i:s', time());
+                                $post->created_by_id = $this->getBasicAdmin()->id;
+                                $post->updated_by_id = $this->getBasicAdmin()->id;
 
-                            if($post->save()){
-                                echo "Post {$post->id} added to database \n";
+                                if ($post->save()) {
+                                    echo "Post {$post->id} added to database \n";
 
-                                $cp = new PostCategory();
-                                $cp -> post_id = $post->id;
-                                $cp -> category_id = $category->id;
-                                $cp -> created_at = date('Y-m-d H:i:s',time());
-                                $cp -> updated_at = date('Y-m-d H:i:s',time());
-                                $cp -> created_by_id = $this->getBasicAdmin()->id;
-                                $cp -> updated_by_id = $this->getBasicAdmin()->id;
-                                $cp -> save();
+                                    $cp = new PostCategory();
+                                    $cp->post_id = $post->id;
+                                    $cp->category_id = $category->id;
+                                    $cp->created_at = date('Y-m-d H:i:s', time());
+                                    $cp->updated_at = date('Y-m-d H:i:s', time());
+                                    $cp->created_by_id = $this->getBasicAdmin()->id;
+                                    $cp->updated_by_id = $this->getBasicAdmin()->id;
+                                    $cp->save();
 
-                                $trl = $post->getATrl($this->getFirstLanguage()->prefix);
-                                $trl -> name = $post->name;
-                                $trl -> isNewRecord ? $trl->save() : $trl->update();
+                                    $trl = $post->getATrl($this->getFirstLanguage()->prefix);
+                                    $trl->name = $post->name;
+                                    $trl->isNewRecord ? $trl->save() : $trl->update();
+                                }
+                            }else{
+                                echo "Post already added \n";
                             }
                         }
                     }

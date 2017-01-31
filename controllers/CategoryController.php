@@ -62,7 +62,7 @@ class CategoryController extends Controller
             ->joinWith('postCategories as pc')
             ->where(['pc.category_id' => $ids])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
-            ->orderBy(new Expression('IF((pc.category_id = :cat AND sticky_position > 0), sticky_position, 2147483647) ASC, p.created_at DESC',['cat' => $category->id]));
+            ->orderBy(new Expression('IF((pc.category_id = :cat AND sticky_position > 0), sticky_position, 2147483647) ASC, p.published_at DESC',['cat' => $category->id]));
         $cq = clone $q;
 
         /* @var $pages Pagination */
