@@ -5,6 +5,7 @@ use app\widgets\LatestPostsWidget;
 use app\widgets\BannersWidget;
 use app\helpers\Help;
 use yii\helpers\ArrayHelper;
+use app\widgets\SearchFormWidget;
 
 /* @var $this yii\web\View */
 /* @var $controller \app\controllers\SiteController */
@@ -43,6 +44,7 @@ use yii\helpers\Url;
             <?php endif; ?>
         </div>
         <div class="col-lg-4 col-md-4 col-sm-4">
+            <?= SearchFormWidget::widget(); ?>
             <?= MostCommentedWidget::widget(); ?>
         </div>
     </div>
@@ -122,6 +124,7 @@ use yii\helpers\Url;
 
         <div class="col-lg-4 col-md-4 col-sm-4">
             <aside class="right_content">
+
                 <?= LatestPostsWidget::widget(); ?>
 
                 <div class="single_sidebar wow fadeInDown animated" style="visibility: visible; animation-name: fadeInDown;">

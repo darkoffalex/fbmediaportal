@@ -2,6 +2,7 @@
 
 use app\widgets\MostCommentedWidget;
 use app\widgets\LatestPostsWidget;
+use app\widgets\SearchFormWidget;
 use app\widgets\BannersWidget;
 use app\helpers\Help;
 use yii\helpers\ArrayHelper;
@@ -121,8 +122,8 @@ use yii\helpers\Url;
 
         <div class="col-lg-4 col-md-4 col-sm-4">
             <aside class="right_content">
+                <?= SearchFormWidget::widget(); ?>
                 <?= LatestPostsWidget::widget(); ?>
-
                 <div class="single_sidebar wow fadeInDown animated" style="visibility: visible; animation-name: fadeInDown;">
                     <h2><span>Баннеры</span></h2>
                     <?= BannersWidget::widget(['position' => 'RIGHT', 'attributes' => ['class' => 'sideAdd']]); ?>

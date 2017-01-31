@@ -51,7 +51,7 @@ jQuery(document).ready(function() {
         return false;
     });
     $('.tootlip').tooltip();
-    $("ul#ticker01").liScroll();
+    //$("ul#ticker01").liScroll();
 });
 
 wow = new WOW({

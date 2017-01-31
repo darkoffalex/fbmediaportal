@@ -73,24 +73,6 @@ $social = Yii::$app->getModule('social');
 
     <?= MainMenuWidget::widget(); ?>
 
-<!--    <section id="newsSection">-->
-<!--        <div class="row">-->
-<!--            <div class="col-lg-12 col-md-12">-->
-<!--                <div class="latest_newsarea">-->
-<!--                    <span>Latest News</span>-->
-<!--                    <ul id="ticker01" class="news_sticker">-->
-<!--                        <li><a href="#"><img src="--><?//= Url::to('@web/img/news_thumbnail3.jpg'); ?><!--" alt="">My First News Item</a></li>-->
-<!--                    </ul>-->
-<!--                    <div class="social_area">-->
-<!--                        <ul class="social_nav">-->
-<!--                            <li class="facebook"><a href="#"></a></li>-->
-<!--                        </ul>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </section>-->
-
     <?= $content; ?>
 
     <footer id="footer">

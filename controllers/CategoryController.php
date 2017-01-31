@@ -72,15 +72,6 @@ class CategoryController extends Controller
             ->limit($pages->limit)
             ->all();
 
-        /*
-        foreach($posts as $post){
-            $categoryPosition = ArrayHelper::map($post->postCategories,'category_id','sticky_position');
-            $post->stickyFlag = ArrayHelper::getValue($categoryPosition,$category->id,PHP_INT_MAX);
-        }
-        */
-
-//        ArrayHelper::multisort($posts,['stickyFlag','created_at'],[SORT_ASC,SORT_DESC]);
-
         return $this->render('show',compact('posts','category','pages'));
     }
 }

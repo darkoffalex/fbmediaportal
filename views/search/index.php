@@ -9,19 +9,15 @@ use yii\helpers\ArrayHelper;
 use app\widgets\RelatedPostsWidget;
 
 /* @var $this yii\web\View */
-/* @var $controller \app\controllers\CategoryController */
+/* @var $controller \app\controllers\SearchController */
 /* @var $user \app\models\User */
 /* @var $posts \app\models\Post[] */
-/* @var $category \app\models\Category */
 /* @var $pages \yii\data\Pagination */
 
 $this->title = $category->trl->name;
-$this->registerMetaTag(['name' => 'description', 'content' => $category->trl->meta_description]);
-$this->registerMetaTag(['name' => 'keywords', 'content' => $category->trl->meta_keywords]);
 $controller = $this->context;
 $user = Yii::$app->user->identity;
 
-$this->registerCssFile('@web/frontend/css/comments.css');
 use yii\helpers\Url;
 ?>
 
@@ -33,31 +29,15 @@ use yii\helpers\Url;
 
                     <ol class="breadcrumb">
                         <li><a href="<?= Url::to(['/site/index']); ?>">Главная</a></li>
-                        <?php if(!empty($category)): ?>
-                            <?php foreach($category->getBreadCrumbs(true) as $id => $name): ?>
-                                <li><a href="<?= Url::to(['category/show','id' => $id, 'title' => Help::slug($name)]); ?>"><?= $name; ?></a></li>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
+                        <li><a href="">Поиск</a></li>
                     </ol>
 
-                    <h1><?= $category->trl->name; ?></h1>
+                    <h1>Результаты поиска</h1>
                     <?php if(!empty($posts)): ?>
                         <br>
-                        <span>Всего материалов : <?= $pages->totalCount; ?></span>
+                        <span>Всего найдено : <?= $pages->totalCount; ?></span>
                     <?php endif; ?>
 
-                    <?php if(!empty($category->children)): ?>
-                        <div class="post_commentbox">
-                            <?php foreach($category->children as $child): ?>
-                                <?php $name = ArrayHelper::getValue($child->trl,'name',$child->name); ?>
-                                <a href="<?= Url::to(['category/show','id' => $child->id, 'title' => Help::slug($name)]); ?>"><i class="fa fa-folder"></i><?= $child->trl->name; ?></a>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php else: ?>
-                        <div class="post_commentbox">
-                            <span>Нет подрубрик</span>
-                        </div>
-                    <?php endif; ?>
 
                     <div class="row">
                         <?php if(!empty($posts)): ?>
@@ -113,9 +93,11 @@ use yii\helpers\Url;
                         <?php endif; ?>
                     </div>
 
-                    <div class="row">
-                        <?= \yii\widgets\LinkPager::widget(['pagination' => $pages]); ?>
-                    </div>
+                    <?php if(!empty($pages)): ?>
+                        <div class="row">
+                            <?= \yii\widgets\LinkPager::widget(['pagination' => $pages]); ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
