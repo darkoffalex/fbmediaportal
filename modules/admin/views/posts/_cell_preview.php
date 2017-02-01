@@ -20,7 +20,7 @@ use yii\helpers\ArrayHelper;
     <?php if(!empty($model->postImages)): ?>
         <?php foreach($model->postImages as $image): ?>
             <div style="display: inline-block">
-                <img src="<?= $image->getFullUrl(); ?>" width="150" class="img-thumbnail" alt="Cinque Terre"><br>
+                <img src="<?= $image->getThumbnailUrl(150,80); ?>" width="150" class="img-thumbnail" alt="Cinque Terre"><br>
                 <span style="font-style: italic;"><?= $image->getATrl($lng)->signature; ?></span>
             </div>
         <?php endforeach; ?>
@@ -33,7 +33,7 @@ use yii\helpers\ArrayHelper;
     <?php if(!empty($model->postImages)): ?>
         <?php foreach($model->postImages as $image): ?>
             <div style="display: inline-block">
-                <img src="<?= $image->getFullUrl(); ?>" width="150" class="img-thumbnail" alt="Cinque Terre"><br>
+                <img src="<?= $image->getThumbnailUrl(150,80);  ?>" width="150" class="img-thumbnail" alt="Cinque Terre"><br>
                 <span style="font-style: italic;"><?= $image->getATrl($lng)->signature; ?></span>
             </div>
         <?php endforeach; ?>
@@ -54,7 +54,7 @@ use yii\helpers\ArrayHelper;
     <?php if(!empty($model->postImages)):?>
         <?php $image = $model->postImages[0]; ?>
         <div style="display: inline-block">
-            <img src="<?= $image->getFullUrl(); ?>" width="300" class="img-thumbnail" alt="Cinque Terre"><br>
+            <img src="<?= $image->getThumbnailUrl(150,80);  ?>" width="300" class="img-thumbnail" alt="Cinque Terre"><br>
             <span style="font-style: italic;"><?= $image->getATrl($lng)->signature; ?></span>
         </div>
     <?php endif; ?>

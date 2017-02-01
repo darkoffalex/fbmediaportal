@@ -19,6 +19,7 @@ use Yii;
  * @property integer $created_by_id
  * @property integer $updated_by_id
  * @property string $fb_sync_id
+ * @property integer $need_crop
  *
  * @property Post $post
  * @property PostImageTrl[] $postImageTrls
@@ -39,7 +40,7 @@ class PostImageDB extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['post_id', 'is_external', 'status_id', 'priority', 'created_by_id', 'updated_by_id'], 'integer'],
+            [['post_id', 'is_external', 'status_id', 'priority', 'created_by_id', 'updated_by_id', 'need_crop'], 'integer'],
             [['file_url'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
             [['file_path', 'fb_sync_id'], 'string', 'max' => 255],
@@ -65,6 +66,7 @@ class PostImageDB extends \yii\db\ActiveRecord
             'created_by_id' => 'Created By ID',
             'updated_by_id' => 'Updated By ID',
             'fb_sync_id' => 'Fb Sync ID',
+            'need_crop' => 'Need Crop',
         ];
     }
 

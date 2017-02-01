@@ -45,6 +45,7 @@ $languages = \app\models\Language::find()->all();
 
         <div class="file_field" style="display: <?= $model->is_external ? 'none' : 'block'; ?>">
             <?= $form->field($model, 'image')->fileInput(); ?>
+            <?= $form->field($model,'need_crop')->checkbox(); ?>
         </div>
 
         <?= $form->field($model, 'status_id')->dropDownList([

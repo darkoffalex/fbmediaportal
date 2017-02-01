@@ -50,7 +50,8 @@ class SearchController extends Controller
                 $q->andWhere(['like','psi.text',$word]);
             }
 
-            $q->orderBy('p.published_at DESC')->groupBy('p.id');
+            $q->distinct();
+            $q->orderBy('p.published_at DESC');
 
             $cq = clone $q;
 

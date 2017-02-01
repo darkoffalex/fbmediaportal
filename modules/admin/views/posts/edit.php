@@ -12,6 +12,7 @@ use kartik\dropdown\DropdownX;
 use kartik\typeahead\Typeahead;
 use yii\helpers\ArrayHelper;
 use app\models\PostGroup;
+use kartik\datetime\DateTimePicker;
 
 $this->title = Yii::t('admin',$model->isNewRecord ? 'Create post' : 'Update post');
 $this->params['breadcrumbs'][] = ['label' => Yii::t('admin','Posts'), 'url' => Url::to(['/admin/posts/index'])];
@@ -31,6 +32,7 @@ $languages = \app\models\Language::find()->all();
 <?php Yii::$app->view->registerJsFile('/js/imperavi-redactor/plugins/fontcolor/fontcolor.js'); ?>
 <?php Yii::$app->view->registerJsFile('/js/imperavi-redactor/plugins/fullscreen/fullscreen.js'); ?>
 <?php Yii::$app->view->registerJsFile('/js/imperavi-redactor/plugins/table/table.js'); ?>
+<?php //Yii::$app->view->registerJsFile('/js/moment/moment.js'); ?>
 
 <?php
 $editorInit = "
@@ -143,6 +145,15 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                         Constants::STATUS_ENABLED => Yii::t('admin','Enabled'),
                         Constants::STATUS_DISABLED => Yii::t('admin','Disabled'),
                     ]); ?>
+
+<!--                    --><?//= $form->field($model, 'published_at')->widget(DateTimePicker::className(),[
+//                        'options' => ['placeholder' => 'Время публикации'],
+//                        'convertFormat' => true,
+//                        'pluginOptions' => [
+//                            'format' => 'dd-M-yyyy hh:ii',
+//                            'todayHighlight' => true
+//                        ]
+//                    ]); ?>
 
                     <ul class="nav nav-tabs">
                         <?php foreach($languages as $index => $lng): ?>

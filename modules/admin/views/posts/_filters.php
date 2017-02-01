@@ -36,7 +36,7 @@ use kartik\daterange\DateRangePicker;
                 return $result;
             }),['prompt' => ''])->label(Yii::t('admin','Category'))->error(false); ?>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <?= $form->field($model,'author_id')->widget(Select2::classname(), [
                 'initValueText' => !empty($model->author) ? $model->author->name.' '.$model->author->surname : '',
                 'options' => ['placeholder' => Yii::t('admin','Search for a user...')],
@@ -62,7 +62,7 @@ use kartik\daterange\DateRangePicker;
                 ],
             ])->error(false) ?>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <?= $form->field($model,'content_type_id')->dropDownList([
                 Constants::CONTENT_TYPE_ARTICLE => Yii::t('admin','Article'),
                 Constants::CONTENT_TYPE_NEWS => Yii::t('admin','News'),
@@ -71,6 +71,12 @@ use kartik\daterange\DateRangePicker;
                 Constants::CONTENT_TYPE_VOTING => Yii::t('admin','Voting'),
                 Constants::CONTENT_TYPE_POST => Yii::t('admin','Post')
             ],['prompt' => '']); ?>
+        </div>
+        <div class="col-md-2">
+            <?= $form->field($model,'type_id')->dropDownList([
+                Constants::POST_TYPE_CREATED => Yii::t('admin','Created'),
+                Constants::POST_TYPE_IMPORTED => Yii::t('admin','Imported'),
+            ],['prompt' => ''])->label(Yii::t('admin','Imported')); ?>
         </div>
     </div>
 

@@ -68,6 +68,7 @@ class PostsController extends Controller
             $model->author_id = Yii::$app->user->id;
             $model->created_at = date('Y-m-d H:i:s',time());
             $model->updated_at = date('Y-m-d H:i:s',time());
+            $model->updated_at = date('Y-m-d H:i:s',time());
             $model->created_by_id = Yii::$app->user->id;
             $model->updated_by_id = Yii::$app->user->id;
 
@@ -80,6 +81,16 @@ class PostsController extends Controller
                     //update counter (increase)
                     $model->author->counter_posts++;
                     $model->author->update();
+
+                    /* @var $firstLng Language */
+                    $firstLng = Language::find()->orderBy('id ASC')->one();
+                    if(!empty($firstLng)){
+                        $trl = $model->getATrl($firstLng->prefix);
+                        $trl -> name = $model->name;
+                        $trl -> isNewRecord ? $trl->save() : $trl->update();
+                    }
+
+                    $model->updateSearchIndices([Constants::IND_R_CONTENT]);
 
                     return $this->redirect(Url::to(['/admin/posts/update', 'id' => $model->id]));
                 }

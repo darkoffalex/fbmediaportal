@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use himiklab\thumbnail\EasyThumbnailImage;
 use Yii;
 use yii\helpers\Url;
 use yii\web\UploadedFile;
@@ -41,7 +42,7 @@ class PostImage extends PostImageDB
     public function rules()
     {
         $baseRules = parent::rules();
-        $baseRules[] = [['image'], 'file', 'extensions' => ['png', 'jpg', 'gif'], 'maxSize' => 1024*1024];
+        $baseRules[] = [['image'], 'file', 'extensions' => ['png', 'jpg', 'gif'], 'maxSize' => 1024*1024*5];
         $baseRules[] = [['translations'],'safe'];
         return $baseRules;
     }
@@ -82,6 +83,23 @@ class PostImage extends PostImageDB
     public function getFullUrl()
     {
         return $this->is_external ? $this->file_url : Url::to('@web/uploads/img/'.$this->file_path);
+    }
+
+    /**
+     * Returns url to thumbnail
+     * @param $w
+     * @param $h
+     * @return string
+     */
+    public function getThumbnailUrl($w, $h)
+    {
+        if(empty($this->file_path) && empty($this->file_url)){
+            return EasyThumbnailImage::thumbnailFileUrl(Yii::getAlias('@webroot/img/no_image.jpg'),$w,$h);
+        }elseif(!empty($this->file_path)){
+            return EasyThumbnailImage::thumbnailFileUrl(Yii::getAlias('@webroot/uploads/img/'.$this->file_path),$w,$h);
+        }else{
+            return $this->file_url;
+        }
     }
 
     /**

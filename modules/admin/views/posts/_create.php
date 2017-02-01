@@ -42,6 +42,7 @@ $controller = $this->context;
             Constants::CONTENT_TYPE_PHOTO => Yii::t('admin','Photo'),
             Constants::CONTENT_TYPE_VIDEO => Yii::t('admin','Video'),
             Constants::CONTENT_TYPE_VOTING => Yii::t('admin','Voting'),
+            Constants::CONTENT_TYPE_POST => Yii::t('admin','Post')
         ]); ?>
     </div>
 

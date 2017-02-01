@@ -106,14 +106,7 @@ class Post extends PostDB
      */
     public function getThumbnailUrl($w = 90, $h = 70)
     {
-        if(empty($this->postImages[0]->file_path) && empty($this->postImages[0]->file_url)){
-            return EasyThumbnailImage::thumbnailFileUrl(Yii::getAlias('@webroot/img/no_image.jpg'),$w,$h);
-        }elseif(!empty($this->postImages[0]->file_path)){
-            return EasyThumbnailImage::thumbnailFileUrl(Yii::getAlias('@webroot/uploads/img/'.$this->postImages[0]->file_path),$w,$h);
-        }else{
-            return $this->postImages[0]->file_url;
-//            return EasyThumbnailImage::thumbnailFileUrl($this->postImages[0]->file_url,$w,$h);
-        }
+        return !empty($this->postImages[0]) ? $this->postImages[0]->getThumbnailUrl($w,$h) : EasyThumbnailImage::thumbnailFileUrl(Yii::getAlias('@webroot/img/no_image.jpg'),$w,$h);
     }
 
     /**
