@@ -90,7 +90,7 @@ return [
     'Author ID' => 'Автор',
     'Author Custom Name' => 'Свое имя автора',
     'Waiting for results' => 'Ожидание загрузки...',
-    'Search for a user...' => 'Поиск пользователя',
+    'Search for a user...' => 'Поиск пользов.',
     '[NON STICKY]' => '[НЕ ЗАКРЕПЛЯТЬ]',
     'Sticky Position Main' => 'Закрепить на глвной странице',
     'On position {position_nr}' => 'В позиции {position_nr}',
@@ -177,5 +177,16 @@ return [
     'Reason' => 'Причина',
     'Category' => 'Рубрика',
     'Move post to main list' => 'Отправить в основной список',
-    'Move to list' => 'Отправить'
+    'Move to list' => 'Отправить',
+    'Move to posts' => 'Перенести в материалы',
+    'Published At' => 'Опубликовано',
+    'Source' => 'Источник',
+    'Useful content' => 'Полезное сождержимое',
+    'Interesting discussion' => 'Интересное обсуждение',
+    'View on portal' => 'Показать на портале',
+    'View on facebook' => 'Показать на facebook',
+    'Post' => 'Пост',
+    'Category Id' => 'Рубрика',
+    'Filter' => 'Фильтровать',
+    'Type' => 'Тип'
 ];

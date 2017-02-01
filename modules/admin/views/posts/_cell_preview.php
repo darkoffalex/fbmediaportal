@@ -16,6 +16,7 @@ use yii\helpers\ArrayHelper;
     <h4 style="font-size: 16px"><?= $trl->name; ?></h4>
     <p style="font-style: italic;"><?= $trl->small_text; ?></p>
     <p><?= strip_tags($trl->text); ?></p>
+
     <?php if(!empty($model->postImages)): ?>
         <?php foreach($model->postImages as $image): ?>
             <div style="display: inline-block">
@@ -25,6 +26,27 @@ use yii\helpers\ArrayHelper;
         <?php endforeach; ?>
     <?php endif; ?>
 
+<?php elseif($model->content_type_id == Constants::CONTENT_TYPE_POST): ?>
+
+    <h4 style="font-size: 16px"><?= $trl->name; ?></h4>
+    <p><?= strip_tags($trl->text); ?></p>
+    <?php if(!empty($model->postImages)): ?>
+        <?php foreach($model->postImages as $image): ?>
+            <div style="display: inline-block">
+                <img src="<?= $image->getFullUrl(); ?>" width="150" class="img-thumbnail" alt="Cinque Terre"><br>
+                <span style="font-style: italic;"><?= $image->getATrl($lng)->signature; ?></span>
+            </div>
+        <?php endforeach; ?>
+    <?php endif; ?>
+
+    <?php if(!empty($model->video_key_yt)): ?>
+        <iframe width="300" src="<?= $model->video_key_yt; ?>" frameborder="0" allowfullscreen></iframe>
+    <?php endif; ?>
+    <?php if(!empty($model->video_key_fb)): ?>
+        <video width="300" controls>
+            <source src="<?= $model->video_key_fb; ?>" type="video/mp4">
+        </video>
+    <?php endif; ?>
 <?php elseif($model->content_type_id == Constants::CONTENT_TYPE_PHOTO): ?>
 
     <h4 style="font-size: 16px"><?= $trl->name; ?></h4>
@@ -42,10 +64,12 @@ use yii\helpers\ArrayHelper;
     <h4 style="font-size: 16px"><?= $trl->name; ?></h4>
     <p><?= strip_tags($trl->text); ?></p>
     <?php if(!empty($model->video_key_yt)): ?>
-        <iframe width="300" src="https://www.youtube.com/embed/<?= $model->video_key_yt; ?>" frameborder="0" allowfullscreen></iframe>
+        <iframe width="300" src="<?= $model->video_key_yt; ?>" frameborder="0" allowfullscreen></iframe>
     <?php endif; ?>
     <?php if(!empty($model->video_key_fb)): ?>
-        <iframe src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F<?= $model->video_key_fb; ?>%2F&width=300&show_text=false&appId=915460531914741&height=150" width="300" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowTransparency="true"></iframe>
+        <video width="300" controls>
+            <source src="<?= $model->video_key_fb; ?>" type="video/mp4">
+        </video>
     <?php endif; ?>
 
 <?php elseif($model->content_type_id == Constants::CONTENT_TYPE_VOTING): ?>

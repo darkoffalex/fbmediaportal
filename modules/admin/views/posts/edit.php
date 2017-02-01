@@ -91,6 +91,7 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                             Constants::CONTENT_TYPE_PHOTO => Yii::t('admin','Photo'),
                             Constants::CONTENT_TYPE_VIDEO => Yii::t('admin','Video'),
                             Constants::CONTENT_TYPE_VOTING => Yii::t('admin','Voting'),
+                            Constants::CONTENT_TYPE_POST => Yii::t('admin','Post')
                         ];
                         echo !empty($types[$model->content_type_id]) ? $types[$model->content_type_id] : Yii::t('admin','Unknown')
                         ?>
@@ -98,6 +99,14 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
 
                     <p>
                         <strong><?= Yii::t('admin','Comments') ?></strong> : <?= count($model->comments); ?> <a data-toggle="modal" data-target=".modal" href="<?= Url::to(['/admin/posts/comments', 'id' => $model->id]); ?>">(<?= Yii::t('admin','View'); ?>)</a>
+                    </p>
+
+                    <p>
+                        <strong><?= Yii::t('admin','Created At') ?></strong> : <?= $model->created_at; ?>
+                    </p>
+
+                    <p>
+                        <strong><?= Yii::t('admin','Published At') ?></strong> : <?= $model->published_at; ?>
                     </p>
                 </div>
             </div>
@@ -151,14 +160,14 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                                     <input id="post_trl-name_<?= $lng->prefix; ?>" value="<?= $model->getATrl($lng->prefix)->name; ?>" class="form-control" name="Post[translations][<?= $lng->prefix; ?>][name]" type="text">
                                 </div>
 
-                                <?php if(in_array($model->content_type_id,[Constants::CONTENT_TYPE_NEWS,Constants::CONTENT_TYPE_ARTICLE])): ?>
+                                <?php if(in_array($model->content_type_id,[Constants::CONTENT_TYPE_NEWS,Constants::CONTENT_TYPE_ARTICLE, Constants::CONTENT_TYPE_POST])): ?>
                                     <div class="form-group field-post_trl-meta_small_text">
                                         <label class="control-label" for="post_trl-meta_small_text_<?= $lng->prefix; ?>"><?= Yii::t('admin','Small text (excerpt)'); ?></label>
                                         <textarea id="post_trl-meta_small_text_<?= $lng->prefix; ?>" class="form-control" name="Post[translations][<?= $lng->prefix; ?>][small_text]"><?= $model->getATrl($lng->prefix)->small_text; ?></textarea>
                                     </div>
                                 <?php endif; ?>
 
-                                <?php if(in_array($model->content_type_id,[Constants::CONTENT_TYPE_PHOTO,Constants::CONTENT_TYPE_ARTICLE,Constants::CONTENT_TYPE_NEWS,Constants::CONTENT_TYPE_VIDEO])): ?>
+                                <?php if(in_array($model->content_type_id,[Constants::CONTENT_TYPE_PHOTO,Constants::CONTENT_TYPE_ARTICLE,Constants::CONTENT_TYPE_NEWS,Constants::CONTENT_TYPE_VIDEO, Constants::CONTENT_TYPE_POST])): ?>
                                     <div class="form-group field-post_trl-text">
                                         <label class="control-label" for="post_trl-full_text_<?= $lng->prefix; ?>"><?= Yii::t('admin','Full text'); ?></label>
                                         <textarea id="post_trl-full_text_<?= $lng->prefix; ?>" class="form-control editor-area" name="Post[translations][<?= $lng->prefix; ?>][text]"><?= $model->getATrl($lng->prefix)->text; ?></textarea>
@@ -184,9 +193,9 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                     <?= $form->field($model,'group_id',['template' => "{label}\n{input}\n{$link}\n{error}\n"])->dropDownList($data,['class' => 'form-control reload-ids', 'data-reload-url' => $reload]); ?>
 
                     <?= $form->field($model, 'kind_id')->dropDownList([
-                        Constants::KIND_INTERESTING_CONTENT => Yii::t('admin','Интересное содержимое'),
-                        Constants::KIND_INTERESTING_COMMENTS => Yii::t('admin','Интересное обсуждение'),
-                    ]); ?>
+                        Constants::KIND_INTERESTING_CONTENT => Yii::t('admin','Useful content'),
+                        Constants::KIND_INTERESTING_COMMENTS => Yii::t('admin','Interesting discussion'),
+                    ],['prompt' => '']); ?>
 
 
                     <?= $form->field($model,'sticky_position_main')->dropDownList([
@@ -238,7 +247,7 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
 
                     <?= $form->field($model,'author_custom_name')->textInput(); ?>
 
-                    <?php if(in_array($model->content_type_id,[Constants::CONTENT_TYPE_ARTICLE,Constants::CONTENT_TYPE_NEWS,Constants::CONTENT_TYPE_VIDEO])): ?>
+                    <?php if(in_array($model->content_type_id,[Constants::CONTENT_TYPE_ARTICLE,Constants::CONTENT_TYPE_NEWS,Constants::CONTENT_TYPE_VIDEO, Constants::CONTENT_TYPE_POST])): ?>
                         <hr>
                         <div class="row">
                             <div class="col-md-6">
@@ -259,7 +268,7 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                         </div>
                     <?php endif; ?>
 
-                    <?php if(in_array($model->content_type_id,[Constants::CONTENT_TYPE_ARTICLE,Constants::CONTENT_TYPE_NEWS,Constants::CONTENT_TYPE_PHOTO])): ?>
+                    <?php if(in_array($model->content_type_id,[Constants::CONTENT_TYPE_ARTICLE,Constants::CONTENT_TYPE_NEWS,Constants::CONTENT_TYPE_PHOTO, Constants::CONTENT_TYPE_POST])): ?>
                         <hr>
                         <label><?= Yii::t('admin','Images'); ?></label>
                         <table class="table table-hover table-bordered ajax-reloadable" data-reload-url="<?= Url::to(['/admin/posts/list-images','id'=>$model->id]); ?>">

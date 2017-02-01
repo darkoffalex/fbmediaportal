@@ -49,7 +49,7 @@ class PostsController extends Controller
 
         //getting comments
         /* @var $comments Comment */
-        $q = Comment::find()->where(['post_id' => $post->id])->orderBy(new Expression('IF(answer_to_id, answer_to_id, id), answer_to_id, created_at ASC'));
+        $q = Comment::find()->where(['post_id' => $post->id])->orderBy(new Expression('IF(answer_to_id, answer_to_id, id), created_at ASC'));
         $cq = clone $q;
         $pages = new Pagination(['totalCount' => $cq->count(), 'defaultPageSize' => 20]);
         $comments = $q ->with(['author','parent'])->offset($pages->offset)->limit($pages->limit)->all();

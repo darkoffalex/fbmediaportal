@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\helpers\Constants;
 use app\helpers\Help;
+use app\models\Comment;
 use himiklab\thumbnail\EasyThumbnailImage;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -132,7 +133,7 @@ class Post extends PostDB
 
 
     /**
-     * Returns
+     * Returns url to post
      * @param bool|true $title
      * @param bool|false $abs
      * @return string
@@ -140,7 +141,22 @@ class Post extends PostDB
     public function getUrl($title = true, $abs = false)
     {
         $slugTitle = $title ? ArrayHelper::getValue($this->trl,'name',$this->name) : null;
-        return Url::to(['posts/show', 'id' => $this->id, 'title' => $title ? Help::slug($slugTitle) : null],$abs);
+        return Url::to(['/posts/show', 'id' => $this->id, 'title' => $title ? Help::slug($slugTitle) : null],$abs);
+    }
+
+    /**
+     * Returns url to post on FB
+     * @return null|string
+     */
+    public function getFbUrl()
+    {
+        if(empty($this->fb_sync_id)){
+            return null;
+        }
+
+        $groupId = $this->group->fb_sync_id;
+        $fbId = $this->fb_sync_id;
+        return "https://www.facebook.com/groups/{$groupId}/permalink/{$fbId}/";
     }
 
     /**
@@ -156,6 +172,50 @@ class Post extends PostDB
         $comments = $q->all();
 
         return $comments;
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getComments()
+    {
+        return parent::getComments()->orderBy('created_at ASC');
+    }
+
+    /**
+     * Returns recursively sorted comments
+     * @return Comment[]
+     */
+    public function getCommentsRecursive()
+    {
+        /* @var $result Comment[] */
+        /* @var $temp Comment[] */
+        $result = [];
+        $temp = Comment::find()
+            ->where('answer_to_id IS NULL OR answer_to_id = 0')
+            ->andWhere(['post_id' => $this->id])
+            ->with([
+                'author',
+                'children',
+                'children.author',
+                'children.parent',
+                'children.children.author',
+                'children.children.parent',
+                'parent',
+                'parent.author',
+                'parent.children',
+                'parent.parent.author',
+                'parent.parent.children'
+            ])
+            ->orderBy('created_at ASC')
+            ->all();
+
+        foreach($temp as $comment){
+            $result[] = $comment;
+            $result = ArrayHelper::merge($result,$comment->getRecursiveChildren());
+        }
+
+        return $result;
     }
 
     /**

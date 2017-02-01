@@ -9,6 +9,7 @@ use app\models\Category;
 use yii\helpers\ArrayHelper;
 use kartik\select2\Select2;
 use yii\web\JsExpression;
+use app\models\PostGroup;
 
 /* @var $searchModel \app\models\PostSearch */
 /* @var $dataProvider \yii\data\ActiveDataProvider */
@@ -69,6 +70,7 @@ $gridColumns = [
 
     [
         'attribute' => 'author_id',
+        'enableSorting' => false,
         'filter' => Select2::widget([
             'model' => $searchModel,
             'attribute' => 'author_id',
@@ -103,33 +105,35 @@ $gridColumns = [
     ],
 
 
-    [
-        'attribute' => 'type_id',
-        'filter' => [
-            Constants::POST_TYPE_CREATED => Yii::t('admin','Created'),
-            Constants::POST_TYPE_IMPORTED => Yii::t('admin','Imported'),
-        ],
-        'enableSorting' => false,
-        'format' => 'raw',
-        'value' => function ($model, $key, $index, $column){
-            /* @var $model \app\models\Post */
-            $types = [
-                Constants::POST_TYPE_CREATED => Yii::t('admin','Created'),
-                Constants::POST_TYPE_IMPORTED => Yii::t('admin','Imported'),
-            ];
-
-            return !empty($types[$model->type_id]) ? $types[$model->type_id] : Yii::t('admin','Unknown');
-        },
-    ],
+//    [
+//        'attribute' => 'type_id',
+//        'filter' => [
+//            Constants::POST_TYPE_CREATED => Yii::t('admin','Created'),
+//            Constants::POST_TYPE_IMPORTED => Yii::t('admin','Imported'),
+//        ],
+//        'enableSorting' => false,
+//        'format' => 'raw',
+//        'value' => function ($model, $key, $index, $column){
+//            /* @var $model \app\models\Post */
+//            $types = [
+//                Constants::POST_TYPE_CREATED => Yii::t('admin','Created'),
+//                Constants::POST_TYPE_IMPORTED => Yii::t('admin','Imported'),
+//            ];
+//
+//            return !empty($types[$model->type_id]) ? $types[$model->type_id] : Yii::t('admin','Unknown');
+//        },
+//    ],
 
     [
         'attribute' => 'content_type_id',
+        'contentOptions'=>['style'=>'width: 100px;'],
         'filter' => [
             Constants::CONTENT_TYPE_ARTICLE => Yii::t('admin','Article'),
             Constants::CONTENT_TYPE_NEWS => Yii::t('admin','News'),
             Constants::CONTENT_TYPE_PHOTO => Yii::t('admin','Photo'),
             Constants::CONTENT_TYPE_VIDEO => Yii::t('admin','Video'),
             Constants::CONTENT_TYPE_VOTING => Yii::t('admin','Voting'),
+            Constants::CONTENT_TYPE_POST => Yii::t('admin','Post')
         ],
         'enableSorting' => false,
         'format' => 'raw',
@@ -141,6 +145,7 @@ $gridColumns = [
                 Constants::CONTENT_TYPE_PHOTO => Yii::t('admin','Photo'),
                 Constants::CONTENT_TYPE_VIDEO => Yii::t('admin','Video'),
                 Constants::CONTENT_TYPE_VOTING => Yii::t('admin','Voting'),
+                Constants::CONTENT_TYPE_POST => Yii::t('admin','Post')
             ];
 
             return !empty($types[$model->content_type_id]) ? $types[$model->content_type_id] : Yii::t('admin','Unknown');
@@ -148,11 +153,23 @@ $gridColumns = [
     ],
 
     [
-        'attribute' => 'created_at',
+        'attribute' => 'group_id',
+        'label' => Yii::t('admin','Source'),
+        'enableSorting' => false,
+        'filter' => ArrayHelper::map(PostGroup::find()->all(),'id','name'),
+        'format' => 'raw',
+        'value' => function ($model, $key, $index, $column) use ($lng){
+            /* @var $model \app\models\Post */
+            return $model->group->name;
+        },
+    ],
+
+    [
+        'attribute' => 'published_at',
         'filter' => \kartik\daterange\DateRangePicker::widget([
             'model' => $searchModel,
             'convertFormat' => true,
-            'attribute' => 'created_at',
+            'attribute' => 'published_at',
             'pluginOptions' => [
                 'locale' => [
                     'format'=>'Y-m-d',
@@ -164,7 +181,7 @@ $gridColumns = [
         'format' => 'raw',
         'value' => function ($model, $key, $index, $column){
             /* @var $model \app\models\Post*/
-            return !empty($model->created_at) ? $model->created_at : Yii::t('admin','No data');
+            return !empty($model->published_at) ? $model->published_at : Yii::t('admin','No data');
         },
     ],
 
@@ -172,16 +189,28 @@ $gridColumns = [
         'class' => 'yii\grid\ActionColumn',
         'contentOptions'=>['style'=>'width: 100px; text-align: center;'],
         'header' => Yii::t('admin','Actions'),
-        'template' => '{delete} &nbsp; {update} &nbsp {comments}',
+        'template' => '{delete} &nbsp; {update} &nbsp {comments} &nbsp {link} &nbsp {fb_link}',
         'buttons' => [
             'comments' => function ($url,$model,$key) {
                 /* @var $model \app\models\Post */
                 return Html::a('<span class="glyphicon glyphicon-comment"></span>', ['/admin/posts/comments', 'id' => $model->id], ['title' => Yii::t('admin','View comments'), 'data-toggle'=>'modal', 'data-target'=>'.modal']);
             },
+
+            'link' => function ($url,$model,$key) {
+                /* @var $model \app\models\Post */
+                return Html::a('<span class="glyphicon glyphicon glyphicon-link"></span>', $model->getUrl(false,true), ['title' => Yii::t('admin','View on portal'), 'target' => '_blank']);
+            },
+
+            'fb_link' => function ($url,$model,$key) {
+                /* @var $model \app\models\Post */
+                return Html::a('<i class="fa fa-facebook-f"></i>', $model->getFbUrl(), ['title' => Yii::t('admin','View on facebook'), 'target' => '_blank']);
+            },
         ],
         'visibleButtons' => [
             'delete' => function ($model, $key, $index) {return true;},
             'update' => function ($model, $key, $index) {return true;},
+            'link' => function ($model, $key, $index) {return $model->status_id == Constants::STATUS_ENABLED;},
+            'fb_link' => function ($model, $key, $index) {return !empty($model->fb_sync_id) && !empty($model->group);},
         ],
     ],
 ];
@@ -207,12 +236,16 @@ $gridColumns = [
             </div>
             <div class="box-body" style="padding-top: 0;">
                 <div class="tab-content inner-block">
+
+                    <?= $this->render('_filters',['model' => $searchModel]); ?>
+
                     <?= GridView::widget([
-                        'filterModel' => $searchModel,
+//                        'filterModel' => $searchModel,
                         'dataProvider' => $dataProvider,
                         'columns' => $gridColumns,
                         'pjax' => false,
                     ]); ?>
+
                 </div>
             </div>
             <div class="box-footer">

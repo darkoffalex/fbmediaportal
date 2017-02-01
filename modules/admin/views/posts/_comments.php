@@ -11,7 +11,7 @@ use app\models\Category;
 /* @var $controller \app\modules\admin\controllers\PostsController */
 
 $controller = $this->context;
-$comments = $post->getNestedOrderedComments();
+$comments = $post->getCommentsRecursive();
 ?>
 
 <div class="modal-header">

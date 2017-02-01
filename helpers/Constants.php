@@ -24,6 +24,7 @@ class Constants
     const CONTENT_TYPE_PHOTO = 3;
     const CONTENT_TYPE_VIDEO = 4;
     const CONTENT_TYPE_VOTING = 5;
+    const CONTENT_TYPE_POST = 6;
 
     //Statuses of objects (enabled/disabled/suspended)
     const STATUS_DISABLED = 0;

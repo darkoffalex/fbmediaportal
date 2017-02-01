@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * @property Comment $parent
@@ -91,7 +92,24 @@ class Comment extends CommentDB
     }
 
     /**
-     * Get recursive listed categories
+     * Returns recursively sorted children
+     * @return Comment[]|array
+     */
+    public function getRecursiveChildren()
+    {
+        $children = $this->children;
+
+        foreach($children as $child){
+            if(!empty($child->children)){
+                $children = ArrayHelper::merge($children,$this->getRecursiveChildren());
+            }
+        }
+
+        return $children;
+    }
+
+    /**
+     * Get recursive listed comments
      * @param int $rootId
      * @param int $postId
      * @return Comment[]

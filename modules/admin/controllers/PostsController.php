@@ -654,7 +654,7 @@ class PostsController extends Controller
     public function actionComments($id)
     {
         /* @var $post Post */
-        $post = Post::findOne((int)$id);
+        $post = Post::find()->where(['id' => $id])->one();
 
         if(empty($post)){
             throw new NotFoundHttpException(Yii::t('admin','Post not found'),404);

@@ -19,8 +19,8 @@ class PostSearch extends Post
     public function rules()
     {
         return [
-            [['name', 'content', 'created_at'], 'string', 'max' => 255],
-            [['content_type_id', 'type_id', 'category_id', 'author_id', 'group_id'], 'integer'],
+            [['name', 'content', 'published_at', 'created_at'], 'string', 'max' => 255],
+            [['content_type_id', 'type_id', 'category_id', 'author_id', 'group_id', 'kind_id'], 'integer'],
         ];
     }
 
@@ -78,6 +78,10 @@ class PostSearch extends Post
                 $q->andWhere(['post.author_id' => $this->author_id]);
             }
 
+            if(!empty($this->kind_id)){
+                $q->andWhere(['post.kind_id' => $this->kind_id]);
+            }
+
             if(!empty($this->category_id)){
                 $q->joinWith('categories as cat')->andWhere(['cat.id' => $this->category_id]);
             }
@@ -107,6 +111,13 @@ class PostSearch extends Post
                 $date_from = $range[0];
                 $date_to = $range[1];
                 $q->andWhere('post.created_at >= :from AND post.created_at <= :to',['from' => $date_from, 'to' => $date_to]);
+            }
+
+            if(!empty($this->published_at)){
+                $range = explode(' - ',$this->published_at);
+                $date_from = $range[0];
+                $date_to = $range[1];
+                $q->andWhere('post.published_at >= :from AND post.published_at <= :to',['from' => $date_from, 'to' => $date_to]);
             }
         }
 

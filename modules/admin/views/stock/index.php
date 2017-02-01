@@ -145,7 +145,7 @@ $gridColumns = [
         'class' => 'yii\grid\ActionColumn',
         'contentOptions'=>['style'=>'width: 100px; text-align: center;'],
         'header' => Yii::t('admin','Actions'),
-        'template' => '{delete} &nbsp; {move} &nbsp {comments}',
+        'template' => '{delete} &nbsp; {move} &nbsp {comments} &nbsp {fb_link}',
         'buttons' => [
             'move' => function ($url,$model,$key) {
                 /* @var $model \app\models\Post */
@@ -156,10 +156,16 @@ $gridColumns = [
                 /* @var $model \app\models\Post */
                 return Html::a('<span class="glyphicon glyphicon-comment"></span>', ['/admin/posts/comments', 'id' => $model->id], ['title' => Yii::t('admin','View comments'), 'data-toggle'=>'modal', 'data-target'=>'.modal']);
             },
+
+            'fb_link' => function ($url,$model,$key) {
+                /* @var $model \app\models\Post */
+                return Html::a('<i class="fa fa-facebook-f"></i>', $model->getFbUrl(), ['title' => Yii::t('admin','View on facebook'), 'target' => '_blank']);
+            },
         ],
         'visibleButtons' => [
             'delete' => function ($model, $key, $index) {return true;},
             'update' => function ($model, $key, $index) {return true;},
+            'fb_link' => function ($model, $key, $index) {return !empty($model->group);},
         ],
     ],
 ];
