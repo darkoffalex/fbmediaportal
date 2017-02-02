@@ -311,6 +311,48 @@ class PostsController extends Controller
     }
 
     /**
+     * Crop image
+     * @param $id
+     * @return string
+     * @throws NotFoundHttpException
+     * @throws \Exception
+     */
+    public function actionCropImage($id)
+    {
+        /* @var $model PostImage */
+        $model = PostImage::findOne((int)$id);
+
+        if(empty($model)){
+            throw new NotFoundHttpException(Yii::t('admin','Image not found'),404);
+        }
+
+        $post = $model->post;
+
+        //if post given
+        if(Yii::$app->request->isPost){
+
+            //load all necessary data
+            $model->load(Yii::$app->request->post());
+
+            //if all data valid
+            if($model->validate()){
+
+                //update cropping positions
+                $model->update();
+
+                //remove cropped image
+                $model->clearCropped();
+
+                //It's ok, can reload table
+                return 'OK';
+            }
+        }
+
+        //render form
+        return $this->renderAjax('_crop_image',compact('model','post'));
+    }
+
+    /**
      * Editing images
      * @param $id
      * @return string

@@ -39,7 +39,7 @@ class CategorySearch extends Category
     {
         //all posts that aren't in stock
         $q = parent::find()->where(['parent_category_id' => (int)$rootId])->orderBy('priority ASC');
-        $q -> with(['posts']);
+        $q -> with(['postsActive']);
 
         $this->load($params);
 

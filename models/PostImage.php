@@ -3,8 +3,14 @@
 namespace app\models;
 
 use himiklab\thumbnail\EasyThumbnailImage;
+use Imagine\Image\Box;
+use Imagine\Image\ManipulatorInterface;
+use Imagine\Image\Point;
 use Yii;
+use yii\helpers\ArrayHelper;
+use yii\helpers\FileHelper;
 use yii\helpers\Url;
+use yii\imagine\Image;
 use yii\web\UploadedFile;
 
 /**
@@ -100,6 +106,69 @@ class PostImage extends PostImageDB
         }else{
             return $this->file_url;
         }
+    }
+
+    /**
+     * Returns URL to cropped image
+     * @param int $w default width
+     * @param int $h default height
+     * @return null|string
+     */
+    public function getCroppedUrl($w = 706, $h = 311)
+    {
+        //if nothing to crop - return null
+        if(empty($this->file_path) || !$this->hasFile()){
+            return null;
+        }
+
+        //get crop settings
+        $cropSettings = json_decode($this->crop_settings,true);
+
+        //if not found cropped version of file
+        if(!file_exists(Yii::getAlias('@webroot/assets/cropped/'.$this->file_path))) {
+
+            //original file
+            $imageUploaded = Image::getImagine()->open(Yii::getAlias('@webroot/uploads/img/'.$this->file_path));
+
+            //create dir if not exist
+            FileHelper::createDirectory(Yii::getAlias('@webroot/assets/cropped'));
+
+            //if cropping not set
+            if(empty($cropSettings)){
+                $imageUploaded
+                    ->thumbnail(new Box($w,$h),ManipulatorInterface::THUMBNAIL_OUTBOUND)
+                    ->save(Yii::getAlias('@webroot/assets/cropped/'.$this->file_path),['quality' => 100]);
+            }else{
+                $cropSettings['x'] = $cropSettings['x'] < 0 ? 0 : $cropSettings['x'];
+                $cropSettings['y'] = $cropSettings['y'] < 0 ? 0 : $cropSettings['y'];
+                $cropSettings['w'] = $cropSettings['w'] <= 0 ? $w : $cropSettings['w'];
+                $cropSettings['h'] = $cropSettings['h'] <= 0 ? $h : $cropSettings['h'];
+
+                $imageUploaded->crop(new Point($cropSettings['x'],$cropSettings['y']),new Box($cropSettings['w'],$cropSettings['h']));
+
+                if($this->strict_ratio){
+                    $imageUploaded->resize(new Box(706,311));
+                }
+
+                $imageUploaded->save(Yii::getAlias('@webroot/assets/cropped/'.$this->file_path),['quality' => 100]);
+            }
+        }
+
+        return Url::to('@web/assets/cropped/'.$this->file_path);
+    }
+
+    /**
+     * Clears cropped file (removes it)
+     * @return bool|null
+     */
+    public function clearCropped()
+    {
+        //if nothing to crop - return null
+        if(empty($this->file_path) || !$this->hasFile()){
+            return null;
+        }
+
+        return unlink(Yii::getAlias('@webroot/assets/cropped/'.$this->file_path));
     }
 
     /**

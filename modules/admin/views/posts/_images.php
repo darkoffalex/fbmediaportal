@@ -5,6 +5,7 @@ use yii\helpers\Url;
 use app\helpers\Constants;
 use yii\helpers\ArrayHelper;
 use app\models\Category;
+use app\helpers\Help;
 
 /* @var $post \app\models\Post */
 /* @var $this \yii\web\View */
@@ -23,7 +24,7 @@ $controller = $this->context;
     <?php foreach($post->postImages as $image): ?>
         <tr>
             <td>
-                <img class="img-thumbnail" width="300" src="<?= $image->need_crop ? $image->getThumbnailUrl(512,512) : $image->getFullUrl(); ?>">
+                <img class="img-thumbnail" width="300" src="<?= $image->need_crop ? $image->getCroppedUrl().'?'.Help::rds(6) : $image->getFullUrl(); ?>">
             </td>
             <td>
                 <?php if($image->status_id == Constants::STATUS_ENABLED): ?>
@@ -40,6 +41,10 @@ $controller = $this->context;
                 <a href="<?= Url::to(['/admin/posts/move-image', 'id' => $image->id, 'dir' => 'up']); ?>" data-ajax-reloader=".ajax-reloadable"><span class="glyphicon glyphicon-arrow-up"></span></a>
                 &nbsp;
                 <a href="<?= Url::to(['/admin/posts/move-image', 'id' => $image->id, 'dir' => 'down']); ?>" data-ajax-reloader=".ajax-reloadable"><span class="glyphicon glyphicon-arrow-down"></span></a>
+                <?php if(!$image->is_external && $image->need_crop): ?>
+                    &nbsp;
+                    <a href="<?= Url::to(['/admin/posts/crop-image', 'id' => $image->id]); ?>" data-toggle="modal" data-target=".modal"><i class="fa fa-crop"></i></a>
+                <?php endif; ?>
             </td>
         </tr>
     <?php endforeach; ?>

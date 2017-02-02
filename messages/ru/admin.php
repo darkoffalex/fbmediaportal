@@ -189,5 +189,7 @@ return [
     'Category Id' => 'Рубрика',
     'Filter' => 'Фильтровать',
     'Type' => 'Тип',
-    'Need Crop' => 'Обрезать'
+    'Need Crop' => 'Обрезать',
+    'Image crop settings' => 'Настройки обрезки изображения',
+    'Strict Ratio' => 'Фиксированные пропорции'
 ];

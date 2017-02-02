@@ -350,7 +350,7 @@ class Post extends PostDB
 
         $affectedRows = 0;
         if(!empty($preparedValues)){
-            $affectedRows = Yii::$app->db->createCommand()->batchInsert(PostSearchIndex::tableName(), ['text', 'post_id', 'type_id'],$preparedValues)->execute();
+            $affectedRows = Yii::$app->db->createCommand()->batchInsert(PostSearchIndex::tableName(),['text', 'post_id', 'type_id'],$preparedValues)->execute();
         }
 
         return !empty($affectedRows);

@@ -20,6 +20,8 @@ use Yii;
  * @property integer $updated_by_id
  * @property string $fb_sync_id
  * @property integer $need_crop
+ * @property string $crop_settings
+ * @property integer $strict_ratio
  *
  * @property Post $post
  * @property PostImageTrl[] $postImageTrls
@@ -40,10 +42,10 @@ class PostImageDB extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['post_id', 'is_external', 'status_id', 'priority', 'created_by_id', 'updated_by_id', 'need_crop'], 'integer'],
+            [['post_id', 'is_external', 'status_id', 'priority', 'created_by_id', 'updated_by_id', 'need_crop', 'strict_ratio'], 'integer'],
             [['file_url'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
-            [['file_path', 'fb_sync_id'], 'string', 'max' => 255],
+            [['file_path', 'fb_sync_id', 'crop_settings'], 'string', 'max' => 255],
             [['post_id'], 'exist', 'skipOnError' => true, 'targetClass' => Post::className(), 'targetAttribute' => ['post_id' => 'id']],
         ];
     }
@@ -67,6 +69,8 @@ class PostImageDB extends \yii\db\ActiveRecord
             'updated_by_id' => 'Updated By ID',
             'fb_sync_id' => 'Fb Sync ID',
             'need_crop' => 'Need Crop',
+            'crop_settings' => 'Crop Settings',
+            'strict_ratio' => 'Strict Ratio',
         ];
     }
 

@@ -65,10 +65,7 @@ class PostSearch extends Post
     {
         //all posts that aren't in stock
         $q = parent::find()->where($stock ? 'post.status_id = :st' : 'post.status_id != :st', ['st' => Constants::STATUS_IN_STOCK]);
-        $q -> with('categories');
-        $q -> with('author');
-        $q -> with('postSearchIndices');
-        $q -> with('comments');
+        $q -> with(['categories','author','comments','group']);
 
         $this->load($params);
 
