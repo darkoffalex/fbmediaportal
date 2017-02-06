@@ -110,6 +110,12 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                     <p>
                         <strong><?= Yii::t('admin','Published At') ?></strong> : <?= $model->published_at; ?>
                     </p>
+                    <p>
+                        <strong><?= Yii::t('admin','View on facebook') ?></strong> : <?= Html::a($model->getFbUrl(),$model->getFbUrl(),['target' => '_blank']); ?>
+                    </p>
+                    <p>
+                        <strong><?= Yii::t('admin','View on portal') ?></strong> : <?= Html::a($model->getUrl(false,true),$model->getUrl(false,true),['target' => '_blank']); ?>
+                    </p>
                 </div>
             </div>
         </div>

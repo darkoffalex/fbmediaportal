@@ -49,8 +49,11 @@ class AdminModule extends \yii\base\Module
             $user->last_online_at = date('Y-m-d H:i:s', time());
             $user->update();
 
+            $a = $action->id;
+            $c = $action->controller->id;
+
             //if redactor trying to access users controller - sent to categories
-            if($action->controller->id == 'users' && $user->role_id == Constants::ROLE_REDACTOR){
+            if(($c == 'users' && $a !== 'ajax-search') && $user->role_id == Constants::ROLE_REDACTOR){
                 Yii::$app->response->redirect(Url::to(['/admin/categories/index']));
                 return false;
             }
