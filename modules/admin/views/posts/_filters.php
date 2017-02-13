@@ -90,7 +90,7 @@ use kartik\daterange\DateRangePicker;
                 Constants::KIND_INTERESTING_COMMENTS => Yii::t('admin','Interesting discussion'),
             ],['prompt' => ''])->label(Yii::t('admin','Type'))->error(false); ?>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <?= $form->field($model, 'published_at')->widget(DateRangePicker::className(),[
                 'convertFormat' => true,
                 'pluginOptions' => [
@@ -101,7 +101,13 @@ use kartik\daterange\DateRangePicker;
                 ]
             ])->error(false); ?>
         </div>
-        <div class="col-md-3" style="margin-top: 25px;">
+        <div class="col-md-2">
+            <?= $form->field($model, 'need_finish')->dropDownList([
+                "YES" => Yii::t('admin','Yes'),
+                "NO" => Yii::t('admin','No')
+            ],['prompt' => '']); ?>
+        </div>
+        <div class="col-md-2" style="margin-top: 25px;">
             <?= Html::submitButton(Yii::t('admin','Filter'), ['class' => 'btn btn-primary box-btn']) ?>
         </div>
     </div>

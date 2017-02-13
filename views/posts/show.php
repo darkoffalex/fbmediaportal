@@ -49,7 +49,7 @@ use yii\helpers\Url;
                     </div>
                     <div class="single_page_content">
                         <?php if(!empty($post->postImages)): ?>
-                            <img class="img-center" src="<?= $post->getFirstImageUrl(); ?>" alt="">
+                            <img class="img-center" src="<?= $post->postImages[0]->getCroppedUrl(); ?>" alt="">
                         <?php endif; ?>
 
                         <?php if(!empty($post->trl->small_text)): ?>

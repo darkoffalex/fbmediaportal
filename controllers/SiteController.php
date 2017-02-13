@@ -66,6 +66,37 @@ class SiteController extends Controller
     }
 
     /**
+     * Temporary method to show all categories in list
+     */
+    public function actionRubricator()
+    {
+        $content = "";
+        /* @var  $categories Category[] */
+        $categories = Category::find()
+            ->with([
+                'trl',
+                'parent.trl',
+                'children.trl',
+                'children.parent.trl',
+                'parent.children.trl'
+            ])
+            ->where(['status_id' => Constants::STATUS_ENABLED, 'parent_category_id' => 0])
+            ->orderBy('priority ASC')
+            ->all();
+
+        foreach ($categories as $cat){
+            $content .= $cat->trl->name."\n";
+            if(!empty($cat->children)){
+                foreach ($cat->children as $child){
+                    $content .= "--".$child->trl->name."\n";
+                }
+            }
+        }
+
+        return $this->renderContent(nl2br($content));
+    }
+
+    /**
      * Login with Facebook
      * @return \yii\web\Response
      * @throws NotAcceptableHttpException

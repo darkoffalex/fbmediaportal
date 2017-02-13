@@ -1,5 +1,7 @@
 <?php
 
+/* @var $model \app\models\Post */
+
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Url;
@@ -22,7 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
 /* @var $this \yii\web\View */
 
 /* @var $languages \app\models\Language[] */
-$languages = \app\models\Language::find()->all();
+$languages = \app\models\Language::find()->orderBy('id ASC')->all();
 ?>
 
 <?php Yii::$app->view->registerCssFile('/js/imperavi-redactor/redactor.css'); ?>
@@ -100,7 +102,9 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                     </p>
 
                     <p>
-                        <strong><?= Yii::t('admin','Comments') ?></strong> : <?= count($model->comments); ?> <a data-toggle="modal" data-target=".modal" href="<?= Url::to(['/admin/posts/comments', 'id' => $model->id]); ?>">(<?= Yii::t('admin','View'); ?>)</a>
+                        <strong><?= Yii::t('admin','Comments') ?></strong> : <?= count($model->comments); ?>
+                        (<?= Html::a(Yii::t('admin','View'),['/admin/posts/comments', 'id' => $model->id],['data-toggle' => 'modal','data-target' => '.modal']); ?> |
+                         <?= Html::a(Yii::t('admin','Refresh'),['/admin/posts/refresh', 'id' => $model->id],['data-confirm' => Yii::t('admin','Please DO NOT close this page until updating be finished!')]); ?>)
                     </p>
 
                     <p>
@@ -128,6 +132,8 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                 <div class="box-body">
 
                     <?= $form->field($model, 'name')->textInput()->label(Yii::t('admin','Internal name')); ?>
+
+                    <?= $form->field($model, 'need_finish')->checkbox(); ?>
 
                     <div class="form-group dropdown inactive-links">
                         <label class="control-label"><?= Yii::t('admin','Categories'); ?></label>

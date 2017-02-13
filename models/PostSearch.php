@@ -19,7 +19,7 @@ class PostSearch extends Post
     public function rules()
     {
         return [
-            [['name', 'content', 'published_at', 'created_at'], 'string', 'max' => 255],
+            [['name', 'content', 'published_at', 'created_at', 'need_finish'], 'string', 'max' => 255],
             [['content_type_id', 'type_id', 'category_id', 'author_id', 'group_id', 'kind_id'], 'integer'],
         ];
     }
@@ -97,6 +97,14 @@ class PostSearch extends Post
 
             if(!empty($this->group_id)){
                 $q->andWhere(['post.group_id' => $this->group_id]);
+            }
+
+            if(!empty($this->need_finish)){
+                if($this->need_finish == "YES"){
+                    $q->andWhere(['post.need_finish' => 1]);
+                }else{
+                    $q->andWhere('post.need_finish = 0 OR post.need_finish IS NULL');
+                }
             }
 
             if(!empty($this->content)){

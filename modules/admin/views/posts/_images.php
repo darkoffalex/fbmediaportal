@@ -12,6 +12,8 @@ use app\helpers\Help;
 /* @var $controller \app\modules\admin\controllers\PostsController */
 
 $controller = $this->context;
+/* @var $languages \app\models\Language[] */
+$languages = \app\models\Language::find()->orderBy('id ASC')->all();
 ?>
 
 <tbody>
@@ -24,7 +26,8 @@ $controller = $this->context;
     <?php foreach($post->postImages as $image): ?>
         <tr>
             <td>
-                <img class="img-thumbnail" width="300" src="<?= $image->need_crop ? $image->getCroppedUrl().'?'.Help::rds(6) : $image->getFullUrl(); ?>">
+                <?php $name = $image->getATrl($languages[0]->prefix)->name;?>
+                <img title="<?= $name; ?>" alt="<?= $name; ?>" class="img-thumbnail" width="300" src="<?= $image->need_crop ? $image->getCroppedUrl().'?'.Help::rds(6) : $image->getFullUrl(); ?>">
             </td>
             <td>
                 <?php if($image->status_id == Constants::STATUS_ENABLED): ?>

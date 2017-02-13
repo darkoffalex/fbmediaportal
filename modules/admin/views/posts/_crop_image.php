@@ -76,7 +76,7 @@ $languages = \app\models\Language::find()->all();
                 }else{
                     reInitCrop(NaN);
                 }
-            },50);
+            },100);
 
             $('.strict-ration-check').change(function(){
                 if($(this).prop('checked')){

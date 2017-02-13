@@ -2,14 +2,18 @@
 
 namespace app\models;
 
+use app\helpers\Help;
 use himiklab\thumbnail\EasyThumbnailImage;
 use Imagine\Image\Box;
+use Imagine\Image\ImageInterface;
+use Imagine\Image\ImagineInterface;
 use Imagine\Image\ManipulatorInterface;
 use Imagine\Image\Point;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
 use yii\helpers\Url;
+use yii\imagine\BaseImage;
 use yii\imagine\Image;
 use yii\web\UploadedFile;
 
@@ -112,9 +116,10 @@ class PostImage extends PostImageDB
      * Returns URL to cropped image
      * @param int $w default width
      * @param int $h default height
+     * @param bool $useWatermark add watermark
      * @return null|string
      */
-    public function getCroppedUrl($w = 706, $h = 311)
+    public function getCroppedUrl($w = 706, $h = 311, $useWatermark = false)
     {
         //if nothing to crop - return null
         if(empty($this->file_path) || !$this->hasFile()){
@@ -126,6 +131,8 @@ class PostImage extends PostImageDB
 
         //if not found cropped version of file
         if(!file_exists(Yii::getAlias('@webroot/assets/cropped/'.$this->file_path))) {
+
+
 
             //original file
             $imageUploaded = Image::getImagine()->open(Yii::getAlias('@webroot/uploads/img/'.$this->file_path));
@@ -149,6 +156,21 @@ class PostImage extends PostImageDB
                 if($this->strict_ratio){
                     $imageUploaded->resize(new Box(706,311));
                 }
+
+                if($useWatermark){
+                    try{
+                        //watermark
+                        $watermark = Image::getImagine()->open(Yii::getAlias('@webroot/img/copyright.jpg'));
+                        //corner position
+                        $bottomRight = new Point($imageUploaded->getSize()->getWidth() - $watermark->getSize()->getWidth(),
+                            $imageUploaded->getSize()->getHeight() - $watermark->getSize()->getHeight());
+                        //apply watermark
+                        $imageUploaded = BaseImage::watermark($imageUploaded,$watermark,[$bottomRight->getX()-5,$bottomRight->getY()-5]);
+                    }catch (\Exception $ex){
+                        Help::log("watermark.log",$ex->getMessage());
+                    }
+                }
+
 
                 $imageUploaded->save(Yii::getAlias('@webroot/assets/cropped/'.$this->file_path),['quality' => 100]);
             }

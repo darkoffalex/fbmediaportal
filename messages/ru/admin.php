@@ -191,5 +191,8 @@ return [
     'Type' => 'Тип',
     'Need Crop' => 'Обрезать',
     'Image crop settings' => 'Настройки обрезки изображения',
-    'Strict Ratio' => 'Фиксированные пропорции'
+    'Strict Ratio' => 'Фиксированные пропорции',
+    'Refresh' => 'Обновить',
+    'Please DO NOT close this page until updating be finished!' => 'Пожалуйста, НЕ ЗАКРЫВАЙТЕ эту страницу, пока обновление не будет завершено',
+    'Need Finish' => 'Доработать пост',
 ];

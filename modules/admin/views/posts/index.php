@@ -189,11 +189,11 @@ $gridColumns = [
         'class' => 'yii\grid\ActionColumn',
         'contentOptions'=>['style'=>'width: 100px; text-align: center;'],
         'header' => Yii::t('admin','Actions'),
-        'template' => '{delete} &nbsp; {update} &nbsp {comments} &nbsp {link} &nbsp {fb_link}',
+        'template' => '{delete} &nbsp; {comments} &nbsp; {update} &nbsp; {link} &nbsp; {fb_link}',
         'buttons' => [
             'comments' => function ($url,$model,$key) {
                 /* @var $model \app\models\Post */
-                return Html::a('<span class="glyphicon glyphicon-comment"></span>', ['/admin/posts/comments', 'id' => $model->id], ['title' => Yii::t('admin','View comments'), 'data-toggle'=>'modal', 'data-target'=>'.modal']);
+                return Html::a('<span class="glyphicon glyphicon-comment"></span> <span style="font-size: 12px; position: relative; top: -3px;">('.count($model->comments).')</span>', ['/admin/posts/comments', 'id' => $model->id], ['title' => Yii::t('admin','View comments'), 'data-toggle'=>'modal', 'data-target'=>'.modal']);
             },
 
             'link' => function ($url,$model,$key) {

@@ -56,7 +56,7 @@ class PostsController extends Controller
 
 
         if(empty($post)){
-            throw new NotFoundHttpException('Страница не найдена', 404);
+            throw new NotFoundHttpException('РЎС‚СЂР°РЅРёС†Р° РЅРµ РЅР°Р№РґРµРЅР°', 404);
         }
 
         return $this->render('show',compact('post','comments','pages'));
@@ -86,7 +86,7 @@ class PostsController extends Controller
         $post = !empty($comment) ? $comment->post : $post;
 
         if(empty($post)){
-            throw new NotFoundHttpException('Не уадлось найти пост', 404);
+            throw new NotFoundHttpException('РЎС‚СЂР°РЅРёС†Р° РЅРµ РЅР°Р№РґРµРЅР°', 404);
         }
 
         $model = new Comment();

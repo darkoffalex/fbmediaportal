@@ -35,6 +35,7 @@ use Yii;
  * @property string $video_preview_fb
  * @property string $video_preview_yt
  * @property string $video_attachment_id_fb
+ * @property integer $need_finish
  *
  * @property Comment[] $comments
  * @property User $author
@@ -63,7 +64,7 @@ class PostDB extends \yii\db\ActiveRecord
     {
         return [
             [['fb_sync_id', 'fb_sync_token', 'video_key_yt', 'video_key_fb', 'voted_ips', 'offer_group_fb_id'], 'string'],
-            [['content_type_id', 'status_id', 'type_id', 'author_id', 'sticky_position_main', 'stats_after_vote', 'votes_only_authorized', 'created_by_id', 'updated_by_id', 'group_id', 'kind_id'], 'integer'],
+            [['content_type_id', 'status_id', 'type_id', 'author_id', 'sticky_position_main', 'stats_after_vote', 'votes_only_authorized', 'created_by_id', 'updated_by_id', 'group_id', 'kind_id', 'need_finish'], 'integer'],
             [['name'], 'required'],
             [['published_at', 'created_at', 'updated_at'], 'safe'],
             [['name', 'author_custom_name', 'offer_category_tag', 'offer_author_tag', 'video_preview_fb', 'video_preview_yt', 'video_attachment_id_fb'], 'string', 'max' => 255],
@@ -106,6 +107,7 @@ class PostDB extends \yii\db\ActiveRecord
             'video_preview_fb' => 'Video Preview Fb',
             'video_preview_yt' => 'Video Preview Yt',
             'video_attachment_id_fb' => 'Video Attachment Id Fb',
+            'need_finish' => 'Need Finish',
         ];
     }
 
