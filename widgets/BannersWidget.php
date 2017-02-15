@@ -14,6 +14,7 @@ class BannersWidget extends Widget
     private $banners = [];
     public $position = null;
     public $attributes = [];
+    public $imgAttributes = [];
 
     public function init()
     {
@@ -36,6 +37,6 @@ class BannersWidget extends Widget
 
     public function run()
     {
-        return !empty($this->banners) ? $this->render('banners',['banners' => $this->banners, 'attributes' => $this->attributes]) : null;
+        return !empty($this->banners) ? $this->render('banners',['banners' => $this->banners, 'attributes' => $this->attributes, 'imgAttributes' => $this->imgAttributes]) : null;
     }
 }

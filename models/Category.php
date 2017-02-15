@@ -3,8 +3,10 @@
 namespace app\models;
 
 use app\helpers\Constants;
+use app\helpers\Help;
 use Yii;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Url;
 
 /**
  * @property CategoryTrl $trl
@@ -258,7 +260,7 @@ class Category extends CategoryDB
 
     /**
      * Returns only active posts
-     * @return $this
+     * @return \yii\db\ActiveQuery
      */
     public function getPostsActive()
     {
@@ -347,5 +349,17 @@ class Category extends CategoryDB
         }
 
         return $result;
+    }
+
+    /**
+     * Returns url to category
+     * @param bool|true $title
+     * @param bool|false $abs
+     * @return string
+     */
+    public function getUrl($title = true, $abs = false)
+    {
+        $slugTitle = $title ? ArrayHelper::getValue($this->trl,'name',$this->name) : null;
+        return Url::to(['/category/show', 'id' => $this->id, 'title' => $title ? Help::slug($slugTitle) : null],$abs);
     }
 }

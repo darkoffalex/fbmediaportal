@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\helpers\Help;
 use himiklab\thumbnail\EasyThumbnailImage;
+use Imagine\Filter\Basic\Thumbnail;
 use Imagine\Image\Box;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\ImagineInterface;
@@ -84,7 +85,7 @@ class PostImage extends PostImageDB
     public function getTrl()
     {
         $lng = Yii::$app->language;
-        return $this->hasOne(LabelTrl::className(), ['post_image_id' => 'id'])->where(['lng' => $lng]);
+        return $this->hasOne(PostImageTrl::className(), ['post_image_id' => 'id'])->where(['lng' => $lng]);
     }
 
     /**
@@ -119,7 +120,7 @@ class PostImage extends PostImageDB
      * @param bool $useWatermark add watermark
      * @return null|string
      */
-    public function getCroppedUrl($w = 706, $h = 311, $useWatermark = false)
+    public function getCroppedUrl($w = 706, $h = 311, $useWatermark = true)
     {
         //if nothing to crop - return null
         if(empty($this->file_path) || !$this->hasFile()){
@@ -132,8 +133,6 @@ class PostImage extends PostImageDB
         //if not found cropped version of file
         if(!file_exists(Yii::getAlias('@webroot/assets/cropped/'.$this->file_path))) {
 
-
-
             //original file
             $imageUploaded = Image::getImagine()->open(Yii::getAlias('@webroot/uploads/img/'.$this->file_path));
 
@@ -141,10 +140,9 @@ class PostImage extends PostImageDB
             FileHelper::createDirectory(Yii::getAlias('@webroot/assets/cropped'));
 
             //if cropping not set
-            if(empty($cropSettings)){
-                $imageUploaded
-                    ->thumbnail(new Box($w,$h),ManipulatorInterface::THUMBNAIL_OUTBOUND)
-                    ->save(Yii::getAlias('@webroot/assets/cropped/'.$this->file_path),['quality' => 100]);
+            if(empty($this->crop_settings)){
+//                $imageUploaded->thumbnail(new Box($w,$h),ManipulatorInterface::THUMBNAIL_OUTBOUND);
+                $imageUploaded = Image::thumbnail($imageUploaded,$w,$h,ManipulatorInterface::THUMBNAIL_OUTBOUND);
             }else{
                 $cropSettings['x'] = $cropSettings['x'] < 0 ? 0 : $cropSettings['x'];
                 $cropSettings['y'] = $cropSettings['y'] < 0 ? 0 : $cropSettings['y'];
@@ -156,24 +154,23 @@ class PostImage extends PostImageDB
                 if($this->strict_ratio){
                     $imageUploaded->resize(new Box(706,311));
                 }
-
-                if($useWatermark){
-                    try{
-                        //watermark
-                        $watermark = Image::getImagine()->open(Yii::getAlias('@webroot/img/copyright.jpg'));
-                        //corner position
-                        $bottomRight = new Point($imageUploaded->getSize()->getWidth() - $watermark->getSize()->getWidth(),
-                            $imageUploaded->getSize()->getHeight() - $watermark->getSize()->getHeight());
-                        //apply watermark
-                        $imageUploaded = BaseImage::watermark($imageUploaded,$watermark,[$bottomRight->getX()-5,$bottomRight->getY()-5]);
-                    }catch (\Exception $ex){
-                        Help::log("watermark.log",$ex->getMessage());
-                    }
-                }
-
-
-                $imageUploaded->save(Yii::getAlias('@webroot/assets/cropped/'.$this->file_path),['quality' => 100]);
             }
+
+            if($useWatermark){
+                try{
+                    //watermark
+                    $watermark = Image::getImagine()->open(Yii::getAlias('@webroot/img/logo_wm.png'));
+                    //corner position
+                    $bottomRight = new Point($imageUploaded->getSize()->getWidth() - $watermark->getSize()->getWidth(),
+                        $imageUploaded->getSize()->getHeight() - $watermark->getSize()->getHeight());
+                    //apply watermark
+                    $imageUploaded = BaseImage::watermark($imageUploaded,$watermark,[$bottomRight->getX()-5,$bottomRight->getY()-5]);
+                }catch (\Exception $ex){
+                    Help::log("watermark.log",$ex->getMessage());
+                }
+            }
+
+            $imageUploaded->save(Yii::getAlias('@webroot/assets/cropped/'.$this->file_path),['quality' => 100]);
         }
 
         return Url::to('@web/assets/cropped/'.$this->file_path);

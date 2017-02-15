@@ -195,4 +195,5 @@ return [
     'Refresh' => 'Обновить',
     'Please DO NOT close this page until updating be finished!' => 'Пожалуйста, НЕ ЗАКРЫВАЙТЕ эту страницу, пока обновление не будет завершено',
     'Need Finish' => 'Доработать пост',
+    'Forum' => 'Форум'
 ];

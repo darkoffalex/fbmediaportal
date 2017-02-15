@@ -38,7 +38,6 @@ class CategoryController extends Controller
      */
     public function actionShow($id)
     {
-
         /* @var $category Category */
         $category = Category::find()
             ->where(['id' => (int)$id])
@@ -57,21 +56,17 @@ class CategoryController extends Controller
         $ids = array_values($ids);
         $ids[] = $category->id;
 
-        $q = Post::find()
+        /* @var $posts Post[] */
+        $posts = Post::find()
             ->alias('p')
             ->joinWith('postCategories as pc')
             ->where(['pc.category_id' => $ids])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
-            ->orderBy(new Expression('IF((pc.category_id = :cat AND sticky_position > 0), sticky_position, 2147483647) ASC, p.published_at DESC',['cat' => $category->id]));
-        $cq = clone $q;
-
-        /* @var $pages Pagination */
-        $pages = new Pagination(['totalCount' => $cq->count(), 'defaultPageSize' => 20]);
-        $posts = $q->with(['trl', 'postImages', 'categories.trl', 'comments', 'author'])
-            ->offset($pages->offset)
-            ->limit($pages->limit)
+            ->orderBy(new Expression('IF((pc.category_id = :cat AND sticky_position > 0), sticky_position, 2147483647) ASC, p.published_at DESC',['cat' => $category->id]))
+            ->with(['trl', 'postImages', 'categories.trl', 'comments', 'author'])
+            ->limit(6)
             ->all();
 
-        return $this->render('show',compact('posts','category','pages'));
+        return $this->render('show',compact('posts','category'));
     }
 }

@@ -102,11 +102,12 @@ class Post extends PostDB
      * Thumbnail URL
      * @param int $w
      * @param int $h
+     * @param bool $placeholder
      * @return string
      */
-    public function getThumbnailUrl($w = 90, $h = 70)
+    public function getThumbnailUrl($w = 90, $h = 70, $placeholder = true)
     {
-        return !empty($this->postImages[0]) ? $this->postImages[0]->getThumbnailUrl($w,$h) : EasyThumbnailImage::thumbnailFileUrl(Yii::getAlias('@webroot/img/no_image.jpg'),$w,$h);
+        return !empty($this->postImages[0]) ? $this->postImages[0]->getThumbnailUrl($w,$h) : ($placeholder ? "http://placehold.it/{$w}x{$h}" : EasyThumbnailImage::thumbnailFileUrl(Yii::getAlias('@webroot/img/no_image.jpg'),$w,$h));
     }
 
     /**
@@ -124,6 +125,28 @@ class Post extends PostDB
         }
     }
 
+    /**
+     * First's image URL (extended functionality, crop, thumbnail ability)
+     * @param $w
+     * @param $h
+     * @param bool $watermark
+     * @param bool $placeholder
+     * @return null|string
+     */
+    public function getFirstImageUrlEx($w, $h, $watermark = true, $placeholder = true)
+    {
+        if(empty($this->postImages[0]->file_path) && empty($this->postImages[0]->file_url)){
+            return $placeholder ? "http://placehold.it/{$w}x{$h}" : Url::to('@web/img/no_image.jpg');
+        }elseif(!empty($this->postImages[0]->file_path)){
+            if($w == 0 || $h == 0){
+                return Url::to('@web/uploads/img/'.$this->postImages[0]->file_path);
+            }else{
+                return $this->postImages[0]->need_crop ? $this->postImages[0]->getCroppedUrl($w, $h, $watermark) : $this->postImages[0]->getThumbnailUrl($w, $h);
+            }
+        }else{
+            return $this->postImages[0]->file_url;
+        }
+    }
 
     /**
      * Returns url to post

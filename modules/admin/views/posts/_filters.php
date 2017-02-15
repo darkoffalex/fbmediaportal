@@ -88,6 +88,7 @@ use kartik\daterange\DateRangePicker;
             <?= $form->field($model, 'kind_id')->dropDownList([
                 Constants::KIND_INTERESTING_CONTENT => Yii::t('admin','Useful content'),
                 Constants::KIND_INTERESTING_COMMENTS => Yii::t('admin','Interesting discussion'),
+                Constants::KIND_FORUM => Yii::t('admin','Forum'),
             ],['prompt' => ''])->label(Yii::t('admin','Type'))->error(false); ?>
         </div>
         <div class="col-md-2">

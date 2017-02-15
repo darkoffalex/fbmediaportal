@@ -44,6 +44,7 @@ class Constants
     //Types of placement
     const KIND_INTERESTING_CONTENT = 1;
     const KIND_INTERESTING_COMMENTS = 2;
+    const KIND_FORUM = 3;
 
     //Types of banners
     const BANNER_TYPE_IMAGE = 1;

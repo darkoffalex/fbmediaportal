@@ -1,0 +1,24 @@
+.reloading-comments
+{
+    background: url('../images/have-ul-dark@2x.png') center left no-repeat;
+    background-size: 12px;
+    padding-left: 20px;
+}
+
+.contentComments__card img,
+.contentComments__card__child img
+{
+    background-image: url("../../img/no_user.png");
+    background-size: contain;
+}
+
+.child-comment-text.has-error,
+.form-control.has-error{
+    border-color: red;
+}
+
+.btn.btn-small
+{
+    padding: 0.2rem 0.2rem;
+    font-size: 0.8rem;
+}

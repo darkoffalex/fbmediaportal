@@ -1,5 +1,5 @@
 <?php
 return [
-    'Login with Facebook' => 'Авторизация при помощи Facebook'
+    'Login with Facebook' => '<i class="ico ico-login"></i><span>Войти <br> на сайт</span>'
 ];
 ?>

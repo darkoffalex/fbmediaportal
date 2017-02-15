@@ -36,33 +36,17 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        $stickyPosts = Post::find()
-            ->with(['trl','postImages'])
+        /* @var $posts Post[] */
+        $posts = Post::find()
+            ->alias('p')
+            ->with(['trl','postImages.trl', 'author', 'comments'])
             ->where(['status_id' => Constants::STATUS_ENABLED])
-            ->orderBy(new Expression('IF(sticky_position_main, sticky_position_main, 2147483647) ASC, created_at DESC'))
-            ->limit(4)
-            ->all();
-
-
-        $categories = Category::find()
-            ->with([
-                'trl',
-                'postsActive',
-                'postsActive.trl',
-                'postsActive.postImages',
-                'children.postsActive',
-                'children.postsActive.trl',
-                'children.postsActive.postImages',
-                'children.children.postsActive',
-                'children.children.postsActive.trl',
-                'children.children.postsActive.postImages'
-            ])
-            ->where(['status_id' => Constants::STATUS_ENABLED, 'parent_category_id' => 0])
-            ->orderBy('priority ASC')
+            ->andWhere(new Expression('EXISTS (SELECT img.id FROM post_image img WHERE img.post_id = p.id)'))
+            ->orderBy(new Expression('IF(sticky_position_main, sticky_position_main, 2147483647) ASC, published_at DESC'))
             ->limit(6)
             ->all();
 
-        return $this->render('index',compact('stickyPosts','categories'));
+        return $this->render('index', compact('posts'));
     }
 
     /**

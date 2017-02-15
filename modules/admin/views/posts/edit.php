@@ -218,6 +218,7 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                     <?= $form->field($model, 'kind_id')->dropDownList([
                         Constants::KIND_INTERESTING_CONTENT => Yii::t('admin','Useful content'),
                         Constants::KIND_INTERESTING_COMMENTS => Yii::t('admin','Interesting discussion'),
+                        Constants::KIND_FORUM => Yii::t('admin','Forum')
                     ],['prompt' => '']); ?>
 
 

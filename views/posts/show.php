@@ -1,134 +1,127 @@
 <?php
-
-use app\widgets\MostCommentedWidget;
-use app\widgets\LatestPostsWidget;
-use app\widgets\SearchFormWidget;
+use yii\helpers\Url;
+use yii\helpers\Html;
+use app\widgets\MainMenuWidget;
+use app\widgets\CarouselWidget;
 use app\widgets\BannersWidget;
-use app\helpers\Help;
-use yii\helpers\ArrayHelper;
-use app\widgets\RelatedPostsWidget;
 
-/* @var $this yii\web\View */
-/* @var $controller \app\controllers\PostsController */
+/* @var $this \yii\web\View */
 /* @var $user \app\models\User */
+/* @var $controller \app\controllers\PostsController */
 /* @var $post \app\models\Post */
 /* @var $comments \app\models\Comment[] */
-/* @var $pages \yii\data\Pagination */
 
-$this->title = $post->trl->name;
-$controller = $this->context;
 $user = Yii::$app->user->identity;
-
-$this->registerCssFile('@web/frontend/css/comments.css');
-use yii\helpers\Url;
+$controller = $this->context;
 ?>
 
-<section id="contentSection">
-    <div class="row">
-        <div class="col-lg-8 col-md-8 col-sm-8">
-            <div class="left_content">
-                <div class="single_page">
-
-                    <ol class="breadcrumb">
-                        <li><a href="<?= Url::to(['/site/index']); ?>">Главная</a></li>
-                        <?php $category = !empty($post->categories) ? $post->categories[0] : null; ?>
-                        <?php if(!empty($category)): ?>
-                            <?php foreach($category->getBreadCrumbs(true) as $id => $name): ?>
-                                <li><a href="<?= Url::to(['category/show','id' => $id, 'title' => Help::slug($name)]); ?>"><?= $name; ?></a></li>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </ol>
-
-                    <h1><?= $post->trl->name; ?></h1>
-                    <div class="post_commentbox">
-                        <?php foreach($post->categories as $category): ?>
-                            <?php $name = ArrayHelper::getValue($category->trl,'name',$category->name); ?>
-                            <a href="<?= Url::to(['category/show','id' => $category->id, 'title' => Help::slug($name)]); ?>"><i class="fa fa-tags"></i><?= $category->trl->name; ?></a>
-                        <?php endforeach; ?>
-                        <span><i class="fa fa-calendar"></i><?= $post->published_at; ?></span>
-                    </div>
-                    <div class="single_page_content">
-                        <?php if(!empty($post->postImages)): ?>
-                            <img class="img-center" src="<?= $post->postImages[0]->getCroppedUrl(); ?>" alt="">
-                        <?php endif; ?>
-
-                        <?php if(!empty($post->trl->small_text)): ?>
-                            <blockquote><?= $post->trl->small_text; ?></blockquote>
-                        <?php endif; ?>
-
-                        <?= !empty($post->trl->text) ? $post->trl->text : ''; ?>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h2>Комментарии <i class="fa fa-comments"></i></h2>
-                            <section class="comment-list">
-                                <!-- First Comment -->
-                                <?php foreach($comments as $comment): ?>
-                                    <article class="row">
-                                        <div class="col-md-2 col-sm-2 <?php if(!empty($comment->parent)): ?> col-md-offset-1 <?php endif; ?> hidden-xs">
-                                            <figure class="thumbnail">
-                                                <img class="img-responsive" src="<?= $comment->author->getAvatar(); ?>" />
-                                                <figcaption class="text-center"><?= $comment->author->name.' '.$comment->author->surname; ?></figcaption>
-                                            </figure>
-                                        </div>
-                                        <?php $size = !empty($comment->parent) ? '9' : '10';  ?>
-                                        <div class="col-md-<?= $size; ?> col-sm-<?= $size; ?>">
-                                            <div class="panel panel-default arrow left">
-                                                <div class="panel-body">
-                                                    <header class="text-left">
-                                                        <div class="comment-user"><i class="fa fa-user"></i> <?= $comment->author->name.''.$comment->author->surname; ?></div>
-                                                        <time class="comment-date" datetime="<?= $comment->created_at; ?>"><i class="fa fa-clock-o"></i> <?= substr($comment->created_at,0,16); ?></time>
-                                                    </header>
-                                                    <div class="comment-post">
-                                                        <p>
-                                                            <?= $comment->text; ?>
-                                                        </p>
-                                                    </div>
-                                                    <?php if(empty($comment->parent)): ?>
-                                                        <p class="text-right"><a href="<?= Url::to(['/posts/add-comment','cid' => $comment->id]); ?>" data-toggle="modal" data-target=".modal" class="btn btn-default btn-sm"><i class="fa fa-reply"></i> ответить</a></p>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </article>
-                                <?php endforeach; ?>
-                            </section>
-
-                            <div class="row clearfix">
-                                <div class="col-md-9 col-sm-12">
-                                    <?= \yii\widgets\LinkPager::widget(['pagination' => $pages]); ?>
-                                </div>
-                                <div class="col-md-3 col-sm-12">
-                                    <a href="<?= Url::to(['/posts/add-comment','pid' => $post->id]); ?>" data-toggle="modal" data-target=".modal" class="btn btn-default pull-right" style="margin: 20px 0;"><i class="fa fa-comment"></i> добавть</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <?php if(!empty($post->categories[0]->posts) && count($post->categories[0]->posts) > 1): ?>
-                        <?php /* @var $related \app\models\Post[] */ ?>
-                        <?php $related = array_slice($post->categories[0]->posts,0,3); ?>
-                        <div class="related_post">
-
-                            <h2>Возможно вас заинтересует <i class="fa fa-thumbs-o-up"></i></h2>
-
-                            <?= RelatedPostsWidget::widget(['post' => $post]); ?>
-                        </div>
-                    <?php endif; ?>
+    <!-- BANNER MOBILE::START-->
+    <section class="topBanner hidden-sm-up">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-12 text-xs-center">
+                    <img src="<?= Url::to('@web/frontend/images/topBanner@2x.png'); ?>">
                 </div>
             </div>
         </div>
-
-        <div class="col-lg-4 col-md-4 col-sm-4">
-            <aside class="right_content">
-                <?= SearchFormWidget::widget(); ?>
-                <?= LatestPostsWidget::widget(); ?>
-                <div class="single_sidebar wow fadeInDown animated" style="visibility: visible; animation-name: fadeInDown;">
-                    <h2><span>Баннеры</span></h2>
-                    <?= BannersWidget::widget(['position' => 'RIGHT', 'attributes' => ['class' => 'sideAdd']]); ?>
-                </div>
-            </aside>
+    </section>
+    <!-- OWL DESKTOP::START-->
+    <section class="topCarousel hidden-xs-down">
+        <div id="owlTop">
+            <?= CarouselWidget::widget(['filtration' => null]); ?>
         </div>
-    </div>
-</section>
+    </section>
+
+    <!-- CONTENT::START-->
+    <section class="content">
+        <div class="container">
+            <div class="row">
+                <div class="hidden-md-down col-lg-2">
+                    <?= MainMenuWidget::widget(); ?>
+                </div>
+
+                <div class="col-sm-8 col-lg-7 no-pad-r">
+                    <!-- cards-->
+                    <div class="content__card content__card--inner content__card--wide">
+                        <div class="content__card__title"><?= $post->trl->name; ?></div>
+                        <div class="content__card__info"><a href="#"><?= $post->author->name.' '.$post->author->surname; ?></a><span>• <?= substr($post->published_at,0,16); ?></span></div>
+
+                        <div class="content__card__crumbs">
+                            <a href="<?= Url::to(['site/index']); ?>">Главная</a><span class="crumb-seprator">-</span><?php if(!empty($post->categories[0])): ?><?php $crumbs = $post->categories[0]->getBreadCrumbs(true); ?><?php foreach ($crumbs as $cid => $name): ?><a href="<?= Url::to(['category/show', 'id' => $cid, 'title' => \app\helpers\Help::slug($name)]); ?>"><?= $name; ?></a><span class="crumb-seprator">-</span><?php endforeach; ?><?php endif; ?><span class="current"><?= $post->trl->name; ?></span>
+                        </div>
+
+                        <div class="content__card__share">
+                            <span>Поделиться</span>
+                        </div>
+
+                        <img class="img-fluid" src="<?= $post->getFirstImageUrlEx(706,311); ?>">
+
+                        <div class="content__card__pageContent">
+                            <?= $post->trl->text; ?>
+                        </div>
+
+                        <div class="content__card__share">
+                            <span>Поделиться</span>
+                        </div>
+
+
+                        <!-- Comment section-->
+                        <div class="contentComments" data-current-page="1" data-postload="<?= Url::to(['posts/comment-post-load', 'id' => $post->id]); ?>">
+                            <h2>Комментарии</h2>
+
+                            <?php if(!Yii::$app->user->isGuest): ?>
+                            <form method="post" class="contentComments__post">
+                                <img class="img-fluid" src="<?= $user->getAvatar(); ?>">
+                                <div class="form-group">
+                                    <label for="comment">Сообщение</label>
+                                    <?= Html::hiddenInput(Yii::$app->getRequest()->csrfParam,Yii::$app->getRequest()->getCsrfToken()); ?>
+                                    <textarea name="Comment[text]" id="comment" class="form-control"></textarea>
+                                </div>
+                                <button data-no-empty=".contentComments__post" class="btn" type="submit">Отправить</button>
+                            </form>
+                            <?php endif; ?>
+
+                            <?= $this->render('_comments_load',['comments' => $comments]); ?>
+                        </div>
+                    </div>
+                </div>
+
+                <!--sidebar-->
+                <div class="col-sm-4 col-lg-3 no-pad-l">
+                    <div class="content__sidebar content__sidebar--top">
+                        <div class="content__sidebar__metrics text-xs-center">
+                            <div class="content__sidebar__metricCurrency"><span>USD 59.3</span><i class="ico ico-growth-up"></i></div>
+                            <div class="content__sidebar__metricCurrency"><span>EUR 63.12</span><i class="ico ico-growth-down"></i></div>
+                        </div>
+                        <div class="content__sidebar__metrics">
+                            <div class="content__sidebar__metricWeather"><span>Погода в <b>Анталии</b></span>
+                                <div class="content__sidebar__metricWeather__row">
+                                    <div class="content__sidebar__metricWeather__left"><i class="ico ico-weather-rain"></i></div>
+                                    <div class="content__sidebar__metricWeather__right"><span>+31 C</span>
+                                        <p>Временами дожди</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="content__sidebar__metrics">
+                            <div class="content__sidebar__metricWeather"><span>Погода в <b>Стамбуле</b></span>
+                                <div class="content__sidebar__metricWeather__row">
+                                    <div class="content__sidebar__metricWeather__left"><i class="ico ico-weather-rain"></i></div>
+                                    <div class="content__sidebar__metricWeather__right"><span>+31 C</span>
+                                        <p>Временами дожди</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="content__sidebar__banner">
+                            <?= BannersWidget::widget(['position' => 'BOTTOM_RIGHT_1','imgAttributes' => ['class' => 'img-fluid']]); ?>
+                        </div>
+
+                        <div class="content__sidebar__banner">
+                            <?= BannersWidget::widget(['position' => 'BOTTOM_RIGHT_2','imgAttributes' => ['class' => 'img-fluid']]); ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>

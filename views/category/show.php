@@ -1,134 +1,226 @@
 <?php
-
-use app\widgets\MostCommentedWidget;
-use app\widgets\LatestPostsWidget;
+use app\widgets\MainMenuWidget;
+use app\widgets\CarouselWidget;
 use app\widgets\BannersWidget;
-use app\widgets\SearchFormWidget;
-use app\helpers\Help;
-use yii\helpers\ArrayHelper;
-use app\widgets\RelatedPostsWidget;
+use app\widgets\LatestPostsWidget;
+use app\widgets\PopularPostWidget;
+use app\widgets\TurkeyPostsWidget;
+use app\widgets\ForumPostsWidget;
 
-/* @var $this yii\web\View */
-/* @var $controller \app\controllers\CategoryController */
-/* @var $user \app\models\User */
+/* @var $this \yii\web\View */
+/* @var $user \yii\web\User */
+/* @var $controller \app\controllers\SiteController */
 /* @var $posts \app\models\Post[] */
 /* @var $category \app\models\Category */
-/* @var $pages \yii\data\Pagination */
 
-$this->title = $category->trl->name;
-$this->registerMetaTag(['name' => 'description', 'content' => $category->trl->meta_description]);
-$this->registerMetaTag(['name' => 'keywords', 'content' => $category->trl->meta_keywords]);
-$controller = $this->context;
 $user = Yii::$app->user->identity;
-
-$this->registerCssFile('@web/frontend/css/comments.css');
-use yii\helpers\Url;
+$controller = $this->context;
 ?>
 
-<section id="contentSection">
-    <div class="row">
-        <div class="col-lg-8 col-md-8 col-sm-8">
-            <div class="left_content">
-                <div class="single_page">
+    <!-- BANNER MOBILE::START-->
+    <section class="topBanner hidden-sm-up">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-12 text-xs-center">
+                    <?= BannersWidget::widget(['position' => 'TOP_BANNER']); ?>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                    <ol class="breadcrumb">
-                        <li><a href="<?= Url::to(['/site/index']); ?>">Главная</a></li>
-                        <?php if(!empty($category)): ?>
-                            <?php foreach($category->getBreadCrumbs(true) as $id => $name): ?>
-                                <li><a href="<?= Url::to(['category/show','id' => $id, 'title' => Help::slug($name)]); ?>"><?= $name; ?></a></li>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </ol>
+    <!-- OWL DESKTOP::START-->
+    <section class="topCarousel hidden-xs-down">
+        <div id="owlTop">
+            <?= CarouselWidget::widget(['filtration' => null]); ?>
+        </div>
+    </section>
 
-                    <h1><?= $category->trl->name; ?></h1>
-                    <?php if(!empty($posts)): ?>
-                        <br>
-                        <span>Всего материалов : <?= $pages->totalCount; ?></span>
-                    <?php endif; ?>
+    <!-- CONTENT::START-->
+    <section class="content">
+        <div class="container">
+            <div class="row">
+                <div class="hidden-md-down col-lg-2">
+                    <?= MainMenuWidget::widget(); ?>
+                </div>
 
-                    <?php if(!empty($category->children)): ?>
-                        <div class="post_commentbox">
-                            <?php foreach($category->children as $child): ?>
-                                <?php $name = ArrayHelper::getValue($child->trl,'name',$child->name); ?>
-                                <a href="<?= Url::to(['category/show','id' => $child->id, 'title' => Help::slug($name)]); ?>"><i class="fa fa-folder"></i><?= $child->trl->name; ?></a>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php else: ?>
-                        <div class="post_commentbox">
-                            <span>Нет подрубрик</span>
-                        </div>
-                    <?php endif; ?>
+                <div class="col-sm-8 col-lg-7 no-pad-r">
 
-                    <div class="row">
-                        <?php if(!empty($posts)): ?>
-                            <?php foreach($posts as $post): ?>
-                                <div class="col-md-12 col-sm-12">
-                                    <ul class="business_catgnav wow fadeInDown animated" style="visibility: visible; animation-name: fadeInDown; border-bottom: 1px solid #ddd;">
-                                        <li>
-                                            <figure class="bsbig_fig" style="padding-bottom: 10px;">
+                    <!-- cards-->
 
-                                                <figcaption>
-                                                    <a href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
-                                                </figcaption>
+                    <?php /* @var $slicedPart1 \app\models\Post[] */ ?>
+                    <?php $slicedPart1 = array_slice($posts,0,3); ?>
 
-                                                <div class="post_commentbox" style="margin: 0;padding: 0 0 5px 0;border: none;">
-                                                    <span><i class="fa fa-calendar"></i><?= substr($post->published_at,0,16); ?></span>
-                                                    <span><i class="fa fa-comment"></i><?= count($post->comments); ?></span>
+                    <?php foreach ($slicedPart1 as $index => $post): ?>
 
-                                                    <?php if(!empty($post->author)): ?>
-                                                        <a href="#"><i class="fa fa-user"></i><?= $post->author->name.' '.$post->author->surname; ?></a>
-                                                    <?php else: ?>
-                                                        <span><i class="fa fa-user"></i><?= $post->author_custom_name; ?></span>
-                                                    <?php endif; ?>
-
-                                                    <?php foreach($post->categories as $c): ?>
-                                                        <?php $name = ArrayHelper::getValue($c->trl,'name',$c->name); ?>
-                                                        <a href="<?= Url::to(['category/show','id' => $c->id, 'title' => Help::slug($name)]); ?>"><i class="fa fa-folder"></i><?= $c->trl->name; ?></a>
-                                                    <?php endforeach; ?>
-                                                </div>
-
-                                                <div class="row">
-                                                    <?php if(!empty($post->postImages)): ?>
-                                                        <div class="col-md-4 col-sm-4">
-                                                            <a href="<?= $post->getUrl(); ?>" class="featured_img">
-                                                                <img class="img-responsive img-thumbnail" alt="" src="<?= $post->getThumbnailUrl(425,283); ?>">
-                                                                <span class="overlay"></span>
-                                                            </a>
-                                                        </div>
-                                                    <?php endif; ?>
-                                                    <?php $col = !empty($post->postImages) ? 8 : 12; ?>
-                                                    <div class="col-md-<?= $col; ?> col-sm-<?= $col; ?>">
-                                                        <p><?= $post->trl->small_text; ?></p>
-                                                    </div>
-                                                </div>
-                                            </figure>
-                                        </li>
-                                    </ul>
+                        <?php if($index == 0): ?>
+                            <div class="content__card content__card--wide">
+                                <div class="heading"><?= $category->trl->name; ?></div>
+                                <a href="<?= $post->getUrl(); ?>"><img width="706" class="img-fluid" src="<?= $post->getFirstImageUrlEx(706,311); ?>"></a>
+                                <?php if(!empty($post->postImages[0]->trl->signature)): ?>
+                                    <div class="content__card__copy"><?= $post->postImages[0]->trl->signature; ?></div>
+                                <?php endif; ?>
+                                <a class="content__card__title" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
+                                <div class="content__card__intro">
+                                    <p><?= $post->trl->small_text; ?></p>
                                 </div>
-                            <?php endforeach; ?>
+                                <div class="content__card__info"><a href="#"><?= $post->author->name.' '.$post->author->surname; ?></a><span>• <?= substr($post->published_at,0,16); ?></span></div>
+                                <div class="content__card__comments"><span><?= count($post->comments); ?> комментариев</span></div>
+                            </div>
                         <?php else: ?>
-                            <div class="col-md-12 col-sm-12">
-                                <p>Нет материалов</p>
+                            <div class="content__card">
+                                <div class="content__card__image">
+                                    <a href="<?= $post->getUrl(); ?>"><img width="484" class="img-fluid" src="<?= $post->getThumbnailUrl(484,276); ?>"></a>
+                                </div>
+
+                                <a class="content__card__title hidden-sm-up" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
+
+                                <div class="content__card__content">
+                                    <a class="content__card__title hidden-xs-down" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
+                                    <div class="content__card__intro">
+                                        <p><?= $post->trl->small_text; ?></p>
+                                        <a href="#"><?= $post->author->name.' '.$post->author->surname; ?></a><span>• <?= substr($post->published_at,0,16); ?></span>
+                                    </div>
+                                </div>
                             </div>
                         <?php endif; ?>
-                    </div>
 
-                    <div class="row">
-                        <?= \yii\widgets\LinkPager::widget(['pagination' => $pages]); ?>
+                        <?php if($index == 0): ?>
+                            <!-- OWL DESKTOP::START-->
+                            <section class="topCarousel hidden-sm-up">
+                                <div id="owlTopMobile">
+                                    <?= CarouselWidget::widget(['filtration' => null]); ?>
+                                </div>
+                            </section>
+                        <?php endif; ?>
+
+                    <?php endforeach; ?>
+                </div>
+
+                <!--sidebar-->
+                <div class="col-sm-4 col-lg-3 no-pad-l">
+                    <div class="content__sidebar content__sidebar--top">
+                        <div class="content__sidebar__metrics text-xs-center">
+                            <div class="content__sidebar__metricCurrency"><span>USD 59.3</span><i class="ico ico-growth-up"></i></div>
+                            <div class="content__sidebar__metricCurrency"><span>EUR 63.12</span><i class="ico ico-growth-down"></i></div>
+                        </div>
+                        <div class="content__sidebar__metrics">
+                            <div class="content__sidebar__metricWeather"><span>Погода в <b>Анталии</b></span>
+                                <div class="content__sidebar__metricWeather__row">
+                                    <div class="content__sidebar__metricWeather__left"><i class="ico ico-weather-rain"></i></div>
+                                    <div class="content__sidebar__metricWeather__right"><span>+31 C</span>
+                                        <p>Временами дожди</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="content__sidebar__metrics">
+                            <div class="content__sidebar__metricWeather"><span>Погода в <b>Стамбуле</b></span>
+                                <div class="content__sidebar__metricWeather__row">
+                                    <div class="content__sidebar__metricWeather__left"><i class="ico ico-weather-rain"></i></div>
+                                    <div class="content__sidebar__metricWeather__right"><span>+31 C</span>
+                                        <p>Временами дожди</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="content__sidebar__banner">
+                            <a href="#">
+                                <?= BannersWidget::widget(['position' => 'TOP_RIGHT_1','imgAttributes' => ['class' => 'img-fluid']]); ?>
+                            </a>
+                        </div>
+
+                        <div class="content__sidebar__banner">
+                            <a href="#">
+                                <?= BannersWidget::widget(['position' => 'TOP_RIGHT_2','imgAttributes' => ['class' => 'img-fluid']]); ?>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </section>
 
-        <div class="col-lg-4 col-md-4 col-sm-4">
-            <aside class="right_content">
-                <?= SearchFormWidget::widget(); ?>
-                <?= LatestPostsWidget::widget(); ?>
-                <div class="single_sidebar wow fadeInDown animated" style="visibility: visible; animation-name: fadeInDown;">
-                    <h2><span>Баннеры</span></h2>
-                    <?= BannersWidget::widget(['position' => 'RIGHT', 'attributes' => ['class' => 'sideAdd']]); ?>
+    <!--CATEGORIES-->
+    <section class="categories">
+        <div class="container">
+            <div class="row">
+                <div class="hidden-md-down col-lg-2"></div>
+                <div class="col-md-12 col-lg-10">
+                    <div class="row">
+                        <?= LatestPostsWidget::widget(['label' => 'Последнее']); ?>
+                        <?= PopularPostWidget::widget(['label' => 'Популярное']); ?>
+                        <?= TurkeyPostsWidget::widget(['label' => 'Полезное о Турции']); ?>
+                    </div>
                 </div>
-            </aside>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
+
+    <!-- CONTENT::START-->
+    <section class="content">
+        <div class="container">
+            <div class="row">
+                <div class="hidden-md-down col-lg-2"></div>
+                <div class="col-sm-8 col-lg-7 no-pad-r">
+
+                    <?php /* @var $slicedPart1 \app\models\Post[] */ ?>
+                    <?php $slicedPart1 = array_slice($posts,3,3); ?>
+
+                    <?php foreach ($slicedPart1 as $index => $post): ?>
+                        <?php if($index == 0): ?>
+                            <div class="content__card content__card--wide">
+                                <a href="<?= $post->getUrl(); ?>"><img width="706" class="img-fluid" src="<?= $post->getFirstImageUrlEx(706,311); ?>"></a>
+                                <?php if(!empty($post->postImages[0]->trl->signature)): ?>
+                                    <div class="content__card__copy"><?= $post->postImages[0]->trl->signature; ?></div>
+                                <?php endif; ?>
+                                <a class="content__card__title" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
+                                <div class="content__card__intro">
+                                    <p><?= $post->trl->small_text; ?></p>
+                                </div>
+                                <div class="content__card__info"><a href="#"><?= $post->author->name.' '.$post->author->surname; ?></a><span>• <?= substr($post->published_at,0,16); ?></span></div>
+
+                                <?php if($post->content_type_id != \app\helpers\Constants::CONTENT_TYPE_VIDEO): ?>
+                                    <div class="content__card__comments"><span><?= count($post->comments); ?> комментариев</span></div>
+                                <?php else: ?>
+                                    <div class="content__card__comments"><span><?= count($post->comments); ?></span></div>
+                                <?php endif; ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="content__card">
+                                <div class="content__card__image">
+                                    <a href="<?= $post->getUrl(); ?>"><img width="484" class="img-fluid" src="<?= $post->getThumbnailUrl(484,276); ?>"></a>
+                                </div>
+
+                                <a class="content__card__title hidden-sm-up" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
+
+                                <div class="content__card__content">
+                                    <a class="content__card__title hidden-xs-down" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
+                                    <div class="content__card__intro">
+                                        <p><?= $post->trl->small_text; ?></p>
+                                        <a href="#"><?= $post->author->name.' '.$post->author->surname; ?></a><span>• <?= substr($post->published_at,0,16); ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+
+                </div>
+                <!--sidebar-->
+                <div class="col-sm-4 col-lg-3 no-pad-l hidden-xs-down">
+                    <div class="content__sidebar">
+                        <div class="content__sidebar__banner">
+                            <?= BannersWidget::widget(['position' => 'BOTTOM_RIGHT_1','imgAttributes' => ['class' => 'img-fluid']]); ?>
+                        </div>
+
+                        <div class="content__sidebar__banner">
+                            <?= BannersWidget::widget(['position' => 'BOTTOM_RIGHT_2','imgAttributes' => ['class' => 'img-fluid']]); ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--CARDS-->
+
+<?= ForumPostsWidget::widget(['label' => 'Популярные материалы']); ?>

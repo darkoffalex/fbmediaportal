@@ -43,34 +43,129 @@ class PostsController extends Controller
      */
     public function actionShow($id)
     {
+        /* @var $user User */
+        $user = Yii::$app->user->identity;
+
         //getting post
         /* @var $post Post */
-        $post = Post::find()->with(['categories','trl'])->where(['id' => $id])->one();
-
-        //getting comments
-        /* @var $comments Comment */
-        $q = Comment::find()->where(['post_id' => $post->id])->orderBy(new Expression('IF(answer_to_id, answer_to_id, id), created_at ASC'));
-        $cq = clone $q;
-        $pages = new Pagination(['totalCount' => $cq->count(), 'defaultPageSize' => 20]);
-        $comments = $q ->with(['author','parent'])->offset($pages->offset)->limit($pages->limit)->all();
+        $post = Post::find()->with([
+            'trl',
+            'categories.trl',
+            'categories.parent.trl',
+            'categories.parent.parent.trl',
+            'author',
+            'postImages',
+        ])->where(['id' => $id, 'status_id' => Constants::STATUS_ENABLED])->one();
 
 
         if(empty($post)){
-            throw new NotFoundHttpException('Страница не найдена', 404);
+            throw  new NotFoundHttpException('Страница не найдена',404);
         }
 
-        return $this->render('show',compact('post','comments','pages'));
+        //C O M M E N T  A D D I N G
+        $newComment = new Comment();
+        $newComment->isFrontend = true;
+
+        if(Yii::$app->request->isPost && $newComment->load(Yii::$app->request->post())){
+            $newComment->post_id = $post->id;
+            $newComment->author_id = Yii::$app->user->id;
+            if(!empty($newComment)) $newComment->answer_to_id = $newComment->id;
+
+            if($newComment->validate()){
+                $newComment->created_by_id = Yii::$app->user->id;
+                $newComment->updated_by_id = Yii::$app->user->id;
+                $newComment->created_at = date('Y-m-d h:i:s',time());
+                $newComment->updated_at = date('Y-m-d h:i:s',time());
+
+                if($newComment->save()){
+                    $post->updated_at = date('Y-m-d h:i:s',time());
+                    $post->updated_by_id = Yii::$app->user->id;
+                    $post->update();
+
+                    $user->refresh();
+                    $user->counter_comments = count($user->comments);
+                    $user->update();
+
+                    if(!empty($user->fb_user_id)){
+                        //TODO: Apply changes in FB
+                    }
+                }
+            }
+        }
+
+        $q = Comment::find()
+            ->where('answer_to_id IS NULL OR answer_to_id = 0')
+            ->andWhere(['post_id' => $post->id])
+            ->with([
+                'author',
+                'children',
+            ])
+            ->orderBy('created_at ASC');
+
+        $cq = clone $q;
+        $pages = new Pagination(['totalCount' => $cq->count(), 'defaultPageSize' => 10]);
+        $comments = $q->offset($pages->offset)->limit($pages->limit)->all();
+
+        return $this->render('show',compact('post','comments','newComment'));
+    }
+
+
+    /**
+     * Loads additional children comments
+     * @param $id
+     * @return string
+     */
+    public function actionChildrenComments($id)
+    {
+        $comments = Comment::find()
+            ->where('answer_to_id = :id', ['id' => $id])
+            ->with([
+                'author',
+                'children',
+            ])
+            ->orderBy('created_at ASC')
+            ->all();
+
+        return $this->renderPartial('_comments_children', compact('comments'));
+    }
+
+    /**
+     * Load comments
+     * @param $id
+     * @param $page
+     * @return string
+     */
+    public function actionCommentPostLoad($id,$page = 1)
+    {
+        $q = Comment::find()
+            ->where('answer_to_id IS NULL OR answer_to_id = 0')
+            ->andWhere(['post_id' => $id])
+            ->with([
+                'author',
+                'children',
+            ])
+            ->orderBy('created_at ASC');
+
+        $cq = clone $q;
+        $pages = new Pagination(['totalCount' => $cq->count(), 'defaultPageSize' => 10]);
+
+        if($page > $pages->pageCount){
+            return null;
+        }
+
+        $comments = $q->offset($pages->offset)->limit($pages->limit)->all();
+
+        return $this->renderPartial('_comments_load', compact('comments'));
     }
 
     /**
      * Leaving comment for post
-     * @param null $pid
      * @param null $cid
      * @return array|string
      * @throws NotFoundHttpException
      * @throws \Exception
      */
-    public function actionAddComment($pid = null,$cid = null)
+    public function actionAddChildComment($cid)
     {
         if(Yii::$app->user->isGuest){
             return $this->renderPartial('_please_login');
@@ -79,11 +174,9 @@ class PostsController extends Controller
         /* @var $post Post */
         /* @var $comment Comment */
         /* @var $user User */
-        $post = Post::find()->where(['id' => $pid])->one();
         $comment = Comment::find()->where(['id' => $cid])->one();
         $user = Yii::$app->user->identity;
-
-        $post = !empty($comment) ? $comment->post : $post;
+        $post = $comment->post;
 
         if(empty($post)){
             throw new NotFoundHttpException('Страница не найдена', 404);
@@ -91,12 +184,6 @@ class PostsController extends Controller
 
         $model = new Comment();
         $model->isFrontend = true;
-
-        //ajax validation
-        if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
-            return ActiveForm::validate($model);
-        }
 
         if(Yii::$app->request->isPost && $model->load(Yii::$app->request->post())){
             $model->post_id = $post->id;
@@ -121,12 +208,10 @@ class PostsController extends Controller
                     if(!empty($user->fb_user_id)){
                         //TODO: Apply changes in FB
                     }
-
-                    $this->redirect(Yii::$app->request->referrer);
                 }
             }
         }
 
-        return $this->renderAjax('_comment',compact('model','post','comment'));
+        return $this->actionChildrenComments($cid);
     }
 }
