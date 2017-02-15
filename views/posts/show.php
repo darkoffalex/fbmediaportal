@@ -54,7 +54,9 @@ $controller = $this->context;
                             <span>Поделиться</span>
                         </div>
 
-                        <img class="img-fluid" src="<?= $post->getFirstImageUrlEx(706,311); ?>">
+                        <div>
+                            <img class="img-fluid" src="<?= $post->getFirstImageUrlEx(706,311); ?>">
+                        </div>
 
                         <div class="content__card__pageContent">
                             <?= $post->trl->text; ?>

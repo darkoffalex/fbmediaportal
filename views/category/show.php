@@ -15,6 +15,20 @@ use app\widgets\ForumPostsWidget;
 
 $user = Yii::$app->user->identity;
 $controller = $this->context;
+$this->title = $category->trl->name;
+
+//meta tags
+$this->registerMetaTag(['name' => 'description', 'content' => !empty($category->trl->meta_description) ? $category->trl->meta_description : $controller->commonSettings->meta_description]);
+$this->registerMetaTag(['name' => 'keywords', 'content' => !empty($category->trl->meta_keywords) ? $category->trl->meta_keywords : $controller->commonSettings->meta_keywords]);
+
+//open-graph meta tags
+$this->registerMetaTag(['property' => 'og:description', 'content' => ""]);
+$this->registerMetaTag(['property' => 'og:url', 'content' => ""]);
+$this->registerMetaTag(['property' => 'og:site_name', 'content' => ""]);
+$this->registerMetaTag(['property' => 'og:title', 'content' => ""]);
+$this->registerMetaTag(['property' => 'og:image', 'content' => ""]);
+$this->registerMetaTag(['property' => 'og:image:width', 'content' => '200']);
+$this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
 ?>
 
     <!-- BANNER MOBILE::START-->
@@ -64,7 +78,12 @@ $controller = $this->context;
                                     <p><?= $post->trl->small_text; ?></p>
                                 </div>
                                 <div class="content__card__info"><a href="#"><?= $post->author->name.' '.$post->author->surname; ?></a><span>• <?= substr($post->published_at,0,16); ?></span></div>
-                                <div class="content__card__comments"><span><?= count($post->comments); ?> комментариев</span></div>
+
+                                <?php if($post->content_type_id != \app\helpers\Constants::CONTENT_TYPE_VIDEO): ?>
+                                    <div class="content__card__comments"><span><?= count($post->comments); ?> комментариев</span></div>
+                                <?php else: ?>
+                                    <div class="content__card__comments"><span><?= count($post->comments); ?></span></div>
+                                <?php endif; ?>
                             </div>
                         <?php else: ?>
                             <div class="content__card">
@@ -148,8 +167,8 @@ $controller = $this->context;
                 <div class="hidden-md-down col-lg-2"></div>
                 <div class="col-md-12 col-lg-10">
                     <div class="row">
-                        <?= LatestPostsWidget::widget(['label' => 'Последнее']); ?>
-                        <?= PopularPostWidget::widget(['label' => 'Популярное']); ?>
+                        <?= LatestPostsWidget::widget(['label' => 'Последнее', 'categories' => $controller->categoryIds]); ?>
+                        <?= PopularPostWidget::widget(['label' => 'Популярное', 'categories' => $controller->categoryIds]); ?>
                         <?= TurkeyPostsWidget::widget(['label' => 'Полезное о Турции']); ?>
                     </div>
                 </div>

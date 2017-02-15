@@ -20,7 +20,7 @@ class PostSearch extends Post
     {
         return [
             [['name', 'content', 'published_at', 'created_at', 'need_finish'], 'string', 'max' => 255],
-            [['content_type_id', 'type_id', 'category_id', 'author_id', 'group_id', 'kind_id'], 'integer'],
+            [['content_type_id', 'id', 'type_id', 'category_id', 'author_id', 'group_id', 'kind_id'], 'integer'],
         ];
     }
 
@@ -70,6 +70,10 @@ class PostSearch extends Post
         $this->load($params);
 
         if($this->validate()){
+
+            if(!empty($this->id)){
+                $q->andWhere(['id' => (int)$this->id]);
+            }
 
             if(!empty($this->author_id)){
                 $q->andWhere(['post.author_id' => $this->author_id]);

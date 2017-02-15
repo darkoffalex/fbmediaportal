@@ -2,6 +2,8 @@
 
 namespace app\helpers;
 
+use yii\helpers\ArrayHelper;
+
 class Help
 {
     /**
@@ -178,5 +180,25 @@ class Help
             $randomString .= $characters[rand(0, $charactersLength - 1)];
         }
         return $randomString;
+    }
+
+    /**
+     * Swaps elements in array
+     * @param $array
+     * @param $index1
+     * @param $index2
+     * @return bool
+     */
+    public static function swap(&$array,$index1,$index2)
+    {
+        if(empty($array[$index1]) || empty($array[$index2])){
+            return false;
+        }
+
+        $tmp = $array[$index1];
+        $array[$index1] = $array[$index2];
+        $array[$index2] = $tmp;
+
+        return true;
     }
 }

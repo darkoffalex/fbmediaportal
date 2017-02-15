@@ -36,6 +36,9 @@ use Yii;
  * @property string $video_preview_yt
  * @property string $video_attachment_id_fb
  * @property integer $need_finish
+ * @property integer $comment_count
+ * @property integer $about_turkey
+ * @property string $last_comment_at
  *
  * @property Comment[] $comments
  * @property User $author
@@ -64,9 +67,9 @@ class PostDB extends \yii\db\ActiveRecord
     {
         return [
             [['fb_sync_id', 'fb_sync_token', 'video_key_yt', 'video_key_fb', 'voted_ips', 'offer_group_fb_id'], 'string'],
-            [['content_type_id', 'status_id', 'type_id', 'author_id', 'sticky_position_main', 'stats_after_vote', 'votes_only_authorized', 'created_by_id', 'updated_by_id', 'group_id', 'kind_id', 'need_finish'], 'integer'],
+            [['content_type_id', 'status_id', 'type_id', 'author_id', 'sticky_position_main', 'stats_after_vote', 'votes_only_authorized', 'created_by_id', 'updated_by_id', 'group_id', 'kind_id', 'need_finish', 'comment_count', 'about_turkey'], 'integer'],
             [['name'], 'required'],
-            [['published_at', 'created_at', 'updated_at'], 'safe'],
+            [['published_at', 'created_at', 'updated_at', 'last_comment_at'], 'safe'],
             [['name', 'author_custom_name', 'offer_category_tag', 'offer_author_tag', 'video_preview_fb', 'video_preview_yt', 'video_attachment_id_fb'], 'string', 'max' => 255],
             [['author_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['author_id' => 'id']],
             [['group_id'], 'exist', 'skipOnError' => true, 'targetClass' => PostGroup::className(), 'targetAttribute' => ['group_id' => 'id']],
@@ -108,6 +111,9 @@ class PostDB extends \yii\db\ActiveRecord
             'video_preview_yt' => 'Video Preview Yt',
             'video_attachment_id_fb' => 'Video Attachment Id Fb',
             'need_finish' => 'Need Finish',
+            'comment_count' => 'Comment Count',
+            'about_turkey' => 'About Turkey',
+            'last_comment_at' => 'Last Comment At',
         ];
     }
 

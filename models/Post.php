@@ -199,6 +199,15 @@ class Post extends PostDB
     }
 
     /**
+     * Counts comments
+     * @return int|string
+     */
+    public function countComments()
+    {
+        return Comment::find()->where(['post_id' => $this->id])->count();
+    }
+
+    /**
      * Returns recursively sorted comments
      * @return Comment[]
      */

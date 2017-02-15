@@ -12,24 +12,32 @@ class LatestPostsWidget extends Widget
 {
     /* @var Post */
     private static $posts = [];
+    public $categories = [];
     public $limit = 7;
     public $label = '';
 
     public function init()
     {
         if(empty(self::$posts)){
-            self::$posts = Post::find()
-                ->where(new Expression('status_id = :status AND (kind_id != :kind OR kind_id IS NULL)', ['status' => Constants::STATUS_ENABLED, 'kind' => Constants::KIND_FORUM]))
-                ->with(['trl'])
+
+            $q = Post::find()
+                ->where(new Expression('status_id = :status AND (kind_id != :kind OR kind_id IS NULL)', ['status' => Constants::STATUS_ENABLED, 'kind' => Constants::KIND_FORUM]));
+
+            if(!empty($this->categories)){
+                $q->joinWith('postCategories as pc')->andWhere(['pc.category_id' => $this->categories]);
+            }
+
+            $q->with(['trl'])
                 ->orderBy('published_at DESC')
-                ->limit($this->limit)
-                ->all();
+                ->limit($this->limit);
+
+            self::$posts = $q->all();
         }
 
     }
 
     public function run()
     {
-        return $this->render('post_list',['posts' => self::$posts, 'type' => 'latest', 'label' => $this->label]);
+        return $this->render('post_list',['posts' => self::$posts, 'type' => 'latest', 'label' => $this->label, 'categories' => $this->categories]);
     }
 }

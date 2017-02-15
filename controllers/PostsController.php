@@ -62,6 +62,10 @@ class PostsController extends Controller
             throw  new NotFoundHttpException('Страница не найдена',404);
         }
 
+        //store post's category ids
+        $ids = array_values(ArrayHelper::map($post->categories,'id','id'));
+        $this->categoryIds = $ids;
+
         //C O M M E N T  A D D I N G
         $newComment = new Comment();
         $newComment->isFrontend = true;

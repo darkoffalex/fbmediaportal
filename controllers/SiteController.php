@@ -11,6 +11,7 @@ use Facebook\Exceptions\FacebookSDKException;
 use Facebook\GraphNodes\GraphPicture;
 use Yii;
 use app\components\Controller;
+use yii\data\Pagination;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
@@ -43,12 +44,70 @@ class SiteController extends Controller
             ->alias('p')
             ->with(['trl','postImages.trl', 'author', 'comments'])
             ->where(['status_id' => Constants::STATUS_ENABLED])
-            ->andWhere(new Expression('EXISTS (SELECT img.id FROM post_image img WHERE img.post_id = p.id)'))
-            ->orderBy(new Expression('IF(sticky_position_main, sticky_position_main, 2147483647) ASC, published_at DESC'))
+            ->andWhere(new Expression('kind_id != :kind OR kind_id IS NULL', ['kind' => Constants::KIND_FORUM]))
+//            ->andWhere(new Expression('EXISTS (SELECT img.id FROM post_image img WHERE img.post_id = p.id)'))
+            ->orderBy(new Expression('IF(sticky_position_main, sticky_position_main, 2147483647) ASC, IF(type_id = :lowestPriorityType, 2147483647, 0) ASC, published_at DESC',
+                ['lowestPriorityType' => Constants::CONTENT_TYPE_POST]
+            ))
+            ->offset(0)
             ->limit(6)
             ->all();
 
-        return $this->render('index', compact('posts'));
+        /* @var $forumPosts Post[] */
+        $forumPosts = Post::find()
+            ->alias('p')
+            ->with(['trl','postImages'])
+            ->where(['status_id' => Constants::STATUS_ENABLED])
+//            ->andWhere(new Expression('EXISTS (SELECT img.id FROM post_image img WHERE img.post_id = p.id)'))
+//            ->andWhere(['kind_id' => Constants::KIND_FORUM])
+            ->orderBy('published_at DESC')
+            ->offset(0)
+            ->limit(4)
+            ->all();
+
+        return $this->render('index', compact('posts','forumPosts'));
+    }
+
+    /**
+     * Post-loading via ajax (while scrolling)
+     * @param int $page
+     * @return null|string
+     */
+    public function actionPostLoad($page = 1)
+    {
+        $qMain = Post::find()
+            ->alias('p')
+            ->with(['trl','postImages.trl', 'author', 'comments'])
+            ->where(['status_id' => Constants::STATUS_ENABLED])
+            ->andWhere(new Expression('kind_id != :kind OR kind_id IS NULL', ['kind' => Constants::KIND_FORUM]))
+//            ->andWhere(new Expression('EXISTS (SELECT img.id FROM post_image img WHERE img.post_id = p.id)'))
+            ->orderBy(new Expression('IF(sticky_position_main, sticky_position_main, 2147483647) ASC, IF(type_id = :lowestPriorityType, 2147483647, 0) ASC, published_at DESC',
+                ['lowestPriorityType' => Constants::CONTENT_TYPE_POST]
+            ));
+
+        $qForum = Post::find()
+            ->alias('p')
+            ->with(['trl','postImages'])
+            ->where(['status_id' => Constants::STATUS_ENABLED])
+//            ->andWhere(new Expression('EXISTS (SELECT img.id FROM post_image img WHERE img.post_id = p.id)'))
+//            ->andWhere(['kind_id' => Constants::KIND_FORUM])
+            ->orderBy('published_at DESC');
+
+        $qMainCount = clone $qMain;
+        $qForumCount = clone $qForum;
+
+        $pagesMain = new Pagination(['totalCount' => $qMainCount->count(), 'defaultPageSize' => 3]);
+        $pagesForum = new Pagination(['totalCount' => $qForumCount->count(), 'defaultPageSize' => 4]);
+
+        if($page > $pagesMain->pageCount){
+            return null;
+        }
+
+        /* @var $posts Post[] */
+        $posts = $qMain->offset($pagesMain->offset)->limit($pagesMain->limit)->all();
+        $forumPosts = $qForum->offset($pagesForum->offset)->limit($pagesForum->limit)->all();
+
+        return $this->renderPartial('_load', compact('posts','forumPosts'));
     }
 
     /**

@@ -112,4 +112,11 @@ $(document).ready(function () {
 
     });
 
+    /**
+     * When changed carousel
+     */
+    $('#owlTop').on('beforeChange', function(event, slick, currentSlide, nextSlide){
+        console.log(nextSlide);
+    });
+
 });

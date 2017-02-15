@@ -6,14 +6,29 @@ use app\widgets\LatestPostsWidget;
 use app\widgets\PopularPostWidget;
 use app\widgets\TurkeyPostsWidget;
 use app\widgets\ForumPostsWidget;
+use yii\helpers\Url;
 
 /* @var $this \yii\web\View */
 /* @var $user \yii\web\User */
 /* @var $controller \app\controllers\SiteController */
 /* @var $posts \app\models\Post[] */
+/* @var $forumPosts \app\models\Post[] */
 
 $user = Yii::$app->user->identity;
 $controller = $this->context;
+
+//meta tags
+$this->registerMetaTag(['name' => 'description', 'content' => $controller->commonSettings->meta_description]);
+$this->registerMetaTag(['name' => 'keywords', 'content' => $controller->commonSettings->meta_keywords]);
+
+//open-graph meta tags
+$this->registerMetaTag(['property' => 'og:description', 'content' => ""]);
+$this->registerMetaTag(['property' => 'og:url', 'content' => ""]);
+$this->registerMetaTag(['property' => 'og:site_name', 'content' => ""]);
+$this->registerMetaTag(['property' => 'og:title', 'content' => ""]);
+$this->registerMetaTag(['property' => 'og:image', 'content' => ""]);
+$this->registerMetaTag(['property' => 'og:image:width', 'content' => '200']);
+$this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
 ?>
 
 <!-- BANNER MOBILE::START-->
@@ -202,8 +217,8 @@ $controller = $this->context;
                         </div>
                     <?php endif; ?>
                 <?php endforeach; ?>
-
             </div>
+
             <!--sidebar-->
             <div class="col-sm-4 col-lg-3 no-pad-l hidden-xs-down">
                 <div class="content__sidebar">
@@ -216,9 +231,12 @@ $controller = $this->context;
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </section>
 <!--CARDS-->
 
-<?= ForumPostsWidget::widget(['label' => 'Популярные материалы']); ?>
+<?= ForumPostsWidget::widget(['label' => 'Форум', 'posts' => $forumPosts]); ?>
+
+<div class="loadable-content" data-current-page="1" data-postload="<?= Url::to(['site/post-load']); ?>"></div>

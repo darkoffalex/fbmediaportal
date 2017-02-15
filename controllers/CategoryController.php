@@ -56,6 +56,9 @@ class CategoryController extends Controller
         $ids = array_values($ids);
         $ids[] = $category->id;
 
+        //store selected category ids
+        $this->categoryIds = $ids;
+
         /* @var $posts Post[] */
         $posts = Post::find()
             ->alias('p')
@@ -63,7 +66,7 @@ class CategoryController extends Controller
             ->where(['pc.category_id' => $ids])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->orderBy(new Expression('IF((pc.category_id = :cat AND sticky_position > 0), sticky_position, 2147483647) ASC, p.published_at DESC',['cat' => $category->id]))
-            ->with(['trl', 'postImages.trl', 'categories.trl', 'comments', 'author'])
+            ->with(['trl', 'postImages.trl', 'author', 'comments'])
             ->limit(6)
             ->all();
 

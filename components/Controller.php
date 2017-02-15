@@ -2,6 +2,7 @@
 
 namespace app\components;
 
+use app\models\CommonSettings;
 use Yii;
 use yii\web\Controller as BaseController;
 use yii\base\Module;
@@ -12,6 +13,16 @@ use app\models\User;
 class Controller extends BaseController
 {
     /**
+     * @var int[]
+     */
+    public $categoryIds = [];
+
+    /**
+     * @var CommonSettings
+     */
+    public $commonSettings = null;
+
+    /**
      * Redefine base constructor
      * @param string $id
      * @param Module $module
@@ -21,19 +32,6 @@ class Controller extends BaseController
     {
         //title of pages
         $this->view->title = "RusTurkey";
-
-        //meta tags
-        $this->view->registerMetaTag(['name' => 'description', 'content' => ""]);
-        $this->view->registerMetaTag(['name' => 'keywords', 'content' => ""]);
-
-        //open-graph meta tags
-        $this->view->registerMetaTag(['property' => 'og:description', 'content' => ""]);
-        $this->view->registerMetaTag(['property' => 'og:url', 'content' => ""]);
-        $this->view->registerMetaTag(['property' => 'og:site_name', 'content' => ""]);
-        $this->view->registerMetaTag(['property' => 'og:title', 'content' => ""]);
-        $this->view->registerMetaTag(['property' => 'og:image', 'content' => ""]);
-        $this->view->registerMetaTag(['property' => 'og:image:width', 'content' => '200']);
-        $this->view->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
 
         //timezone
         date_default_timezone_set('Europe/Moscow');
@@ -60,6 +58,15 @@ class Controller extends BaseController
         if(!empty($user)){
             $user->last_online_at = date('Y-m-d H:i:s', time());
             $user->update();
+        }
+
+        //Get common settings if empty
+        if(empty($this->commonSettings)){
+            $this->commonSettings = CommonSettings::find()->one();
+            if(empty($this->commonSettings)){
+                $this->commonSettings = new CommonSettings();
+                $this->commonSettings->save();
+            }
         }
 
         return parent::beforeAction($action);

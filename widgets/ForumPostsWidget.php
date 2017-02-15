@@ -11,27 +11,17 @@ use yii\helpers\Html;
 class ForumPostsWidget extends Widget
 {
     /* @var Post */
-    private static $posts = [];
+    public $posts = [];
     public $limit = 4;
     public $label = '';
 
     public function init()
     {
-        if(empty(self::$posts)){
-            self::$posts = Post::find()
-                ->alias('p')
-                ->where(['status_id' => Constants::STATUS_ENABLED])
-                ->andWhere(new Expression('EXISTS (SELECT img.id FROM post_image img WHERE img.post_id = p.id)'))
-                ->with(['trl','postImages'])
-                ->orderBy('published_at DESC')
-                ->limit($this->limit)
-                ->all();
-        }
-
+        //TODO: initialization stuff
     }
 
     public function run()
     {
-        return $this->render('post_horizontal',['posts' => self::$posts, 'label' => $this->label]);
+        return $this->render('post_horizontal',['posts' => $this->posts, 'label' => $this->label]);
     }
 }

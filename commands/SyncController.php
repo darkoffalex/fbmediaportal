@@ -431,19 +431,9 @@ class SyncController extends Controller
 
             }
 
-            if($this->confirm("Would you like to update user's counters (this can take some time) ?")){
+            if($this->confirm("Would you like to update counters ?")){
                 //should recalculate all user's counters
-                /* @var $users User[] */
-                echo "Updating users's counters... \n";
-                $users = User::find()->all();
-                foreach($users as $u){
-                    $postCount = Post::find()->where(['author_id' => $u->id])->count();
-                    $commentCount = Comment::find()->where(['author_id' => $u->id])->count();
-                    $u->counter_comments = $commentCount;
-                    $u->counter_posts = $postCount;
-                    $u->update();
-                }
-                echo "Counters updated. \n";
+                $this->actionUpdateCounters();
             }
 
         }else{
@@ -460,17 +450,14 @@ class SyncController extends Controller
      */
     public function actionUpdateCounters()
     {
+        $db = Yii::$app->db;
+
+        echo "Updating post's counters... \n";
+        $db->createCommand("UPDATE post p SET p.comment_count = (SELECT COUNT(*) FROM `comment` WHERE `comment`.post_id = p.id), last_comment_at = (SELECT created_at FROM `comment` ORDER BY created_at LIMIT 1)")->query();
+
         echo "Updating users's counters... \n";
-        /* @var $users User[] */
-        $users = User::find()->all();
-        foreach($users as $u){
-            $postCount = Post::find()->where(['author_id' => $u->id])->count();
-            $commentCount = Comment::find()->where(['author_id' => $u->id])->count();
-            $u->counter_comments = $commentCount;
-            $u->counter_posts = $postCount;
-            $u->update();
-            echo "User {$u->id} done. \n";
-        }
+        $db->createCommand("UPDATE `user` u SET counter_comments = (SELECT COUNT(*) FROM `comment` WHERE `comment`.author_id = u.id), counter_posts = (SELECT COUNT(*) FROM post WHERE post.author_id = u.id)")->query();
+
         echo "Counters updated. \n";
     }
 

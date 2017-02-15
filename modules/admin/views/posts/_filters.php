@@ -24,8 +24,11 @@ use kartik\daterange\DateRangePicker;
     ]); ?>
 
     <div class="row">
-        <div class="col-md-3">
+        <div class="col-md-2">
             <?= $form->field($model,'content')->textInput()->error(false); ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model,'id')->textInput()->error(false); ?>
         </div>
         <div class="col-md-3">
             <?= $form->field($model,'category_id')->dropDownList(ArrayHelper::map(Category::getRecursiveItemsEx(),'id',function($model,$defaultValue){
