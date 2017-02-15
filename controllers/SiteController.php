@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\helpers\Constants;
 use app\helpers\Help;
+use app\models\Banner;
 use app\models\Category;
 use app\models\Post;
 use Facebook\Exceptions\FacebookSDKException;
@@ -15,6 +16,7 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\web\NotAcceptableHttpException;
 use app\models\User;
+use yii\web\NotFoundHttpException;
 
 class SiteController extends Controller
 {
@@ -47,6 +49,28 @@ class SiteController extends Controller
             ->all();
 
         return $this->render('index', compact('posts'));
+    }
+
+    /**
+     * Updates banner clicks and redirects to it's url
+     * @param $id
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     */
+    public function actionBannerRedirect($id)
+    {
+        /* @var $banner Banner */
+        $banner = Banner::findOne((int)$id);
+
+        if(empty($banner)){
+            throw new NotFoundHttpException('Страница не найдена', 404);
+        }
+
+        $banner->clicks++;
+        $banner->updated_at = date('Y-m-d H:i:s', time());
+        $banner->update();
+
+        return $this->redirect($banner->link);
     }
 
     /**

@@ -20,7 +20,7 @@ class Controller extends BaseController
     public function __construct($id, $module, $config = [])
     {
         //title of pages
-        $this->view->title = "Мой сайт";
+        $this->view->title = "RusTurkey";
 
         //meta tags
         $this->view->registerMetaTag(['name' => 'description', 'content' => ""]);

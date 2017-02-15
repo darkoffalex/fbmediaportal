@@ -20,7 +20,7 @@ $controller = $this->context;
         <div class="container">
             <div class="row">
                 <div class="col-sm-12 text-xs-center">
-                    <img src="<?= Url::to('@web/frontend/images/topBanner@2x.png'); ?>">
+                    <?= BannersWidget::widget(['position' => 'TOP_BANNER']); ?>
                 </div>
             </div>
         </div>
