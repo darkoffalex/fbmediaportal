@@ -30,20 +30,24 @@ class CarouselWidget extends Widget
                     ->with(['trl','postImages.trl', 'author', 'comments'])
                     ->where(['status_id' => Constants::STATUS_ENABLED]);
 
-
-                //if need filter by current category and it's children
-                if(!empty($this->currentIds)){
-                    $q->joinWith('postCategories as pc')->andWhere(['pc.category_id' => $this->currentIds]);
-                    //if lack of posts
-                    if($q->count() < 20 && !empty($this->siblingIds)){
-                        $q->orWhere(['pc.category_id' => $this->siblingIds])
-                            ->andWhere(['status_id' => Constants::STATUS_ENABLED]);
-                    }
-                }
-
                 $q->andWhere(new Expression('kind_id != :kind OR kind_id IS NULL', ['kind' => Constants::KIND_FORUM]));
                 $q->andWhere(new Expression('EXISTS (SELECT img.id FROM post_image img WHERE img.post_id = p.id)'));
                 $q->andWhere(['content_type_id' => Constants::CONTENT_TYPE_POST]);
+
+                //if need filter by current category and it's children
+                if(!empty($this->currentIds)){
+                    $q->joinWith('postCategories as pc');
+
+                    $countQ = clone $q;
+                    $countQ->andWhere(['pc.category_id' => $this->currentIds]);
+
+                    //if lack of posts
+                    if($countQ->count() < $this->limit && !empty($this->siblingIds)){
+                        $q->andWhere(['pc.category_id' => $this->siblingIds]);
+                    }else{
+                        $q->andWhere(['pc.category_id' => $this->currentIds]);
+                    }
+                }
 
                 $q->orderBy(new Expression('IF(sticky_position_main, sticky_position_main, 2147483647) ASC, IF(type_id = :lowestPriorityType, 2147483647, 0) ASC, published_at DESC',
                     ['lowestPriorityType' => Constants::CONTENT_TYPE_POST]

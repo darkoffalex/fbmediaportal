@@ -28,19 +28,24 @@ class LatestPostsWidget extends Widget
             //get all posts
             $q = Post::find();
 
-            //if need filter by current category and it's children
-            if(!empty($this->currentIds)){
-                $q->joinWith('postCategories as pc')->andWhere(['pc.category_id' => $this->currentIds]);
-                //if lack of posts
-                if($q->count() < 7 && !empty($this->siblingIds)){
-//                    use siblings
-                    $siblingsUsed = true;
-                    $q->orWhere(['pc.category_id' => $this->siblingIds]);
-                }
-            }
-
             //select which's type is not forum
             $q->andWhere(new Expression('status_id = :status AND (kind_id != :kind OR kind_id IS NULL)', ['status' => Constants::STATUS_ENABLED, 'kind' => Constants::KIND_FORUM]));
+
+            //if need filter by current category and it's children
+            if(!empty($this->currentIds)){
+                $q->joinWith('postCategories as pc');
+
+                $countQ = clone $q;
+                $countQ->andWhere(['pc.category_id' => $this->currentIds]);
+
+                //if lack of posts
+                if($countQ->count() < 7 && !empty($this->siblingIds)){
+                    $siblingsUsed = true;
+                    $q->andWhere(['pc.category_id' => $this->siblingIds]);
+                }else{
+                    $q->andWhere(['pc.category_id' => $this->currentIds]);
+                }
+            }
 
             //load translations
             $q->with(['trl']);

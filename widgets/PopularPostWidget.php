@@ -25,21 +25,28 @@ class PopularPostWidget extends Widget
             //get all popular posts
             $q = Post::find();
 
-            //if need filter by current category and it's children
-            if(!empty($this->currentIds)){
-                $q->joinWith('postCategories as pc')->andWhere(['pc.category_id' => $this->currentIds]);
-                //if lack of posts
-                if($q->count() < 7 && !empty($this->siblingIds)){
-                    $q->orWhere(['pc.category_id' => $this->siblingIds]);
-                }
-            }
-
             $q->andWhere('last_comment_at > :minDate AND comment_count > :minComments AND status_id = :status',
                 [
                     'minDate' => $this->minDate,
                     'minComments' => $this->minComments,
                     'status' => Constants::STATUS_ENABLED
                 ]);
+
+            //if need filter by current category and it's children
+            if(!empty($this->currentIds)){
+                $q->joinWith('postCategories as pc');
+
+                $countQ = clone $q;
+                $countQ->andWhere(['pc.category_id' => $this->currentIds]);
+
+                //if lack of posts
+                if($countQ->count() < 7 && !empty($this->siblingIds)){
+                    $q->andWhere(['pc.category_id' => $this->siblingIds]);
+                }else{
+                    $q->andWhere(['pc.category_id' => $this->currentIds]);
+                }
+            }
+
 
             $q->with(['trl']);
 //            $q->distinct();
