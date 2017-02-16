@@ -30,7 +30,7 @@ $user = Yii::$app->user->identity;
                             <div class="col-sm-4 col-lg-3">
                                 <a class="bottomCards__card" href="<?= $post->getUrl(); ?>">
                                     <img class="img-fluid" style="width: 220px; height: 140px;" src="<?= $post->getThumbnailUrl(220,140); ?>">
-                                    <a class="bottomCards__card__title" href="#"><?= $post->trl->name; ?></a>
+                                    <a class="bottomCards__card__title" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
                                 </a>
                             </div>
                         <?php endforeach; ?>

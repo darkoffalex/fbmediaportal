@@ -6,12 +6,19 @@ use app\widgets\LatestPostsWidget;
 use app\widgets\PopularPostWidget;
 use app\widgets\TurkeyPostsWidget;
 use app\widgets\ForumPostsWidget;
+use app\helpers\Help;
+use app\helpers\Constants;
+use yii\helpers\Url;
 
 /* @var $this \yii\web\View */
 /* @var $user \yii\web\User */
 /* @var $controller \app\controllers\SiteController */
 /* @var $posts \app\models\Post[] */
+/* @var $forumPosts \app\models\Post[] */
 /* @var $category \app\models\Category */
+
+/* @var $currentIds int[] */
+/* @var $siblingIds int[] */
 
 $user = Yii::$app->user->identity;
 $controller = $this->context;
@@ -45,7 +52,7 @@ $this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
     <!-- OWL DESKTOP::START-->
     <section class="topCarousel hidden-xs-down">
         <div id="owlTop">
-            <?= CarouselWidget::widget(['filtration' => null]); ?>
+            <?= CarouselWidget::widget(['currentIds' => $currentIds, 'siblingIds' => $siblingIds]); ?>
         </div>
     </section>
 
@@ -107,7 +114,7 @@ $this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
                             <!-- OWL DESKTOP::START-->
                             <section class="topCarousel hidden-sm-up">
                                 <div id="owlTopMobile">
-                                    <?= CarouselWidget::widget(['filtration' => null]); ?>
+                                    <?= CarouselWidget::widget(['currentIds' => $currentIds, 'siblingIds' => $siblingIds]); ?>
                                 </div>
                             </section>
                         <?php endif; ?>
@@ -167,9 +174,9 @@ $this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
                 <div class="hidden-md-down col-lg-2"></div>
                 <div class="col-md-12 col-lg-10">
                     <div class="row">
-                        <?= LatestPostsWidget::widget(['label' => 'Последнее', 'categories' => $controller->categoryIds]); ?>
-                        <?= PopularPostWidget::widget(['label' => 'Популярное', 'categories' => $controller->categoryIds]); ?>
-                        <?= TurkeyPostsWidget::widget(['label' => 'Полезное о Турции']); ?>
+                        <?= LatestPostsWidget::widget(['label' => 'Последнее', 'currentIds' => $currentIds, 'siblingIds' => $siblingIds]); ?>
+                        <?= PopularPostWidget::widget(['label' => 'Популярное', 'currentIds' => $currentIds, 'siblingIds' => $siblingIds]); ?>
+<!--                        --><?//= TurkeyPostsWidget::widget(['label' => 'Полезное о Турции']); ?>
                     </div>
                 </div>
             </div>
@@ -199,7 +206,7 @@ $this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
                                 </div>
                                 <div class="content__card__info"><a href="#"><?= $post->author->name.' '.$post->author->surname; ?></a><span>• <?= substr($post->published_at,0,16); ?></span></div>
 
-                                <?php if($post->content_type_id != \app\helpers\Constants::CONTENT_TYPE_VIDEO): ?>
+                                <?php if($post->content_type_id != Constants::CONTENT_TYPE_VIDEO): ?>
                                     <div class="content__card__comments"><span><?= count($post->comments); ?> комментариев</span></div>
                                 <?php else: ?>
                                     <div class="content__card__comments"><span><?= count($post->comments); ?></span></div>
@@ -242,4 +249,6 @@ $this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
     </section>
     <!--CARDS-->
 
-<?= ForumPostsWidget::widget(['label' => 'Популярные материалы']); ?>
+<?= ForumPostsWidget::widget(['label' => 'Форум', 'posts' => $forumPosts]); ?>
+
+<div class="loadable-content" data-current-page="1" data-postload="<?= Url::to(['category/post-load','id' => $category->id]); ?>"></div>

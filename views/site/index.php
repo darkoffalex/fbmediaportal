@@ -44,8 +44,8 @@ $this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
 
 <!-- OWL DESKTOP::START-->
 <section class="topCarousel hidden-xs-down">
-    <div id="owlTop">
-        <?= CarouselWidget::widget(['filtration' => null]); ?>
+    <div id="owlTop" data-current-page="1" data-loading="<?= Url::to(['site/carousel-load']); ?>">
+        <?= CarouselWidget::widget(); ?>
     </div>
 </section>
 
@@ -100,8 +100,8 @@ $this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
                     <?php if($index == 0): ?>
                         <!-- OWL DESKTOP::START-->
                         <section class="topCarousel hidden-sm-up">
-                            <div id="owlTopMobile">
-                                <?= CarouselWidget::widget(['filtration' => null]); ?>
+                            <div id="owlTopMobile" data-current-page="1" data-loading="<?= Url::to(['site/carousel-load']); ?>">
+                                <?= CarouselWidget::widget(); ?>
                             </div>
                         </section>
                     <?php endif; ?>
@@ -163,7 +163,7 @@ $this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
                 <div class="row">
                     <?= LatestPostsWidget::widget(['label' => 'Последнее']); ?>
                     <?= PopularPostWidget::widget(['label' => 'Популярное']); ?>
-                    <?= TurkeyPostsWidget::widget(['label' => 'Полезное о Турции']); ?>
+<!--                    --><?//= TurkeyPostsWidget::widget(['label' => 'Полезное о Турции']); ?>
                 </div>
             </div>
         </div>

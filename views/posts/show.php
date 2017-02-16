@@ -28,7 +28,7 @@ $controller = $this->context;
     <!-- OWL DESKTOP::START-->
     <section class="topCarousel hidden-xs-down">
         <div id="owlTop">
-            <?= CarouselWidget::widget(['filtration' => null]); ?>
+            <?= CarouselWidget::widget(); ?>
         </div>
     </section>
 

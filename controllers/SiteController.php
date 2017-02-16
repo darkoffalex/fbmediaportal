@@ -69,6 +69,34 @@ class SiteController extends Controller
     }
 
     /**
+     * Post-loading via ajax for carousels
+     * @param $page
+     * @param null $cat
+     * @param null $additional
+     * @return string
+     */
+    public function actionCarouselLoad($page, $cat = null, $additional = null)
+    {
+        $q = Post::find()
+            ->alias('p')
+            ->with(['trl','postImages.trl', 'author', 'comments'])
+            ->where(['status_id' => Constants::STATUS_ENABLED])
+            ->andWhere(['content_type_id' => Constants::CONTENT_TYPE_POST])
+            ->andWhere(new Expression('kind_id != :kind OR kind_id IS NULL', ['kind' => Constants::KIND_FORUM]))
+            ->andWhere(new Expression('EXISTS (SELECT img.id FROM post_image img WHERE img.post_id = p.id)'))
+            ->orderBy(new Expression('IF(sticky_position_main, sticky_position_main, 2147483647) ASC, IF(type_id = :lowestPriorityType, 2147483647, 0) ASC, published_at DESC',
+                ['lowestPriorityType' => Constants::CONTENT_TYPE_POST]
+            ));
+
+
+        $count = clone $q;
+        $pages = new Pagination(['totalCount' => $count->count(), 'defaultPageSize' => 1]);
+        $posts = $q->offset($pages->offset+20)->limit($pages->limit)->all();
+
+        return $this->renderPartial('_load_carousel',compact('posts'));
+    }
+
+    /**
      * Post-loading via ajax (while scrolling)
      * @param int $page
      * @return null|string
@@ -81,7 +109,7 @@ class SiteController extends Controller
             ->where(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('kind_id != :kind OR kind_id IS NULL', ['kind' => Constants::KIND_FORUM]))
 //            ->andWhere(new Expression('EXISTS (SELECT img.id FROM post_image img WHERE img.post_id = p.id)'))
-            ->orderBy(new Expression('IF(sticky_position_main, sticky_position_main, 2147483647) ASC, IF(type_id = :lowestPriorityType, 2147483647, 0) ASC, published_at DESC',
+            ->orderBy(new Expression('IF(sticky_position_main, sticky_position_main, 2147483647) ASC, IF(content_type_id = :lowestPriorityType, 2147483647, 0) ASC, published_at DESC',
                 ['lowestPriorityType' => Constants::CONTENT_TYPE_POST]
             ));
 
@@ -104,7 +132,7 @@ class SiteController extends Controller
         }
 
         /* @var $posts Post[] */
-        $posts = $qMain->offset($pagesMain->offset)->limit($pagesMain->limit)->all();
+        $posts = $qMain->offset($pagesMain->offset+3)->limit($pagesMain->limit)->all();
         $forumPosts = $qForum->offset($pagesForum->offset)->limit($pagesForum->limit)->all();
 
         return $this->renderPartial('_load', compact('posts','forumPosts'));

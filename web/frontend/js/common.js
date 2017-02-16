@@ -32,7 +32,7 @@ $(document).ready(function () {
      * When scrolled to the bottom
      */
     $(document).scroll(function () {
-        if($(window).scrollTop()+$(window).height()>=$(document).height()){
+        if(($(window).scrollTop()+$(window).height())+450 >= $(document).height()){
 
             $('[data-postload]').each(function () {
 
@@ -40,17 +40,24 @@ $(document).ready(function () {
                 var page = parseInt($(this).data('current-page'));
                 var container = $(this);
 
-                $.ajax({
-                    url: url+'?page='+(page+1),
-                    type: 'GET',
-                    async: false,
-                    success: function(data){
-                        container.data('current-page',(page+1));
-                        if(data != ''){
-                            container.append(data);
+                if(!container.hasClass('no-load')){
+                    container.addClass('no-load');
+
+                    $.ajax({
+                        url: url+'?page='+(page+1),
+                        type: 'GET',
+                        async: false,
+                        success: function(data){
+                            container.data('current-page',(page+1));
+                            if(data != ''){
+                                container.removeClass('no-load');
+                                container.append(data);
+                            }
                         }
-                    }
-                });
+                    });
+                }
+
+
             })
         }
     });
@@ -115,8 +122,33 @@ $(document).ready(function () {
     /**
      * When changed carousel
      */
-    $('#owlTop').on('beforeChange', function(event, slick, currentSlide, nextSlide){
-        console.log(nextSlide);
+
+    /*
+    $('.topCarousel > div').on('beforeChange', function(event, slick, currentSlide, nextSlide){
+
+        var url = $(this).data('loading');
+        var page = parseInt($(this).data('current-page'));
+        var carousel = $(this);
+        var container = $(this).find('.slick-track');
+
+        if(!carousel.hasClass('no-load')) {
+            carousel.addClass('no-load');
+            $.ajax({
+                url: url + '?page=' + (page + 1),
+                type: 'GET',
+                async: false,
+                success: function (data) {
+                    carousel.data('current-page', (page + 1));
+                    if (data != '') {
+                        carousel.removeClass('no-load');
+                        container.append(data);
+                        // carousel.slick('reinit');
+                        // carousel.slick("slickGoTo", page);
+                    }
+                }
+            });
+        }
     });
+    */
 
 });

@@ -11,7 +11,6 @@ class TurkeyPostsWidget extends Widget
 {
     /* @var Post */
     private static $posts = [];
-    public $categories = [];
     public $limit = 7;
     public $label = '';
 
@@ -21,9 +20,9 @@ class TurkeyPostsWidget extends Widget
             $q = Post::find()
                 ->where(['status_id' => Constants::STATUS_ENABLED]);
 
-            if(!empty($this->categories)){
-                $q->joinWith('postCategories as pc')->andWhere(['pc.category_id' => $this->categories]);
-            }
+//            if(!empty($this->categories)){
+//                $q->joinWith('postCategories as pc')->andWhere(['pc.category_id' => $this->categories]);
+//            }
 
             $q ->with(['trl'])
                 ->orderBy('published_at DESC')
@@ -36,6 +35,11 @@ class TurkeyPostsWidget extends Widget
 
     public function run()
     {
-        return $this->render('post_list',['posts' => self::$posts, 'type' => 'turkey', 'label' => $this->label, ]);
+        return $this->render('post_list',[
+            'posts' => self::$posts,
+            'type' => 'turkey',
+            'label' => $this->label,
+            'ico' => 'ico-cat-turkey'
+        ]);
     }
 }

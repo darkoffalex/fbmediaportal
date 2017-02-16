@@ -43,11 +43,8 @@ class CategoryController extends Controller
             ->where(['id' => (int)$id])
             ->with([
                 'trl',
-//                'children.trl',
-//                'children.children.trl',
-//                'parent',
-//                'parent.trl',
-//                'parent.parent.trl'
+                'parent.childrenActive.childrenActive',
+                'childrenActive.childrenActive'
             ])->one();
 
         /* @var $children Category[] */
@@ -56,8 +53,13 @@ class CategoryController extends Controller
         $ids = array_values($ids);
         $ids[] = $category->id;
 
-        //store selected category ids
-        $this->categoryIds = $ids;
+        $currentIds = $ids;
+        if(!empty($category->parent)){
+            $siblingIds = array_values(ArrayHelper::map($category->parent->getChildrenRecursive(true),'id','id'));
+        }else{
+            $siblingIds = [];
+        }
+
 
         /* @var $posts Post[] */
         $posts = Post::find()
@@ -65,11 +67,91 @@ class CategoryController extends Controller
             ->joinWith('postCategories as pc')
             ->where(['pc.category_id' => $ids])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
-            ->orderBy(new Expression('IF((pc.category_id = :cat AND sticky_position > 0), sticky_position, 2147483647) ASC, p.published_at DESC',['cat' => $category->id]))
+//            ->andWhere(new Expression('EXISTS (SELECT img.id FROM post_image img WHERE img.post_id = p.id)'))
+            ->orderBy(new Expression('IF((pc.category_id = :cat AND sticky_position > 0), sticky_position, 2147483647) ASC, IF(content_type_id = :lowestPriorityType, 2147483647, 0) ASC, p.published_at DESC',
+                ['cat' => $category->id, 'lowestPriorityType' => Constants::CONTENT_TYPE_POST]))
             ->with(['trl', 'postImages.trl', 'author', 'comments'])
             ->limit(6)
             ->all();
 
-        return $this->render('show',compact('posts','category'));
+        /* @var $forumPosts Post[] */
+        $forumPosts = Post::find()
+            ->alias('p')
+            ->with(['trl','postImages'])
+            ->joinWith('postCategories as pc')
+            ->where(['pc.category_id' => $ids])
+            ->andWhere(['status_id' => Constants::STATUS_ENABLED])
+//            ->andWhere(new Expression('EXISTS (SELECT img.id FROM post_image img WHERE img.post_id = p.id)'))
+//            ->andWhere(['kind_id' => Constants::KIND_FORUM])
+            ->orderBy('published_at DESC')
+            ->offset(0)
+            ->limit(4)
+            ->all();
+
+        return $this->render('show',compact('posts','forumPosts','category','currentIds','siblingIds'));
+    }
+
+    /**
+     * Post-loading via ajax (while scrolling)
+     * @param $id
+     * @param int $page
+     * @return null|string
+     */
+    public function actionPostLoad($id,$page = 1)
+    {
+        /* @var $category Category */
+        $category = Category::find()
+            ->where(['id' => (int)$id])
+            ->with([
+                'trl',
+                'parent.childrenActive.childrenActive',
+                'childrenActive.childrenActive'
+            ])->one();
+
+        /* @var $children Category[] */
+        $children = $category->getChildrenRecursive(true);
+        $ids = ArrayHelper::map($children,'id','id');
+        $ids = array_values($ids);
+        $ids[] = $category->id;
+
+        $qMain = Post::find()
+            ->alias('p')
+            ->joinWith('postCategories as pc')
+            ->where(['pc.category_id' => $ids])
+            ->andWhere(['status_id' => Constants::STATUS_ENABLED])
+            ->orderBy(new Expression('IF((pc.category_id = :cat AND sticky_position > 0), sticky_position, 2147483647) ASC, IF(type_id = :lowestPriorityType, 2147483647, 0) ASC, p.published_at DESC',
+                ['cat' => $category->id, 'lowestPriorityType' => Constants::CONTENT_TYPE_POST]))
+            ->with(['trl', 'postImages.trl', 'author', 'comments']);
+
+        $qForum = Post::find()
+            ->alias('p')
+            ->with(['trl','postImages'])
+            ->joinWith('postCategories as pc')
+            ->where(['pc.category_id' => $ids])
+            ->andWhere(['status_id' => Constants::STATUS_ENABLED])
+//            ->andWhere(new Expression('EXISTS (SELECT img.id FROM post_image img WHERE img.post_id = p.id)'))
+//            ->andWhere(['kind_id' => Constants::KIND_FORUM])
+            ->orderBy('published_at DESC');
+
+        $qMainCount = clone $qMain;
+        $qForumCount = clone $qForum;
+
+        $pagesMain = new Pagination(['totalCount' => $qMainCount->count(), 'defaultPageSize' => 3]);
+        $pagesForum = new Pagination(['totalCount' => $qForumCount->count(), 'defaultPageSize' => 4]);
+
+        if($page > $pagesMain->pageCount){
+            return null;
+        }
+
+        /* @var $posts Post[] */
+        $posts = $qMain->offset($pagesMain->offset+3)->limit($pagesMain->limit)->all();
+
+        if($page > $pagesForum->pageCount){
+            $forumPosts = [];
+        }else{
+            $forumPosts = $qForum->offset($pagesForum->offset)->limit($pagesForum->limit)->all();
+        }
+
+        return $this->renderPartial('/site/_load', compact('posts','forumPosts'));
     }
 }

@@ -11,13 +11,14 @@ use yii\helpers\ArrayHelper;
 /* @var $user \yii\web\User */
 /* @var $type string */
 /* @var $label string */
+/* @var $ico string */
 
 $widget = $this->context;
 $user = Yii::$app->user->identity;
 ?>
 
 <div class="col-md-12 col-lg-4">
-    <div class="categories__name"><i class="ico ico-cat-news"></i><span><?= $label; ?></span></div>
+    <div class="categories__name"><i class="ico <?= !empty($ico) ? $ico : 'ico-cat-news'; ?>"></i><span><?= $label; ?></span></div>
     <ul class="categories__list">
         <?php foreach ($posts as $post): ?>
             <li><a href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a></li>
