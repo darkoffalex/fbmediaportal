@@ -12,7 +12,7 @@ use yii\helpers\Url;
 
 /* @var $this \yii\web\View */
 /* @var $user \yii\web\User */
-/* @var $controller \app\controllers\SiteController */
+/* @var $controller \app\controllers\CategoryController */
 /* @var $posts \app\models\Post[] */
 /* @var $forumPosts \app\models\Post[] */
 /* @var $category \app\models\Category */

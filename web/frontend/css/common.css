@@ -22,3 +22,10 @@
     padding: 0.2rem 0.2rem;
     font-size: 0.8rem;
 }
+
+.pagination li.last a,
+.pagination li.active a
+{
+    background: #4f8abe;
+    color: #fff;
+}

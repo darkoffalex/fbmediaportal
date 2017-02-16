@@ -69,6 +69,45 @@ class SiteController extends Controller
     }
 
     /**
+     * Outputs all items
+     * @param $type
+     * @return string
+     */
+    public function actionAll($type)
+    {
+        $minComments = 200;
+        $minDate = '2014.01.01 00:00:00';
+        $q = Post::find();
+
+        switch ($type){
+            case 'latest':
+                $q->andWhere(new Expression('status_id = :status AND (kind_id != :kind OR kind_id IS NULL)', ['status' => Constants::STATUS_ENABLED, 'kind' => Constants::KIND_FORUM]));
+                $q->orderBy('published_at DESC');
+                break;
+            case 'popular':
+                $q->andWhere('last_comment_at > :minDate AND comment_count > :minComments AND status_id = :status',
+                    [
+                        'minDate' => $minDate,
+                        'minComments' => $minComments,
+                        'status' => Constants::STATUS_ENABLED
+                    ]);
+                $q->orderBy('comment_count DESC');
+                break;
+            default:
+                $type = 'latest';
+                $q->andWhere(new Expression('status_id = :status AND (kind_id != :kind OR kind_id IS NULL)', ['status' => Constants::STATUS_ENABLED, 'kind' => Constants::KIND_FORUM]));
+                break;
+        }
+
+        $countQ = clone $q;
+        $pages = new Pagination(['totalCount' => $countQ->count(), 'defaultPageSize' => 20]);
+        $q->with(['trl','postImages','author']);
+        $posts = $q->offset($pages->offset)->limit($pages->limit)->all();
+
+        return $this->render('all', compact('type','posts','pages'));
+    }
+
+    /**
      * Post-loading via ajax for carousels
      * @param $page
      * @param null $cat

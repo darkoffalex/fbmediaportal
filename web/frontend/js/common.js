@@ -123,7 +123,6 @@ $(document).ready(function () {
      * When changed carousel
      */
 
-    /*
     $('.topCarousel > div').on('beforeChange', function(event, slick, currentSlide, nextSlide){
 
         var url = $(this).data('loading');
@@ -141,7 +140,8 @@ $(document).ready(function () {
                     carousel.data('current-page', (page + 1));
                     if (data != '') {
                         carousel.removeClass('no-load');
-                        container.append(data);
+                        // container.append(data);
+                        carousel.slick('slickAdd',data);
                         // carousel.slick('reinit');
                         // carousel.slick("slickGoTo", page);
                     }
@@ -149,6 +149,5 @@ $(document).ready(function () {
             });
         }
     });
-    */
 
 });
