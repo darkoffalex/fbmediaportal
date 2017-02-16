@@ -69,6 +69,31 @@ class SiteController extends Controller
     }
 
     /**
+     * Render user's profile
+     * @param $id
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionProfile($id)
+    {
+        /* @var $user User */
+        $user = User::find()->where(['id' => $id])->one();
+
+        if(empty($user)){
+            throw new NotFoundHttpException('Пользователь не найден', 404);
+        }
+
+        $q = Post::find()->where(['author_id' => $user->id]);
+        $q->orderBy('published_at DESC');
+        $countQ = clone $q;
+        $pages = new Pagination(['totalCount' => $countQ->count(), 'defaultPageSize' => 20]);
+        $q->with(['trl','postImages','author']);
+        $posts = $q->offset($pages->offset)->limit($pages->limit)->all();
+
+        return $this->render('profile', compact('posts','pages','user'));
+    }
+
+    /**
      * Outputs all items
      * @param $type
      * @return string

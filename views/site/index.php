@@ -76,7 +76,16 @@ $this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
                             <div class="content__card__intro">
                                 <p><?= $post->trl->small_text; ?></p>
                             </div>
-                            <div class="content__card__info"><a href="#"><?= $post->author->name.' '.$post->author->surname; ?></a><span>• <?= substr($post->published_at,0,16); ?></span></div>
+                            <div class="content__card__info">
+                                <?php if(!empty($post->author)): ?>
+                                    <a href="<?= Url::to(['site/profile','id'=> $post->author_id]); ?>">
+                                        <?= $post->author->name.' '.$post->author->surname; ?>
+                                    </a>
+                                <?php else: ?>
+                                    <a href=""><?= $post->author_custom_name; ?></a>
+                                <?php endif; ?>
+                                <span>• <?= substr($post->published_at,0,16); ?></span>
+                            </div>
                             <div class="content__card__comments"><span><?= count($post->comments); ?> комментариев</span></div>
                         </div>
                     <?php else: ?>
@@ -91,7 +100,14 @@ $this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
                                 <a class="content__card__title hidden-xs-down" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
                                 <div class="content__card__intro">
                                     <p><?= $post->trl->small_text; ?></p>
-                                    <a href="#"><?= $post->author->name.' '.$post->author->surname; ?></a><span>• <?= substr($post->published_at,0,16); ?></span>
+                                    <?php if(!empty($post->author)): ?>
+                                        <a href="<?= Url::to(['site/profile','id'=> $post->author_id]); ?>">
+                                            <?= $post->author->name.' '.$post->author->surname; ?>
+                                        </a>
+                                    <?php else: ?>
+                                        <a href=""><?= $post->author_custom_name; ?></a>
+                                    <?php endif; ?>
+                                    <span>• <?= substr($post->published_at,0,16); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -191,7 +207,16 @@ $this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
                             <div class="content__card__intro">
                                 <p><?= $post->trl->small_text; ?></p>
                             </div>
-                            <div class="content__card__info"><a href="#"><?= $post->author->name.' '.$post->author->surname; ?></a><span>• <?= substr($post->published_at,0,16); ?></span></div>
+                            <div class="content__card__info">
+                                <?php if(!empty($post->author)): ?>
+                                    <a href="<?= Url::to(['site/profile','id'=> $post->author_id]); ?>">
+                                        <?= $post->author->name.' '.$post->author->surname; ?>
+                                    </a>
+                                <?php else: ?>
+                                    <a href=""><?= $post->author_custom_name; ?></a>
+                                <?php endif; ?>
+                                <span>• <?= substr($post->published_at,0,16); ?></span>
+                            </div>
 
                             <?php if($post->content_type_id != \app\helpers\Constants::CONTENT_TYPE_VIDEO): ?>
                                 <div class="content__card__comments"><span><?= count($post->comments); ?> комментариев</span></div>
@@ -211,7 +236,14 @@ $this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
                                 <a class="content__card__title hidden-xs-down" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
                                 <div class="content__card__intro">
                                     <p><?= $post->trl->small_text; ?></p>
-                                    <a href="#"><?= $post->author->name.' '.$post->author->surname; ?></a><span>• <?= substr($post->published_at,0,16); ?></span>
+                                    <?php if(!empty($post->author)): ?>
+                                        <a href="<?= Url::to(['site/profile','id'=> $post->author_id]); ?>">
+                                            <?= $post->author->name.' '.$post->author->surname; ?>
+                                        </a>
+                                    <?php else: ?>
+                                        <a href=""><?= $post->author_custom_name; ?></a>
+                                    <?php endif; ?>
+                                    <span>• <?= substr($post->published_at,0,16); ?></span>
                                 </div>
                             </div>
                         </div>

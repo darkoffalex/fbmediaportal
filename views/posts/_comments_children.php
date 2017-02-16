@@ -12,7 +12,8 @@ $controller = $this->context;
 ?>
 
 <?php foreach($comments as $comment): ?>
-    <div class="contentComments__card__child"><img class="img-fluid" src="<?= $comment->author->getAvatar(); ?>">
+    <div class="contentComments__card__child">
+        <a href="<?= Url::to(['site/profile','id' => $comment->author_id]); ?>"><img class="img-fluid" src="<?= $comment->author->getAvatar(); ?>"></a>
         <p><?= $comment->text; ?></p>
     </div>
 <?php endforeach; ?>

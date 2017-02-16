@@ -2,20 +2,20 @@
 use app\widgets\MainMenuWidget;
 use app\widgets\CarouselWidget;
 use app\widgets\BannersWidget;
-use yii\helpers\ArrayHelper;
+use app\models\Post;
+use app\helpers\Constants;
 use yii\helpers\Url;
 use yii\widgets\LinkPager;
 
 /* @var $this \yii\web\View */
-/* @var $user \yii\web\User */
+/* @var $user \app\models\User; */
 /* @var $controller \app\controllers\SiteController */
 /* @var $posts \app\models\Post[] */
 /* @var $pages \yii\data\Pagination */
 /* @var $type string */
 
-$user = Yii::$app->user->identity;
 $controller = $this->context;
-$this->title = "Все материалы | ".ArrayHelper::getValue(['latest' => 'Последние', 'popular' => 'Популярные'],$type,'Последние');
+$this->title = "Профиль участника ".$user->name.' '.$user->surname;
 
 //meta tags
 $this->registerMetaTag(['name' => 'description', 'content' => $controller->commonSettings->meta_description]);
@@ -59,15 +59,26 @@ $this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
 
             <div class="col-sm-8 col-lg-7 no-pad-r">
                 <div class="innerWrapper">
-                    <h1><?= ArrayHelper::getValue(['latest' => 'Последние', 'popular' => 'Популярные'],$type,'Последние'); ?></h1>
+                    <h1><?= $user->name.' '.$user->surname; ?></h1>
+                    <div class="profile"><img class="img-fluid" src="<?= $user->getAvatar(); ?>">
+                        <div class="profile__right">
+                            <div class="profile__username">Профиль участника</div>
+                            <div class="profile__stats">
+                                <p>Количество материалов:<b><?= Post::find()->where(['author_id' => $user->id, 'status_id' => Constants::STATUS_ENABLED, 'content_type_id' => [Constants::CONTENT_TYPE_NEWS,Constants::CONTENT_TYPE_ARTICLE]])->count(); ?></b></p>
+                                <p>Количество постов:<b><?= Post::find()->where(['author_id' => $user->id, 'status_id' => Constants::STATUS_ENABLED, 'content_type_id' => Constants::CONTENT_TYPE_POST])->count(); ?></b></p>
+                                <p>Количество комментариев:<b><?= $user->counter_comments; ?></b></p>
+                            </div>
 
-                    <div class="sorting">
-                        <a class="btn btn-outline <?= $type=='latest' ? 'active' : ''; ?>" href="<?= Url::to(['site/all','type' => 'latest']); ?>">
-                            <span>Последнее</span>
-                        </a>
-                        <a class="btn btn-outline <?= $type=='popular' ? 'active' : ''; ?>" href="<?= Url::to(['site/all','type' => 'popular']); ?>">
-                            <span>Популярное</span>
-                        </a>
+                            <?php if(!empty($user->fb_user_id)): ?>
+                                <a class="btn btn-fb" href="<?= "https://www.facebook.com/{$user->fb_user_id}/" ?>">
+                                    <i class="ico ico-fb"></i>
+                                    <span>Профиль в facebook</span>
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div class="headingBorder">
+                        <h2>Лента Активности: <b><?= $user->name.' '.$user->surname; ?></b></h2>
                     </div>
 
                     <?php foreach ($posts as $post): ?>
@@ -103,7 +114,6 @@ $this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
                         'prevPageCssClass' => 'last',
                         'maxButtonCount' => 5
                     ]); ?>
-
                 </div>
             </div>
 

@@ -15,7 +15,7 @@ $controller = $this->context;
     <div class="contentComments__card">
         <img class="img-fluid" src="<?= $comment->author->getAvatar(); ?>">
         <div class="contentComments__card__content">
-            <b><a href="#"><?= $comment->author->name.' '.$comment->author->surname; ?></a><span>-  <?= substr($comment->created_at,0,16); ?></span></b>
+            <b><a href="<?= Url::to(['site/profile','id' => $comment->author_id]); ?>"><?= $comment->author->name.' '.$comment->author->surname; ?></a><span>-  <?= substr($comment->created_at,0,16); ?></span></b>
             <p><?= $comment->text; ?></p>
 
             <?php if(count($comment->children) > 0): ?>

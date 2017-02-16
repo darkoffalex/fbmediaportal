@@ -44,7 +44,16 @@ $controller = $this->context;
                     <!-- cards-->
                     <div class="content__card content__card--inner content__card--wide">
                         <div class="content__card__title"><?= $post->trl->name; ?></div>
-                        <div class="content__card__info"><a href="#"><?= $post->author->name.' '.$post->author->surname; ?></a><span>• <?= substr($post->published_at,0,16); ?></span></div>
+                        <div class="content__card__info">
+                            <?php if(!empty($post->author)): ?>
+                                <a href="<?= Url::to(['site/profile','id'=> $post->author_id]); ?>">
+                                    <?= $post->author->name.' '.$post->author->surname; ?>
+                                </a>
+                            <?php else: ?>
+                                <a href=""><?= $post->author_custom_name; ?></a>
+                            <?php endif; ?>
+                            <span>• <?= substr($post->published_at,0,16); ?></span>
+                        </div>
 
                         <div class="content__card__crumbs">
                             <a href="<?= Url::to(['site/index']); ?>">Главная</a><span class="crumb-seprator">-</span><?php if(!empty($post->categories[0])): ?><?php $crumbs = $post->categories[0]->getBreadCrumbs(true); ?><?php foreach ($crumbs as $cid => $name): ?><a href="<?= Url::to(['category/show', 'id' => $cid, 'title' => \app\helpers\Help::slug($name)]); ?>"><?= $name; ?></a><span class="crumb-seprator">-</span><?php endforeach; ?><?php endif; ?><span class="current"><?= $post->trl->name; ?></span>
