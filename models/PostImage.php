@@ -153,6 +153,12 @@ class PostImage extends PostImageDB
 
                 if($this->strict_ratio){
                     $imageUploaded->resize(new Box(706,311));
+                }else{
+                    if($imageUploaded->getSize()->getWidth() > 706){
+                        $newW = 706;
+                        $newH = (706/$imageUploaded->getSize()->getWidth())*$imageUploaded->getSize()->getHeight();
+                        $imageUploaded->resize(new Box($newW,$newH));
+                    }
                 }
             }
 

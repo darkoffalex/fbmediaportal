@@ -1,116 +1,151 @@
 <?php
-
-use app\widgets\MostCommentedWidget;
-use app\widgets\LatestPostsWidget;
+use app\widgets\MainMenuWidget;
+use app\widgets\CarouselWidget;
 use app\widgets\BannersWidget;
-use app\widgets\SearchFormWidget;
-use app\helpers\Help;
 use yii\helpers\ArrayHelper;
-use app\widgets\RelatedPostsWidget;
+use yii\helpers\Url;
+use yii\widgets\LinkPager;
 
-/* @var $this yii\web\View */
-/* @var $controller \app\controllers\SearchController */
+/* @var $this \yii\web\View */
 /* @var $user \app\models\User */
+/* @var $controller \app\controllers\SearchController */
 /* @var $posts \app\models\Post[] */
 /* @var $pages \yii\data\Pagination */
 
-$this->title = $category->trl->name;
-$controller = $this->context;
 $user = Yii::$app->user->identity;
+$controller = $this->context;
+$this->title = "Поиск";
 
-use yii\helpers\Url;
+//meta tags
+$this->registerMetaTag(['name' => 'description', 'content' => $controller->commonSettings->meta_description]);
+$this->registerMetaTag(['name' => 'keywords', 'content' => $controller->commonSettings->meta_keywords]);
+
+//open-graph meta tags
+$this->registerMetaTag(['property' => 'og:description', 'content' => ""]);
+$this->registerMetaTag(['property' => 'og:url', 'content' => ""]);
+$this->registerMetaTag(['property' => 'og:site_name', 'content' => ""]);
+$this->registerMetaTag(['property' => 'og:title', 'content' => ""]);
+$this->registerMetaTag(['property' => 'og:image', 'content' => ""]);
+$this->registerMetaTag(['property' => 'og:image:width', 'content' => '200']);
+$this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
 ?>
 
-<section id="contentSection">
-    <div class="row">
-        <div class="col-lg-8 col-md-8 col-sm-8">
-            <div class="left_content">
-                <div class="single_page">
-
-                    <ol class="breadcrumb">
-                        <li><a href="<?= Url::to(['/site/index']); ?>">Главная</a></li>
-                        <li><a href="">Поиск</a></li>
-                    </ol>
-
-                    <h1>Результаты поиска</h1>
-                    <?php if(!empty($posts)): ?>
-                        <br>
-                        <span>Всего найдено : <?= $pages->totalCount; ?></span>
-                    <?php endif; ?>
-
-
-                    <div class="row">
-                        <?php if(!empty($posts)): ?>
-                            <?php foreach($posts as $post): ?>
-                                <div class="col-md-12 col-sm-12">
-                                    <ul class="business_catgnav wow fadeInDown animated" style="visibility: visible; animation-name: fadeInDown; border-bottom: 1px solid #ddd;">
-                                        <li>
-                                            <figure class="bsbig_fig" style="padding-bottom: 10px;">
-
-                                                <figcaption>
-                                                    <a href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
-                                                </figcaption>
-
-                                                <div class="post_commentbox" style="margin: 0;padding: 0 0 5px 0;border: none;">
-                                                    <span><i class="fa fa-calendar"></i><?= substr($post->published_at,0,16); ?></span>
-                                                    <span><i class="fa fa-comment"></i><?= count($post->comments); ?></span>
-
-                                                    <?php if(!empty($post->author)): ?>
-                                                        <a href="#"><i class="fa fa-user"></i><?= $post->author->name.' '.$post->author->surname; ?></a>
-                                                    <?php else: ?>
-                                                        <span><i class="fa fa-user"></i><?= $post->author_custom_name; ?></span>
-                                                    <?php endif; ?>
-
-                                                    <?php foreach($post->categories as $c): ?>
-                                                        <?php $name = ArrayHelper::getValue($c->trl,'name',$c->name); ?>
-                                                        <a href="<?= Url::to(['category/show','id' => $c->id, 'title' => Help::slug($name)]); ?>"><i class="fa fa-folder"></i><?= $c->trl->name; ?></a>
-                                                    <?php endforeach; ?>
-                                                </div>
-
-                                                <div class="row">
-                                                    <?php if(!empty($post->postImages)): ?>
-                                                        <div class="col-md-4 col-sm-4">
-                                                            <a href="<?= $post->getUrl(); ?>" class="featured_img">
-                                                                <img class="img-responsive img-thumbnail" alt="" src="<?= $post->getThumbnailUrl(425,283); ?>">
-                                                                <span class="overlay"></span>
-                                                            </a>
-                                                        </div>
-                                                    <?php endif; ?>
-                                                    <?php $col = !empty($post->postImages) ? 8 : 12; ?>
-                                                    <div class="col-md-<?= $col; ?> col-sm-<?= $col; ?>">
-                                                        <p><?= $post->trl->small_text; ?></p>
-                                                    </div>
-                                                </div>
-                                            </figure>
-                                        </li>
-                                    </ul>
-                                </div>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <div class="col-md-12 col-sm-12">
-                                <p>Нет материалов</p>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-
-                    <?php if(!empty($pages)): ?>
-                        <div class="row">
-                            <?= \yii\widgets\LinkPager::widget(['pagination' => $pages]); ?>
-                        </div>
-                    <?php endif; ?>
-                </div>
+<!-- BANNER MOBILE::START-->
+<section class="topBanner hidden-sm-up">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 text-xs-center">
+                <?= BannersWidget::widget(['position' => 'TOP_BANNER']); ?>
             </div>
         </div>
+    </div>
+</section>
 
-        <div class="col-lg-4 col-md-4 col-sm-4">
-            <aside class="right_content">
-                <?= SearchFormWidget::widget(); ?>
-                <?= LatestPostsWidget::widget(); ?>
-                <div class="single_sidebar wow fadeInDown animated" style="visibility: visible; animation-name: fadeInDown;">
-                    <h2><span>Баннеры</span></h2>
-                    <?= BannersWidget::widget(['position' => 'RIGHT', 'attributes' => ['class' => 'sideAdd']]); ?>
+<!-- OWL DESKTOP::START-->
+<section class="topCarousel hidden-xs-down">
+    <div id="owlTop">
+        <?= CarouselWidget::widget(); ?>
+    </div>
+</section>
+
+<!-- CONTENT::START-->
+<section class="content separatorCards">
+    <div class="container">
+        <div class="row">
+            <div class="hidden-md-down col-lg-2">
+                <?= MainMenuWidget::widget(); ?>
+            </div>
+
+            <div class="col-sm-8 col-lg-7 no-pad-r">
+                <div class="innerWrapper">
+                    <h1>Поиск</h1>
+
+                    <form method="get" class="searchbar">
+                        <input name="q" value="<?= Yii::$app->request->get('q'); ?>" type="text">
+                        <button class="btn" type="submit">Поиск</button>
+                    </form>
+
+                    <?php foreach ($posts as $post): ?>
+                        <!-- card-->
+                        <div class="content__card">
+                            <div class="content__card__image">
+                                <a href="<?= $post->getUrl(); ?>">
+                                    <img class="img-fluid" src="<?= $post->getThumbnailUrl(484,276); ?>">
+                                </a>
+                            </div>
+                            <a class="content__card__title hidden-sm-up" href="#"><?= $post->trl->name; ?></a>
+                            <div class="content__card__content"><a class="content__card__title hidden-xs-down" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
+                                <div class="content__card__intro">
+                                    <p><?= $post->trl->small_text; ?></p>
+                                    <?php if(!empty($post->author)): ?>
+                                        <a href="<?= Url::to(['site/profile','id'=> $post->author_id]); ?>">
+                                            <?= $post->author->name.' '.$post->author->surname; ?>
+                                        </a>
+                                    <?php else: ?>
+                                        <a href=""><?= $post->author_custom_name; ?></a>
+                                    <?php endif; ?>
+                                    <span>• <?= substr($post->published_at,0,16); ?></span>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+
+                    <?= LinkPager::widget([
+                        'pagination' => $pages,
+                        'nextPageLabel' => '<i class="ico ico-paginate-next"></i>',
+                        'nextPageCssClass' => 'last',
+                        'prevPageLabel' => '<i class="ico ico-paginate-prev"></i>',
+                        'prevPageCssClass' => 'last',
+                        'maxButtonCount' => 5
+                    ]); ?>
                 </div>
-            </aside>
+            </div>
+
+            <!--sidebar-->
+            <div class="col-sm-4 col-lg-3 no-pad-l">
+                <div class="content__sidebar content__sidebar--top">
+                    <div class="content__sidebar__metrics text-xs-center">
+                        <div class="content__sidebar__metricCurrency"><span>USD 59.3</span><i class="ico ico-growth-up"></i></div>
+                        <div class="content__sidebar__metricCurrency"><span>EUR 63.12</span><i class="ico ico-growth-down"></i></div>
+                    </div>
+                    <div class="content__sidebar__metrics">
+                        <div class="content__sidebar__metricWeather"><span>Погода в <b>Анталии</b></span>
+                            <div class="content__sidebar__metricWeather__row">
+                                <div class="content__sidebar__metricWeather__left"><i class="ico ico-weather-rain"></i></div>
+                                <div class="content__sidebar__metricWeather__right"><span>+31 C</span>
+                                    <p>Временами дожди</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content__sidebar__metrics">
+                        <div class="content__sidebar__metricWeather"><span>Погода в <b>Стамбуле</b></span>
+                            <div class="content__sidebar__metricWeather__row">
+                                <div class="content__sidebar__metricWeather__left"><i class="ico ico-weather-rain"></i></div>
+                                <div class="content__sidebar__metricWeather__right"><span>+31 C</span>
+                                    <p>Временами дожди</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content__sidebar__banner">
+                        <?= BannersWidget::widget(['position' => 'TOP_RIGHT_1','imgAttributes' => ['class' => 'img-fluid']]); ?>
+                    </div>
+
+                    <div class="content__sidebar__banner">
+                        <?= BannersWidget::widget(['position' => 'TOP_RIGHT_2','imgAttributes' => ['class' => 'img-fluid']]); ?>
+                    </div>
+
+                    <div class="content__sidebar__banner">
+                        <?= BannersWidget::widget(['position' => 'BOTTOM_RIGHT_1','imgAttributes' => ['class' => 'img-fluid']]); ?>
+                    </div>
+
+                    <div class="content__sidebar__banner">
+                        <?= BannersWidget::widget(['position' => 'BOTTOM_RIGHT_2','imgAttributes' => ['class' => 'img-fluid']]); ?>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </section>

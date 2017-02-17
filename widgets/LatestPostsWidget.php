@@ -55,7 +55,7 @@ class LatestPostsWidget extends Widget
                $q->orderBy('published_at DESC');
             //if used siblings - complex sorting (first should be current category's items)
             }else{
-                $idsImploded = implode($this->currentIds);
+                $idsImploded = implode(',',$this->currentIds);
                 $q->orderBy(new Expression("IF(pc.category_id IN ({$idsImploded}), 0, 2147483647) ASC, published_at DESC"));
             }
 

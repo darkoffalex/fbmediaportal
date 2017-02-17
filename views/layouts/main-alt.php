@@ -3,13 +3,12 @@
 use app\assets\FrontendAsset;
 use yii\helpers\Url;
 use yii\helpers\Html;
-use app\widgets\MainMenuWidget;
-use app\widgets\BannersWidget;
+use yii\helpers\ArrayHelper;
 
 /* @var $this \yii\web\View */
 /* @var $content string */
 /* @var $user \yii\web\User */
-/* @var $controller \app\components\Controller */
+/* @var $controller \app\components\ControllerEx */
 /* @var $social kartik\social\Module */
 
 FrontendAsset::register($this);
@@ -40,7 +39,7 @@ $social = Yii::$app->getModule('social');
     <div class="container">
         <div class="row">
             <div class="col-sm-12 text-xs-center">
-                <?= BannersWidget::widget(['position' => 'TOP_BANNER']); ?>
+                <?= $this->render('/common/_banners',['banners' => ArrayHelper::getValue($controller->banners,'TOP_BANNER')]); ?>
             </div>
         </div>
     </div>
@@ -70,7 +69,10 @@ $social = Yii::$app->getModule('social');
 
                 <div class="header__navi hidden-lg-up hidden-xs-down"><i class="ico ico-hamb"></i><span>Наши <br> рубрики</span>
                     <div class="header__navi__drop">
-                        <?= MainMenuWidget::widget(); ?>
+                        <?= $this->render('/common/_main_menu',[
+                            'categories' => $controller->mainMenu,
+                            'active' => !empty($category) ? $category->id : null
+                        ]); ?>
                     </div>
                 </div>
 
@@ -81,7 +83,10 @@ $social = Yii::$app->getModule('social');
                     </form>
                     <div class="header__navi"><span>Наши рубрики</span><i class="ico ico-hamb"></i>
                         <div class="header__navi__drop">
-                            <?= MainMenuWidget::widget(); ?>
+                            <?= $this->render('/common/_main_menu',[
+                                'categories' => $controller->mainMenu,
+                                'active' => !empty($category) ? $category->id : null
+                            ]); ?>
                         </div>
                     </div>
                 </div>

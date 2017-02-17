@@ -101,7 +101,7 @@ class SiteController extends Controller
     public function actionAll($type)
     {
         $minComments = 200;
-        $minDate = '2014.01.01 00:00:00';
+        $minDate = date('Y-m-d H:i:s',(time()-(86400*100)));
         $q = Post::find();
 
         switch ($type){
@@ -110,7 +110,7 @@ class SiteController extends Controller
                 $q->orderBy('published_at DESC');
                 break;
             case 'popular':
-                $q->andWhere('last_comment_at > :minDate AND comment_count > :minComments AND status_id = :status',
+                $q->andWhere('published_at > :minDate AND comment_count > :minComments AND status_id = :status',
                     [
                         'minDate' => $minDate,
                         'minComments' => $minComments,

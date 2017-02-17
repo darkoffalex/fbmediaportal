@@ -2,7 +2,9 @@
 
 namespace app\helpers;
 
+use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
+use Yii;
 
 class Help
 {
@@ -201,6 +203,20 @@ class Help
         curl_close($ch);
 
         return !empty($matches[1]) ? trim($matches[1][0]) : null;
+    }
+
+    /**
+     * Returns data from db and caches query (if needed)
+     * @param callable $callback
+     * @param bool $cache
+     * @return mixed
+     */
+    public static function cquery(callable $callback, $cache = true)
+    {
+        if(!$cache){
+            return call_user_func($callback,Yii::$app->db);
+        }
+        return Yii::$app->db->cache($callback);
     }
 
     /**

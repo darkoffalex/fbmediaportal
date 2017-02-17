@@ -14,20 +14,22 @@ class PopularPostWidget extends Widget
     public $currentIds = [];
     public $siblingIds = [];
     public $minComments = 200;
-    public $minDate = '2014.01.01 00:00:00';
+    public $dayEld = 100;
     public $limit = 7;
     public $label = '';
 
     public function init()
     {
+        $minDate = date('Y-m-d H:i:s',(time()-(86400*$this->dayEld)));
+
         if(empty(self::$posts)){
 
             //get all popular posts
             $q = Post::find();
 
-            $q->andWhere('last_comment_at > :minDate AND comment_count > :minComments AND status_id = :status',
+            $q->andWhere('published_at > :minDate AND comment_count > :minComments AND status_id = :status',
                 [
-                    'minDate' => $this->minDate,
+                    'minDate' => $minDate,
                     'minComments' => $this->minComments,
                     'status' => Constants::STATUS_ENABLED
                 ]);
