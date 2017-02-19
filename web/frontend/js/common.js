@@ -122,32 +122,45 @@ $(document).ready(function () {
     /**
      * When changed carousel
      */
-
     $('.topCarousel > div').on('beforeChange', function(event, slick, currentSlide, nextSlide){
 
         var url = $(this).data('loading');
         var page = parseInt($(this).data('current-page'));
         var carousel = $(this);
-        var container = $(this).find('.slick-track');
+
+        var delta = nextSlide - currentSlide;
+        if(delta > 1){
+            //TODO: prevent
+        }
 
         if(!carousel.hasClass('no-load')) {
             carousel.addClass('no-load');
             $.ajax({
-                url: url + '?page=' + (page + 1),
+                url: url + '&page=' + (page + 1),
                 type: 'GET',
                 async: false,
                 success: function (data) {
                     carousel.data('current-page', (page + 1));
                     if (data != '') {
                         carousel.removeClass('no-load');
-                        // container.append(data);
                         carousel.slick('slickAdd',data);
-                        // carousel.slick('reinit');
-                        // carousel.slick("slickGoTo", page);
                     }
                 }
             });
         }
     });
 
+    /**
+     * Adding children comment via ajax
+     */
+    $(document).on('change','[data-reloading-select]',function () {
+        var name = $(this).attr('name');
+        var value = $(this).val();
+        var url = $(this).data('reloading-select')+'?'+name+'='+value;
+
+        var link = document.createElement('a');
+        link.href = url;
+        document.body.appendChild(link);
+        link.click();
+    });
 });

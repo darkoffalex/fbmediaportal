@@ -360,6 +360,6 @@ class Category extends CategoryDB
     public function getUrl($title = true, $abs = false)
     {
         $slugTitle = $title ? ArrayHelper::getValue($this->trl,'name',$this->name) : null;
-        return Url::to(['/category/show', 'id' => $this->id, 'title' => $title ? Help::slug($slugTitle) : null],$abs);
+        return Url::to(['/main/category', 'id' => $this->id, 'title' => $title ? Help::slug($slugTitle) : null],$abs);
     }
 }

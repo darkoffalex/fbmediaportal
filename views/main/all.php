@@ -1,33 +1,18 @@
 <?php
-use app\widgets\MainMenuWidget;
-use app\widgets\CarouselWidget;
-use app\widgets\BannersWidget;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\widgets\LinkPager;
 
 /* @var $this \yii\web\View */
 /* @var $user \app\models\User */
-/* @var $controller \app\controllers\SearchController */
+/* @var $controller \app\controllers\MainController */
 /* @var $posts \app\models\Post[] */
+/* @var $carouselPosts \app\models\Post[] */
 /* @var $pages \yii\data\Pagination */
+/* @var $type string */
 
 $user = Yii::$app->user->identity;
 $controller = $this->context;
-$this->title = "Поиск";
-
-//meta tags
-$this->registerMetaTag(['name' => 'description', 'content' => $controller->commonSettings->meta_description]);
-$this->registerMetaTag(['name' => 'keywords', 'content' => $controller->commonSettings->meta_keywords]);
-
-//open-graph meta tags
-$this->registerMetaTag(['property' => 'og:description', 'content' => ""]);
-$this->registerMetaTag(['property' => 'og:url', 'content' => ""]);
-$this->registerMetaTag(['property' => 'og:site_name', 'content' => ""]);
-$this->registerMetaTag(['property' => 'og:title', 'content' => ""]);
-$this->registerMetaTag(['property' => 'og:image', 'content' => ""]);
-$this->registerMetaTag(['property' => 'og:image:width', 'content' => '200']);
-$this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
 ?>
 
 <!-- BANNER MOBILE::START-->
@@ -35,7 +20,7 @@ $this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
     <div class="container">
         <div class="row">
             <div class="col-sm-12 text-xs-center">
-                <?= BannersWidget::widget(['position' => 'TOP_BANNER']); ?>
+                <?= $this->render('/common/_banners',['banners' => ArrayHelper::getValue($controller->banners,'TOP_BANNER')]); ?>
             </div>
         </div>
     </div>
@@ -43,8 +28,8 @@ $this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
 
 <!-- OWL DESKTOP::START-->
 <section class="topCarousel hidden-xs-down">
-    <div id="owlTop">
-        <?= CarouselWidget::widget(); ?>
+    <div id="owlTop" data-current-page="1" data-loading="<?= Url::to(['main/category-ajax','carousel' => 1]); ?>">
+        <?= $this->render('/common/_carousel',['posts' => $carouselPosts]); ?>
     </div>
 </section>
 
@@ -53,17 +38,24 @@ $this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
     <div class="container">
         <div class="row">
             <div class="hidden-md-down col-lg-2">
-                <?= MainMenuWidget::widget(); ?>
+                <?= $this->render('/common/_main_menu',[
+                    'categories' => $controller->mainMenu,
+                    'active' => null
+                ]); ?>
             </div>
 
             <div class="col-sm-8 col-lg-7 no-pad-r">
                 <div class="innerWrapper">
-                    <h1>Поиск</h1>
+                    <h1><?= ArrayHelper::getValue(['latest' => 'Последние', 'popular' => 'Популярные'],$type,'Последние'); ?></h1>
 
-                    <form method="get" class="searchbar">
-                        <input name="q" value="<?= Yii::$app->request->get('q'); ?>" type="text">
-                        <button class="btn" type="submit">Поиск</button>
-                    </form>
+                    <div class="sorting">
+                        <a class="btn btn-outline <?= $type=='latest' ? 'active' : ''; ?>" href="<?= Url::to(['main/all','type' => 'latest']); ?>">
+                            <span>Последнее</span>
+                        </a>
+                        <a class="btn btn-outline <?= $type=='popular' ? 'active' : ''; ?>" href="<?= Url::to(['main/all','type' => 'popular']); ?>">
+                            <span>Популярное</span>
+                        </a>
+                    </div>
 
                     <?php foreach ($posts as $post): ?>
                         <!-- card-->
@@ -78,7 +70,7 @@ $this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
                                 <div class="content__card__intro">
                                     <p><?= $post->trl->small_text; ?></p>
                                     <?php if(!empty($post->author)): ?>
-                                        <a href="<?= Url::to(['site/profile','id'=> $post->author_id]); ?>">
+                                        <a href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
                                             <?= $post->author->name.' '.$post->author->surname; ?>
                                         </a>
                                     <?php else: ?>
@@ -98,6 +90,7 @@ $this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
                         'prevPageCssClass' => 'last',
                         'maxButtonCount' => 5
                     ]); ?>
+
                 </div>
             </div>
 
@@ -130,19 +123,31 @@ $this->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
                     </div>
 
                     <div class="content__sidebar__banner">
-                        <?= BannersWidget::widget(['position' => 'TOP_RIGHT_1','imgAttributes' => ['class' => 'img-fluid']]); ?>
+                        <?= $this->render('/common/_banners',[
+                            'imgAttributes' => ['class' => 'img-fluid'],
+                            'banners' => ArrayHelper::getValue($controller->banners,'TOP_RIGHT_1')
+                        ]); ?>
                     </div>
 
                     <div class="content__sidebar__banner">
-                        <?= BannersWidget::widget(['position' => 'TOP_RIGHT_2','imgAttributes' => ['class' => 'img-fluid']]); ?>
+                        <?= $this->render('/common/_banners',[
+                            'imgAttributes' => ['class' => 'img-fluid'],
+                            'banners' => ArrayHelper::getValue($controller->banners,'TOP_RIGHT_2')
+                        ]); ?>
                     </div>
 
                     <div class="content__sidebar__banner">
-                        <?= BannersWidget::widget(['position' => 'BOTTOM_RIGHT_1','imgAttributes' => ['class' => 'img-fluid']]); ?>
+                        <?= $this->render('/common/_banners',[
+                            'imgAttributes' => ['class' => 'img-fluid'],
+                            'banners' => ArrayHelper::getValue($controller->banners,'BOTTOM_RIGHT_1')
+                        ]); ?>
                     </div>
 
                     <div class="content__sidebar__banner">
-                        <?= BannersWidget::widget(['position' => 'BOTTOM_RIGHT_2','imgAttributes' => ['class' => 'img-fluid']]); ?>
+                        <?= $this->render('/common/_banners',[
+                            'imgAttributes' => ['class' => 'img-fluid'],
+                            'banners' => ArrayHelper::getValue($controller->banners,'BOTTOM_RIGHT_2')
+                        ]); ?>
                     </div>
                 </div>
             </div>

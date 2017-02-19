@@ -49,6 +49,7 @@ class CommonSettingsController extends Controller
 
             $model->image = null;
             $model->isNewRecord ? $model->save() : $model->update();
+            Yii::$app->cache->flush();
         }
 
         return $this->render('index',compact('model'));
@@ -67,6 +68,7 @@ class CommonSettingsController extends Controller
             $model->deleteFile();
             $model->header_logo_filename = '';
             $model->update();
+            Yii::$app->cache->flush();
         }
 
         return $this->redirect(Url::to(['/admin/common-settings/index']));

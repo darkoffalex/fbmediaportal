@@ -26,6 +26,6 @@ $user = Yii::$app->user->identity;
         <?php endforeach; ?>
     </ul>
     <?php if(!empty($type)): ?>
-        <a class="categories__more" href="<?= Url::to(['site/all','type' => $type]); ?>">Все материалы</a>
+        <a class="categories__more" href="<?= Url::to(['main/all','type' => $type]); ?>">Все материалы</a>
     <?php endif; ?>
 </div>

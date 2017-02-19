@@ -2,6 +2,7 @@
 use app\helpers\Constants;
 use yii\helpers\Url;
 use yii\helpers\ArrayHelper;
+use app\helpers\Help;
 
 /* @var $this \yii\web\View */
 /* @var $user \app\models\User */
@@ -9,6 +10,7 @@ use yii\helpers\ArrayHelper;
 
 /* @var $mainPosts \app\models\Post[] */
 /* @var $forumPosts \app\models\Post[] */
+/* @var $popularPosts  */
 /* @var $category \app\models\Category */
 
 /* @var $currentIds int[] */
@@ -31,7 +33,7 @@ $controller = $this->context;
 
     <!-- OWL DESKTOP::START-->
     <section class="topCarousel hidden-xs-down">
-        <div id="owlTop">
+        <div id="owlTop" data-current-page="1" data-loading="<?= Url::to(['main/category-ajax','carousel' => 1,'id' => !empty($category) ? $category->id : null]); ?>">
             <?= $this->render('/common/_carousel',['posts' => $mainPosts]); ?>
         </div>
     </section>
@@ -71,7 +73,7 @@ $controller = $this->context;
                                 </div>
                                 <div class="content__card__info">
                                     <?php if(!empty($post->author)): ?>
-                                        <a href="<?= Url::to(['site/profile','id'=> $post->author_id]); ?>">
+                                        <a href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
                                             <?= $post->author->name.' '.$post->author->surname; ?>
                                         </a>
                                     <?php else: ?>
@@ -98,7 +100,7 @@ $controller = $this->context;
                                     <div class="content__card__intro">
                                         <p><?= $post->trl->small_text; ?></p>
                                         <?php if(!empty($post->author)): ?>
-                                            <a href="<?= Url::to(['site/profile','id'=> $post->author_id]); ?>">
+                                            <a href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
                                                 <?= $post->author->name.' '.$post->author->surname; ?>
                                             </a>
                                         <?php else: ?>
@@ -113,7 +115,7 @@ $controller = $this->context;
                         <?php if($index == 0): ?>
                             <!-- OWL DESKTOP::START-->
                             <section class="topCarousel hidden-sm-up">
-                                <div id="owlTopMobile">
+                                <div id="owlTopMobile" data-current-page="1" data-loading="<?= Url::to(['main/category-ajax','carousel' => 1,'id' => !empty($category) ? $category->id : null]); ?>">
                                     <?= $this->render('/common/_carousel',['posts' => $mainPosts]); ?>
                                 </div>
                             </section>
@@ -181,7 +183,7 @@ $controller = $this->context;
                 <div class="col-md-12 col-lg-10">
                     <div class="row">
                         <?= $this->render('/common/_posts_list',['posts' => $mainPosts, 'label' => 'Последнее', 'type' => 'latest']); ?>
-                        <?= $this->render('/common/_posts_list',['posts' => $mainPosts, 'label' => 'Популярное', 'type' => 'popular', 'ico' => 'ico-cat-hot']); ?>
+                        <?= $this->render('/common/_posts_list',['posts' => $popularPosts, 'label' => 'Популярное', 'type' => 'popular', 'ico' => 'ico-cat-hot']); ?>
                         <?= $this->render('/common/_posts_list',['posts' => $mainPosts, 'label' => 'Полезное о Турции', 'ico' => 'ico-cat-turkey']); ?>
                     </div>
                 </div>
@@ -196,51 +198,28 @@ $controller = $this->context;
                 <div class="hidden-md-down col-lg-2"></div>
                 <div class="col-sm-8 col-lg-7 no-pad-r">
 
-                    <?php /* @var $slicedPart1 \app\models\Post[] */ ?>
-                    <?php $slicedPart1 = array_slice($mainPosts,3,3); ?>
+                    <?php /* @var $slicedPart2 \app\models\Post[] */ ?>
+                    <?php $slicedPart2 = array_slice($mainPosts,3,3); ?>
 
-                    <?php foreach ($slicedPart1 as $index => $post): ?>
-                        <?php if($index == 0): ?>
-                            <div class="content__card content__card--wide">
-                                <a href="<?= $post->getUrl(); ?>"><img width="706" class="img-fluid" src="<?= $post->getFirstImageUrlEx(706,311); ?>"></a>
-                                <?php if(!empty($post->postImages[0]->trl->signature)): ?>
-                                    <div class="content__card__copy"><?= $post->postImages[0]->trl->signature; ?></div>
-                                <?php endif; ?>
-                                <a class="content__card__title" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
-                                <div class="content__card__intro">
-                                    <p><?= $post->trl->small_text; ?></p>
-                                </div>
-                                <div class="content__card__info">
-                                    <?php if(!empty($post->author)): ?>
-                                        <a href="<?= Url::to(['site/profile','id'=> $post->author_id]); ?>">
-                                            <?= $post->author->name.' '.$post->author->surname; ?>
-                                        </a>
-                                    <?php else: ?>
-                                        <a href=""><?= $post->author_custom_name; ?></a>
+                    <?php if(!empty($slicedPart2)): ?>
+                        <?php if($slicedPart2[0]->content_type_id == Constants::CONTENT_TYPE_VIDEO): ?>
+                            <?php Help::swap($mainPosts,0,1); ?>
+                        <?php endif; ?>
+
+                        <?php foreach ($slicedPart2 as $index => $post): ?>
+                            <?php if($index == 0): ?>
+                                <div class="content__card content__card--wide">
+                                    <a href="<?= $post->getUrl(); ?>"><img width="706" class="img-fluid" src="<?= $post->getFirstImageUrlEx(706,311); ?>"></a>
+                                    <?php if(!empty($post->postImages[0]->trl->signature)): ?>
+                                        <div class="content__card__copy"><?= $post->postImages[0]->trl->signature; ?></div>
                                     <?php endif; ?>
-                                    <span>• <?= substr($post->published_at,0,16); ?></span>
-                                </div>
-
-                                <?php if($post->content_type_id != Constants::CONTENT_TYPE_VIDEO): ?>
-                                    <div class="content__card__comments"><span><?= count($post->comments); ?> комментариев</span></div>
-                                <?php else: ?>
-                                    <div class="content__card__comments"><span><?= count($post->comments); ?></span></div>
-                                <?php endif; ?>
-                            </div>
-                        <?php else: ?>
-                            <div class="content__card">
-                                <div class="content__card__image">
-                                    <a href="<?= $post->getUrl(); ?>"><img width="484" class="img-fluid" src="<?= $post->getThumbnailUrl(484,276); ?>"></a>
-                                </div>
-
-                                <a class="content__card__title hidden-sm-up" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
-
-                                <div class="content__card__content">
-                                    <a class="content__card__title hidden-xs-down" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
+                                    <a class="content__card__title" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
                                     <div class="content__card__intro">
                                         <p><?= $post->trl->small_text; ?></p>
+                                    </div>
+                                    <div class="content__card__info">
                                         <?php if(!empty($post->author)): ?>
-                                            <a href="<?= Url::to(['site/profile','id'=> $post->author_id]); ?>">
+                                            <a href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
                                                 <?= $post->author->name.' '.$post->author->surname; ?>
                                             </a>
                                         <?php else: ?>
@@ -248,11 +227,39 @@ $controller = $this->context;
                                         <?php endif; ?>
                                         <span>• <?= substr($post->published_at,0,16); ?></span>
                                     </div>
-                                </div>
-                            </div>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
 
+                                    <?php if($post->content_type_id != Constants::CONTENT_TYPE_VIDEO): ?>
+                                        <div class="content__card__comments"><span><?= count($post->comments); ?> комментариев</span></div>
+                                    <?php else: ?>
+                                        <div class="content__card__comments"><span><?= count($post->comments); ?></span></div>
+                                    <?php endif; ?>
+                                </div>
+                            <?php else: ?>
+                                <div class="content__card">
+                                    <div class="content__card__image">
+                                        <a href="<?= $post->getUrl(); ?>"><img width="484" class="img-fluid" src="<?= $post->getThumbnailUrl(484,276); ?>"></a>
+                                    </div>
+
+                                    <a class="content__card__title hidden-sm-up" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
+
+                                    <div class="content__card__content">
+                                        <a class="content__card__title hidden-xs-down" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
+                                        <div class="content__card__intro">
+                                            <p><?= $post->trl->small_text; ?></p>
+                                            <?php if(!empty($post->author)): ?>
+                                                <a href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
+                                                    <?= $post->author->name.' '.$post->author->surname; ?>
+                                                </a>
+                                            <?php else: ?>
+                                                <a href=""><?= $post->author_custom_name; ?></a>
+                                            <?php endif; ?>
+                                            <span>• <?= substr($post->published_at,0,16); ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
                 <!--sidebar-->
                 <div class="col-sm-4 col-lg-3 no-pad-l hidden-xs-down">
@@ -278,4 +285,4 @@ $controller = $this->context;
     <!--CARDS-->
 <?= $this->render('/common/_forum_posts',['posts' => $forumPosts, 'label' => 'Форум']); ?>
 
-<!--<div class="loadable-content" data-current-page="1" data-postload="--><?//= Url::to(['category/post-load','id' => $category->id]); ?><!--"></div>-->
+<div class="loadable-content" data-current-page="1" data-postload="<?= Url::to(['main/category-ajax','id' => !empty($category) ? $category->id : null]); ?>"></div>

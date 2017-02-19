@@ -1,17 +1,11 @@
 <?php
-
-use yii\helpers\Url;
-use kartik\helpers\Html;
-use app\helpers\Help;
-use yii\helpers\ArrayHelper;
-
 /* @var $posts \app\models\Post[] */
-/* @var $widget \app\widgets\CarouselWidget */
+/* @var $controller \app\controllers\MainController */
 /* @var $this \yii\web\View */
-/* @var $user \yii\web\User */
+/* @var $user \app\models\User */
 /* @var $error string */
 
-$widget = $this->context;
+$controller = $this->context;
 $user = Yii::$app->user->identity;
 ?>
 
@@ -23,5 +17,3 @@ $user = Yii::$app->user->identity;
         </a>
     </div>
 <?php endforeach; ?>
-
-<?= $error; ?>

@@ -77,6 +77,8 @@ class BannerController extends Controller
                     $model->image = null;
                     $model->save();
 
+                    Yii::$app->cache->flush();
+
                     return $this->redirect(Url::to(['/admin/banner/index']));
                 }
             }
@@ -140,6 +142,8 @@ class BannerController extends Controller
                     $model->updated_by_id = Yii::$app->user->id;
                     $model->image = null;
                     $model->update();
+
+                    Yii::$app->cache->flush();
                 }
             }
         }
@@ -165,6 +169,7 @@ class BannerController extends Controller
 
         $model->deleteFile();
         $model->delete();
+        Yii::$app->cache->flush();
 
         return $this->redirect(Yii::$app->request->referrer);
     }
@@ -206,6 +211,8 @@ class BannerController extends Controller
                 $model->updated_by_id = Yii::$app->user->id;
                 $model->save();
 
+                Yii::$app->cache->flush();
+
                 return $this->redirect(Url::to(['/admin/banner/places']));
             }
         }
@@ -242,6 +249,8 @@ class BannerController extends Controller
                 $model->updated_by_id = Yii::$app->user->id;
                 $model->update();
 
+                Yii::$app->cache->flush();
+
                 return $this->redirect(Url::to(['/admin/banner/places']));
             }
         }
@@ -266,6 +275,7 @@ class BannerController extends Controller
         }
 
         $model->delete();
+        Yii::$app->cache->flush();
 
         return $this->redirect(Yii::$app->request->referrer);
     }
@@ -356,6 +366,8 @@ class BannerController extends Controller
                 $display->updated_by_id = Yii::$app->user->id;
                 $display->save();
 
+                Yii::$app->cache->flush();
+
                 //response (json)
                 Yii::$app->response->format = Response::FORMAT_JSON;
                 return [
@@ -394,6 +406,8 @@ class BannerController extends Controller
         $display->updated_by_id = Yii::$app->user->id;
         $display->update();
 
+        Yii::$app->cache->flush();
+
         //response (json)
         Yii::$app->response->format = Response::FORMAT_JSON;
         return [
@@ -418,6 +432,8 @@ class BannerController extends Controller
             return 'FAILED';
         }
 
-        return $display->delete() ? 'OK' : 'FAILED';
+        $deleted = $display->delete();
+        Yii::$app->cache->flush();
+        return $deleted ? 'OK' : 'FAILED';
     }
 }

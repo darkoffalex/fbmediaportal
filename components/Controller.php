@@ -2,8 +2,13 @@
 
 namespace app\components;
 
+use app\helpers\Constants;
+use app\helpers\Help;
+use app\models\Banner;
+use app\models\Category;
 use app\models\CommonSettings;
 use Yii;
+use yii\caching\Cache;
 use yii\web\Controller as BaseController;
 use yii\base\Module;
 use yii\base\Action;
@@ -12,15 +17,21 @@ use app\models\User;
 
 class Controller extends BaseController
 {
-    /**
-     * @var int[]
-     */
-    public $categoryIds = [];
 
     /**
      * @var CommonSettings
      */
     public $commonSettings = null;
+
+    /**
+     * @var Category[]
+     */
+    public $mainMenu = [];
+
+    /**
+     * @var Banner[][]
+     */
+    public $banners = [];
 
     /**
      * Redefine base constructor
@@ -35,9 +46,6 @@ class Controller extends BaseController
 
         //timezone
         date_default_timezone_set('Europe/Moscow');
-
-        //enable foreign keys (for SQLITE database)
-//        Yii::$app->db->createCommand("PRAGMA foreign_keys = ON")->execute();
 
         //base constructor
         parent::__construct($id,$module,$config);
@@ -62,12 +70,38 @@ class Controller extends BaseController
 
         //Get common settings if empty
         if(empty($this->commonSettings)){
-            $this->commonSettings = CommonSettings::find()->one();
+            $this->commonSettings = Help::cquery(function($db){return CommonSettings::find()->one();},true);
             if(empty($this->commonSettings)){
                 $this->commonSettings = new CommonSettings();
                 $this->commonSettings->save();
             }
         }
+
+        //Get main menu
+        $qMenu = Category::find()
+            ->where(['status_id' => Constants::STATUS_ENABLED, 'parent_category_id' => 0])
+            ->with(['trl', 'childrenActive.trl', 'childrenActive.childrenActive.trl'])
+            ->orderBy('priority ASC');
+        $this->mainMenu = Help::cquery(function($db)use($qMenu){return $qMenu->all();},true);
+
+
+        //Get all banners
+        $qBanners = Banner::find()
+            ->with('bannerDisplays.place')
+            ->joinWith('bannerDisplays as bd')
+            ->where('bd.start_at < :cur',['cur' => date('Y-m-d H:i:s',time())])
+            ->andWhere('bd.end_at > :cur',['cur' => date('Y-m-d H:i:s',time())]);
+        $banners = Help::cquery(function($db)use($qBanners){return $qBanners->all();},true);
+
+        /* @var $banners Banner[] */
+        foreach ($banners as $banner){
+            foreach ($banner->bannerDisplays as $bds){
+                $this->banners[$bds->place->alias][] = $banner;
+            }
+        }
+
+        //clear the cache
+//        Yii::$app->cache->flush();
 
         return parent::beforeAction($action);
     }

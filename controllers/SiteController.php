@@ -33,174 +33,6 @@ class SiteController extends Controller
         ];
     }
 
-    /**
-     * Главная страница
-     * @return string
-     */
-    public function actionIndex()
-    {
-        /* @var $posts Post[] */
-        $posts = Post::find()
-            ->alias('p')
-            ->with(['trl','postImages.trl', 'author', 'comments'])
-            ->where(['status_id' => Constants::STATUS_ENABLED])
-            ->andWhere(new Expression('kind_id != :kind OR kind_id IS NULL', ['kind' => Constants::KIND_FORUM]))
-//            ->andWhere(new Expression('EXISTS (SELECT img.id FROM post_image img WHERE img.post_id = p.id)'))
-            ->orderBy(new Expression('IF(sticky_position_main, sticky_position_main, 2147483647) ASC, IF(type_id = :lowestPriorityType, 2147483647, 0) ASC, published_at DESC',
-                ['lowestPriorityType' => Constants::CONTENT_TYPE_POST]
-            ))
-            ->offset(0)
-            ->limit(6)
-            ->all();
-
-        /* @var $forumPosts Post[] */
-        $forumPosts = Post::find()
-            ->alias('p')
-            ->with(['trl','postImages'])
-            ->where(['status_id' => Constants::STATUS_ENABLED])
-//            ->andWhere(new Expression('EXISTS (SELECT img.id FROM post_image img WHERE img.post_id = p.id)'))
-//            ->andWhere(['kind_id' => Constants::KIND_FORUM])
-            ->orderBy('published_at DESC')
-            ->offset(0)
-            ->limit(4)
-            ->all();
-
-        return $this->render('index', compact('posts','forumPosts'));
-    }
-
-    /**
-     * Render user's profile
-     * @param $id
-     * @return string
-     * @throws NotFoundHttpException
-     */
-    public function actionProfile($id)
-    {
-        /* @var $user User */
-        $user = User::find()->where(['id' => $id])->one();
-
-        if(empty($user)){
-            throw new NotFoundHttpException('Пользователь не найден', 404);
-        }
-
-        $q = Post::find()->where(['author_id' => $user->id]);
-        $q->orderBy('published_at DESC');
-        $countQ = clone $q;
-        $pages = new Pagination(['totalCount' => $countQ->count(), 'defaultPageSize' => 20]);
-        $q->with(['trl','postImages','author']);
-        $posts = $q->offset($pages->offset)->limit($pages->limit)->all();
-
-        return $this->render('profile', compact('posts','pages','user'));
-    }
-
-    /**
-     * Outputs all items
-     * @param $type
-     * @return string
-     */
-    public function actionAll($type)
-    {
-        $minComments = 200;
-        $minDate = date('Y-m-d H:i:s',(time()-(86400*100)));
-        $q = Post::find();
-
-        switch ($type){
-            case 'latest':
-                $q->andWhere(new Expression('status_id = :status AND (kind_id != :kind OR kind_id IS NULL)', ['status' => Constants::STATUS_ENABLED, 'kind' => Constants::KIND_FORUM]));
-                $q->orderBy('published_at DESC');
-                break;
-            case 'popular':
-                $q->andWhere('published_at > :minDate AND comment_count > :minComments AND status_id = :status',
-                    [
-                        'minDate' => $minDate,
-                        'minComments' => $minComments,
-                        'status' => Constants::STATUS_ENABLED
-                    ]);
-                $q->orderBy('comment_count DESC');
-                break;
-            default:
-                $type = 'latest';
-                $q->andWhere(new Expression('status_id = :status AND (kind_id != :kind OR kind_id IS NULL)', ['status' => Constants::STATUS_ENABLED, 'kind' => Constants::KIND_FORUM]));
-                break;
-        }
-
-        $countQ = clone $q;
-        $pages = new Pagination(['totalCount' => $countQ->count(), 'defaultPageSize' => 20]);
-        $q->with(['trl','postImages','author']);
-        $posts = $q->offset($pages->offset)->limit($pages->limit)->all();
-
-        return $this->render('all', compact('type','posts','pages'));
-    }
-
-    /**
-     * Post-loading via ajax for carousels
-     * @param $page
-     * @param null $cat
-     * @param null $additional
-     * @return string
-     */
-    public function actionCarouselLoad($page, $cat = null, $additional = null)
-    {
-        $q = Post::find()
-            ->alias('p')
-            ->with(['trl','postImages.trl', 'author', 'comments'])
-            ->where(['status_id' => Constants::STATUS_ENABLED])
-            ->andWhere(['content_type_id' => Constants::CONTENT_TYPE_POST])
-            ->andWhere(new Expression('kind_id != :kind OR kind_id IS NULL', ['kind' => Constants::KIND_FORUM]))
-            ->andWhere(new Expression('EXISTS (SELECT img.id FROM post_image img WHERE img.post_id = p.id)'))
-            ->orderBy(new Expression('IF(sticky_position_main, sticky_position_main, 2147483647) ASC, IF(type_id = :lowestPriorityType, 2147483647, 0) ASC, published_at DESC',
-                ['lowestPriorityType' => Constants::CONTENT_TYPE_POST]
-            ));
-
-
-        $count = clone $q;
-        $pages = new Pagination(['totalCount' => $count->count(), 'defaultPageSize' => 1]);
-        $posts = $q->offset($pages->offset+20)->limit($pages->limit)->all();
-
-        return $this->renderPartial('_load_carousel',compact('posts'));
-    }
-
-    /**
-     * Post-loading via ajax (while scrolling)
-     * @param int $page
-     * @return null|string
-     */
-    public function actionPostLoad($page = 1)
-    {
-        $qMain = Post::find()
-            ->alias('p')
-            ->with(['trl','postImages.trl', 'author', 'comments'])
-            ->where(['status_id' => Constants::STATUS_ENABLED])
-            ->andWhere(new Expression('kind_id != :kind OR kind_id IS NULL', ['kind' => Constants::KIND_FORUM]))
-//            ->andWhere(new Expression('EXISTS (SELECT img.id FROM post_image img WHERE img.post_id = p.id)'))
-            ->orderBy(new Expression('IF(sticky_position_main, sticky_position_main, 2147483647) ASC, IF(content_type_id = :lowestPriorityType, 2147483647, 0) ASC, published_at DESC',
-                ['lowestPriorityType' => Constants::CONTENT_TYPE_POST]
-            ));
-
-        $qForum = Post::find()
-            ->alias('p')
-            ->with(['trl','postImages'])
-            ->where(['status_id' => Constants::STATUS_ENABLED])
-//            ->andWhere(new Expression('EXISTS (SELECT img.id FROM post_image img WHERE img.post_id = p.id)'))
-//            ->andWhere(['kind_id' => Constants::KIND_FORUM])
-            ->orderBy('published_at DESC');
-
-        $qMainCount = clone $qMain;
-        $qForumCount = clone $qForum;
-
-        $pagesMain = new Pagination(['totalCount' => $qMainCount->count(), 'defaultPageSize' => 3]);
-        $pagesForum = new Pagination(['totalCount' => $qForumCount->count(), 'defaultPageSize' => 4]);
-
-        if($page > $pagesMain->pageCount){
-            return null;
-        }
-
-        /* @var $posts Post[] */
-        $posts = $qMain->offset($pagesMain->offset+3)->limit($pagesMain->limit)->all();
-        $forumPosts = $qForum->offset($pagesForum->offset)->limit($pagesForum->limit)->all();
-
-        return $this->renderPartial('_load', compact('posts','forumPosts'));
-    }
 
     /**
      * Updates banner clicks and redirects to it's url
@@ -268,7 +100,7 @@ class SiteController extends Controller
 
         try {
             $helper = $fb->getRedirectLoginHelper();
-            $accessToken = $helper->getAccessToken();
+            $accessToken = $helper->getAccessToken(Url::to(['/site/fb-login'],true));
         } catch(FacebookSDKException $e) {
             throw new NotAcceptableHttpException($e->getMessage(),'402');
         }
@@ -332,7 +164,7 @@ class SiteController extends Controller
         }
 
         //back to main page
-        return $this->redirect(Url::to(['/site/index']));
+        return $this->redirect(Url::to(['/main/index']));
     }
 
     /**
@@ -344,6 +176,6 @@ class SiteController extends Controller
         Yii::$app->user->logout(true);
 
         //back to main page
-        return $this->redirect(Url::to(['/site/index']));
+        return $this->redirect(Url::to(['/main/index']));
     }
 }

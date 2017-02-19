@@ -39,7 +39,7 @@ class CategoriesController extends Controller
      * Moves category (up or down, changes priority)
      * @param int $id
      * @param string $dir
-     * @return \yii\web\Response
+     * @return \yii\web\Response|string
      * @throws NotFoundHttpException
      */
     public function actionMove($id, $dir)
@@ -52,6 +52,7 @@ class CategoriesController extends Controller
         }
 
         Sort::Move($model,$dir,Category::className(),['parent_category_id' => $model->parent_category_id]);
+        Yii::$app->cache->flush();
 
         if(Yii::$app->request->isAjax){
             return $this->actionIndex($model->parent_category_id);
@@ -63,7 +64,7 @@ class CategoriesController extends Controller
     /**
      * Delete
      * @param $id
-     * @return \yii\web\Response
+     * @return \yii\web\Response|string
      * @throws NotFoundHttpException
      */
     public function actionDelete($id)
@@ -77,6 +78,7 @@ class CategoriesController extends Controller
 
         $parentId = $model->parent_category_id;
         $model->recursiveDelete();
+        Yii::$app->cache->flush();
 
         if(Yii::$app->request->isAjax){
             return $this->actionIndex($parentId);
@@ -117,6 +119,7 @@ class CategoriesController extends Controller
             //if validated - save and go to detail edit
             if($model->validate()){
                 $model->save();
+                Yii::$app->cache->flush();
                 return $this->redirect(Url::to(['/admin/categories/edit', 'id' => $model->id]));
             }
         }
@@ -155,6 +158,7 @@ class CategoriesController extends Controller
 
                 //update main object
                 $model->update();
+                Yii::$app->cache->flush();
 
                 //save translations
                 foreach($model->translations as $lng => $attributes){

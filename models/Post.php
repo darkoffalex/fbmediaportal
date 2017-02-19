@@ -159,7 +159,7 @@ class Post extends PostDB
     public function getUrl($title = true, $abs = false)
     {
         $slugTitle = $title ? ArrayHelper::getValue($this->trl,'name',$this->name) : null;
-        return Url::to(['/posts/show', 'id' => $this->id, 'title' => $title ? Help::slug($slugTitle) : null],$abs);
+        return Url::to(['/main/post', 'id' => $this->id, 'title' => $title ? Help::slug($slugTitle) : null],$abs);
     }
 
     /**
@@ -392,32 +392,33 @@ class Post extends PostDB
 
     /**
      * Builds complexly sort query for selecting all posts depending on current categories
-     * @param null $curCatId
-     * @param null $curCatIds
-     * @param null $sibIds
+     * @param null|int $curCatId
+     * @param null|int[] $curCatIds
+     * @param null|int[] $sibIds
+     * @param bool $sticky
      * @return ActiveQuery
      */
-    public static function findSorted($curCatId = null, $curCatIds = null, $sibIds = null)
+    public static function findSorted($curCatId = null, $curCatIds = null, $sibIds = null, $sticky = true)
     {
+
+        //implode for using in queries
+        $currentIdsStr = !empty($curCatIds) ? implode(',',$curCatIds) : null;
+        $siblingIdsStr = !empty($sibIds) ? implode(',',$sibIds) : null;
+
         //get all basic posts data
         /* @var $posts Post[] */
         $mainPostsQuery = Post::find()
             ->alias('p')
             ->joinWith('postCategories as pc');
 
-        //implode for using in queries
-        $currentIdsStr = implode(',',$curCatIds);
-        $siblingIdsStr = implode(',',$sibIds);
-
-
         //build ordering condition
         $orderPriorities = [];
         if(!empty($curCatId)){
-            $orderPriorities[] = "IF((pc.category_id = :cat AND sticky_position > 0), sticky_position, 2147483647) ASC";
+            if($sticky) : $orderPriorities[] = "IF((pc.category_id = :cat AND sticky_position > 0), sticky_position, 2147483647) ASC"; endif;
 //            $orderPriorities[] = "IF(pc.category_id = :cat, 0, 2147483647) ASC";
             $orderPriorities[] = "IF(pc.category_id IN ({$currentIdsStr}), 0, 2147483647) ASC";
             if(!empty($sibIds)) : $orderPriorities[] = "IF(pc.category_id IN ({$siblingIdsStr}), 0, 2147483647) ASC"; endif;
-        }else{
+        }elseif($sticky){
             $orderPriorities[] = "IF(sticky_position_main, sticky_position_main, 2147483647)";
         }
         $orderPriorities[] = "IF(content_type_id = :lowestPriorityType, 2147483647, 0) ASC";
@@ -428,6 +429,39 @@ class Post extends PostDB
         $orderParams = ['lowestPriorityType' => Constants::CONTENT_TYPE_POST];
         if(!empty($curCatId)) : $orderParams['cat'] = $curCatId; endif;
         $mainPostsQuery->orderBy(new Expression(implode(', ',$orderPriorities), $orderParams));
+
+        return $mainPostsQuery;
+    }
+
+    /**
+     * Builds complexly sort query for selecting all popular posts depending on current categories
+     * @param null $curCatId
+     * @param null $curCatIds
+     * @param null $sibIds
+     * @return ActiveQuery
+     */
+    public static function findSortedPopular($curCatId = null, $curCatIds = null, $sibIds = null)
+    {
+        //implode for using in queries
+        $currentIdsStr = implode(',',$curCatIds);
+        $siblingIdsStr = implode(',',$sibIds);
+
+        //get all basic posts data
+        /* @var $posts Post[] */
+        $mainPostsQuery = Post::find()
+            ->alias('p')
+            ->joinWith('postCategories as pc');
+
+        //build ordering condition
+        $orderPriorities = [];
+        if(!empty($curCatId)){
+            $orderPriorities[] = "IF(pc.category_id IN ({$currentIdsStr}), 0, 2147483647) ASC";
+            if(!empty($sibIds)) : $orderPriorities[] = "IF(pc.category_id IN ({$siblingIdsStr}), 0, 2147483647) ASC"; endif;
+        }
+        $orderPriorities[] = "p.comment_count DESC";
+
+        //finalize query
+        $mainPostsQuery->orderBy(new Expression(implode(', ',$orderPriorities)));
 
         return $mainPostsQuery;
     }

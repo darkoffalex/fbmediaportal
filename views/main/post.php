@@ -1,14 +1,13 @@
 <?php
 use yii\helpers\Url;
 use yii\helpers\Html;
-use app\widgets\MainMenuWidget;
-use app\widgets\CarouselWidget;
-use app\widgets\BannersWidget;
+use yii\helpers\ArrayHelper;
 
 /* @var $this \yii\web\View */
 /* @var $user \app\models\User */
-/* @var $controller \app\controllers\PostsController */
+/* @var $controller \app\controllers\MainController */
 /* @var $post \app\models\Post */
+/* @var $carouselPosts \app\models\Post[] */
 /* @var $comments \app\models\Comment[] */
 
 $user = Yii::$app->user->identity;
@@ -20,15 +19,15 @@ $controller = $this->context;
         <div class="container">
             <div class="row">
                 <div class="col-sm-12 text-xs-center">
-                    <?= BannersWidget::widget(['position' => 'TOP_BANNER']); ?>
+                    <?= $this->render('/common/_banners',['banners' => ArrayHelper::getValue($controller->banners,'TOP_BANNER')]); ?>
                 </div>
             </div>
         </div>
     </section>
     <!-- OWL DESKTOP::START-->
     <section class="topCarousel hidden-xs-down">
-        <div id="owlTop">
-            <?= CarouselWidget::widget(); ?>
+        <div id="owlTop" data-current-page="1" data-loading="<?= Url::to(['main/category-ajax','carousel' => 1,'id' => !empty($post->categories[0]) ? $post->categories[0]->id : null]); ?>">
+            <?= $this->render('/common/_carousel',['posts' => $carouselPosts]); ?>
         </div>
     </section>
 
@@ -37,7 +36,10 @@ $controller = $this->context;
         <div class="container">
             <div class="row">
                 <div class="hidden-md-down col-lg-2">
-                    <?= MainMenuWidget::widget(); ?>
+                    <?= $this->render('/common/_main_menu',[
+                        'categories' => $controller->mainMenu,
+                        'active' => !empty($post->categories[0]) ? $post->categories[0]->id : null
+                    ]); ?>
                 </div>
 
                 <div class="col-sm-8 col-lg-7 no-pad-r">
@@ -46,7 +48,7 @@ $controller = $this->context;
                         <div class="content__card__title"><?= $post->trl->name; ?></div>
                         <div class="content__card__info">
                             <?php if(!empty($post->author)): ?>
-                                <a href="<?= Url::to(['site/profile','id'=> $post->author_id]); ?>">
+                                <a href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
                                     <?= $post->author->name.' '.$post->author->surname; ?>
                                 </a>
                             <?php else: ?>
@@ -56,7 +58,7 @@ $controller = $this->context;
                         </div>
 
                         <div class="content__card__crumbs">
-                            <a href="<?= Url::to(['site/index']); ?>">Главная</a><span class="crumb-seprator">-</span><?php if(!empty($post->categories[0])): ?><?php $crumbs = $post->categories[0]->getBreadCrumbs(true); ?><?php foreach ($crumbs as $cid => $name): ?><a href="<?= Url::to(['category/show', 'id' => $cid, 'title' => \app\helpers\Help::slug($name)]); ?>"><?= $name; ?></a><span class="crumb-seprator">-</span><?php endforeach; ?><?php endif; ?><span class="current"><?= $post->trl->name; ?></span>
+                            <a href="<?= Url::to(['main/index']); ?>">Главная</a><span class="crumb-seprator">-</span><?php if(!empty($post->categories[0])): ?><?php $crumbs = $post->categories[0]->getBreadCrumbs(true); ?><?php foreach ($crumbs as $cid => $name): ?><a href="<?= Url::to(['main/category', 'id' => $cid, 'title' => \app\helpers\Help::slug($name)]); ?>"><?= $name; ?></a><span class="crumb-seprator">-</span><?php endforeach; ?><?php endif; ?><span class="current"><?= $post->trl->name; ?></span>
                         </div>
 
                         <div class="content__card__share">
@@ -77,7 +79,7 @@ $controller = $this->context;
 
 
                         <!-- Comment section-->
-                        <div class="contentComments" data-current-page="1" data-postload="<?= Url::to(['posts/comment-post-load', 'id' => $post->id]); ?>">
+                        <div class="contentComments" data-current-page="1" data-postload="<?= Url::to(['main/comments-ajax', 'id' => $post->id]); ?>">
                             <h2>Комментарии</h2>
 
                             <?php if(!Yii::$app->user->isGuest): ?>
@@ -92,7 +94,7 @@ $controller = $this->context;
                             </form>
                             <?php endif; ?>
 
-                            <?= $this->render('_comments_load',['comments' => $comments]); ?>
+                            <?= $this->render('_load_comments',['comments' => $comments]); ?>
                         </div>
                     </div>
                 </div>
@@ -125,11 +127,17 @@ $controller = $this->context;
                             </div>
                         </div>
                         <div class="content__sidebar__banner">
-                            <?= BannersWidget::widget(['position' => 'BOTTOM_RIGHT_1','imgAttributes' => ['class' => 'img-fluid']]); ?>
+                            <?= $this->render('/common/_banners',[
+                                'imgAttributes' => ['class' => 'img-fluid'],
+                                'banners' => ArrayHelper::getValue($controller->banners,'BOTTOM_RIGHT_1')
+                            ]); ?>
                         </div>
 
                         <div class="content__sidebar__banner">
-                            <?= BannersWidget::widget(['position' => 'BOTTOM_RIGHT_2','imgAttributes' => ['class' => 'img-fluid']]); ?>
+                            <?= $this->render('/common/_banners',[
+                                'imgAttributes' => ['class' => 'img-fluid'],
+                                'banners' => ArrayHelper::getValue($controller->banners,'BOTTOM_RIGHT_2')
+                            ]); ?>
                         </div>
                     </div>
                 </div>

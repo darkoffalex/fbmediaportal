@@ -104,11 +104,11 @@ $config = [
                 'admin/<controller>/<action>/<id:\d+>' => 'admin/<controller>/<action>',
                 'admin/<controller>/<action>' => 'admin/<controller>/<action>',
 
-                '/' => 'site/index',
+                '/' => 'main/index',
                 '<controller>' => '<controller>/index',
 
-                'post/<id:\d+>/<title:\w+(-\w+)*>' => 'posts/show',
-                'category/<id:\d+>/<title:\w+(-\w+)*>' => 'category/show',
+                'post/<id:\d+>/<title:\w+(-\w+)*>' => 'main/post',
+                'category/<id:\d+>/<title:\w+(-\w+)*>' => 'main/category',
 
                 '<controller>/<action>/<id:\d+>/<title:\w+(-\w+)*>' => '<controller>/<action>',
                 '<controller>/<action>/<id:\d+>/<status:\d+>' => '<controller>/<action>',

@@ -4,8 +4,9 @@ use yii\helpers\Html;
 
 /* @var $this \yii\web\View */
 /* @var $user \app\models\User */
-/* @var $controller \app\controllers\PostsController */
+/* @var $controller \app\controllers\MainController */
 /* @var $comments \app\models\Comment[] */
+/* @var $viewOnly bool */
 
 $user = Yii::$app->user->identity;
 $controller = $this->context;
@@ -15,11 +16,11 @@ $controller = $this->context;
     <div class="contentComments__card">
         <img class="img-fluid" src="<?= $comment->author->getAvatar(); ?>">
         <div class="contentComments__card__content">
-            <b><a href="<?= Url::to(['site/profile','id' => $comment->author_id]); ?>"><?= $comment->author->name.' '.$comment->author->surname; ?></a><span>-  <?= substr($comment->created_at,0,16); ?></span></b>
+            <b><a href="<?= Url::to(['main/profile','id' => $comment->author_id]); ?>"><?= $comment->author->name.' '.$comment->author->surname; ?></a><span>-  <?= substr($comment->created_at,0,16); ?></span></b>
             <p><?= $comment->text; ?></p>
 
             <?php if(count($comment->children) > 0): ?>
-                <a class="reloading-comments" data-click-load="#children-for-<?= $comment->id; ?>" href="<?= Url::to(['posts/children-comments', 'id' => $comment->id]); ?>">
+                <a class="reloading-comments" data-click-load="#children-for-<?= $comment->id; ?>" href="<?= Url::to(['main/children-comments-ajax', 'id' => $comment->id]); ?>">
                     <?= count($comment->children); ?> ответов
                 </a>
             <?php endif; ?>
@@ -27,8 +28,8 @@ $controller = $this->context;
             <div id="children-for-<?= $comment->id; ?>">
             </div>
 
-            <?php if(!Yii::$app->user->isGuest): ?>
-            <form data-container="#children-for-<?= $comment->id; ?>" class="contentComments__card__child" method="post" action="<?= Url::to(['posts/add-child-comment','cid'=>$comment->id]); ?>">
+            <?php if(!Yii::$app->user->isGuest && !$viewOnly): ?>
+            <form data-container="#children-for-<?= $comment->id; ?>" class="contentComments__card__child" method="post" action="<?= Url::to(['main/children-comments-add','id'=>$comment->id]); ?>">
                 <img class="img-fluid" src="<?= $user->getAvatar(); ?>">
                 <?= Html::hiddenInput(Yii::$app->getRequest()->csrfParam,Yii::$app->getRequest()->getCsrfToken()); ?>
                 <textarea class="child-comment-text" name="Comment[text]" placeholder="напишите ответ"></textarea>
