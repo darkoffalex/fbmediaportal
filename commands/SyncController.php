@@ -13,6 +13,7 @@ use app\models\User;
 use app\helpers\Constants;
 use app\models\Language;
 use yii\console\Exception;
+use yii\data\Pagination;
 use yii\helpers\ArrayHelper;
 use yii\helpers\StringHelper;
 use linslin\yii2\curl\Curl;
@@ -27,7 +28,7 @@ class SyncController extends Controller
     public $type = 'stock'; //available values : stock, non stock
     public function options($actionID)
     {
-        return ['limit','api', 'timeout', 'type'];
+        return ['limit', 'api', 'timeout', 'type'];
     }
 
     /**
@@ -265,12 +266,7 @@ class SyncController extends Controller
 
         if(!empty($post->comments)){
             echo "Building nested relations, updating... \n";
-            foreach($post->comments as $comment){
-                if(!empty($comment->admParent)){
-                    $comment->answer_to_id = $comment->admParent->id;
-                    $comment->update();
-                }
-            }
+            Yii::$app->db->createCommand("UPDATE `comment` c1 SET answer_to_id = (SELECT id FROM (SELECT id, adm_id FROM `comment` WHERE post_id = :post) as c2 WHERE c2.adm_id = c1.answer_to_adm_id LIMIT 1) WHERE c1.post_id = :post",['post' => $post->id])->query();
             echo "Nested relations updated \n";
         }
 
@@ -431,10 +427,8 @@ class SyncController extends Controller
 
             }
 
-            if($this->confirm("Would you like to update counters ?")){
-                //should recalculate all user's counters
-                $this->actionUpdateCounters();
-            }
+            //updating counters
+            $this->actionUpdateCounters();
 
         }else{
             echo "Can't find any posts related with facebook \n";
@@ -470,15 +464,24 @@ class SyncController extends Controller
         echo "Querying all non-stock posts. Please wait...";
 
         $q = Post::find()->where('status_id != :status',['status' => Constants::STATUS_IN_STOCK]);
-        $q ->with(['categories','comments']);
         $count = $q->count();
-        $all = $q->all();
 
         echo "Found ({$count}) posts. Updating search indices... \n";
 
-        foreach($all as $post){
-            $post->updateSearchIndices();
-            echo "Post {$post->id} with FB ID {$post->fb_sync_id} done. \n";
+        $pages = new Pagination(['totalCount' => $q->count(), 'defaultPageSize' => 20]);
+        for ($i = 0; $i < $pages->pageCount; $i++){
+            $pages->setPage($i+1);
+
+            /* @var $posts Post[] */
+            $posts = $q->with(['categories','comments'])
+                ->limit($pages->limit)
+                ->offset($pages->offset)->all();
+
+            foreach($posts as $index => $post){
+                $currentIndex = (($pages->page-1) * $pages->limit) + $index;
+                $post->updateSearchKeywords();
+                echo "Post {$currentIndex} of {$count} done. \n";
+            }
         }
 
         echo "Finished! \n";
@@ -490,22 +493,15 @@ class SyncController extends Controller
      */
     public function actionReRelateComments()
     {
-        echo "Querying comments. Please wait... \n";
+        echo "Querying posts. Please wait... \n";
         /* @var $comments Comment[] */
-        $comments = Comment::find()->with('admParent')->all();
-        $count = count($comments);
+        $posts = Post::find()->all();
+        $count = count($posts);
 
-        echo "Found ({$count}) comments. Processing... \n";
+        echo "Found ({$count}) posts. Updating comment relations... \n";
 
-        foreach($comments as $index => $comment){
-            if(!empty($comment->admParent)){
-                echo "Set prent. ";
-                $comment->answer_to_id = $comment->admParent->id;
-            }else{
-                echo "Set no parents. ";
-                $comment->answer_to_id = 0;
-            }
-            $comment->update();
+        foreach($posts as $index => $post){
+            Yii::$app->db->createCommand("UPDATE `comment` c1 SET answer_to_id = (SELECT id FROM (SELECT id, adm_id FROM `comment` WHERE post_id = :post) as c2 WHERE c2.adm_id = c1.answer_to_adm_id LIMIT 1) WHERE c1.post_id = :post",['post' => $post->id])->query();
             $nr = $index+1;
             echo "Done {$nr} of {$count} \n";
         }

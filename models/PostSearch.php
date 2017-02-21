@@ -112,8 +112,7 @@ class PostSearch extends Post
             }
 
             if(!empty($this->content)){
-                $q->joinWith('postSearchIndices as psi')->andWhere(['like','psi.text',$this->content]);
-                $q->distinct();
+                $q->andWhere(['like','search_keywords',$this->content]);
             }
 
             if(!empty($this->created_at)){

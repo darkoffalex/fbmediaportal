@@ -29,3 +29,7 @@
     background: #4f8abe;
     color: #fff;
 }
+.content__menu ul li.have-ul
+{
+    background: none;
+}

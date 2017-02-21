@@ -56,7 +56,7 @@ $controller = $this->context;
                     <!-- cards-->
 
                     <?php /* @var $slicedPart1 \app\models\Post[] */ ?>
-                    <?php $slicedPart1 = array_slice($mainPosts,0,3); ?>
+                    <?php $slicedPart1 = array_slice($mainPosts,0,5); ?>
 
                     <?php foreach ($slicedPart1 as $index => $post): ?>
 
@@ -199,7 +199,7 @@ $controller = $this->context;
                 <div class="col-sm-8 col-lg-7 no-pad-r">
 
                     <?php /* @var $slicedPart2 \app\models\Post[] */ ?>
-                    <?php $slicedPart2 = array_slice($mainPosts,3,3); ?>
+                    <?php $slicedPart2 = array_slice($mainPosts,5,3); ?>
 
                     <?php if(!empty($slicedPart2)): ?>
                         <?php if($slicedPart2[0]->content_type_id == Constants::CONTENT_TYPE_VIDEO): ?>
@@ -207,7 +207,7 @@ $controller = $this->context;
                         <?php endif; ?>
 
                         <?php foreach ($slicedPart2 as $index => $post): ?>
-                            <?php if($index == 0): ?>
+                            <?php if($post->content_type_id == Constants::CONTENT_TYPE_VIDEO): ?>
                                 <div class="content__card content__card--wide">
                                     <a href="<?= $post->getUrl(); ?>"><img width="706" class="img-fluid" src="<?= $post->getFirstImageUrlEx(706,311); ?>"></a>
                                     <?php if(!empty($post->postImages[0]->trl->signature)): ?>

@@ -193,7 +193,7 @@ class MainController extends Controller
         $mainPostsQueryCount = clone $mainPostsQuery;
         $mainPostsCount = Help::cquery(function($db)use($mainPostsQueryCount){return $mainPostsQueryCount->count();},false);
         $pagesMain = new Pagination(['totalCount' => $mainPostsCount, 'defaultPageSize' => ($carousel ? 1 : 3)]);
-        $mainPosts = Help::cquery(function($db)use($mainPostsQuery,$pagesMain,$carousel){return $mainPostsQuery->offset($pagesMain->offset + ($carousel ? 15 : 3))->limit($pagesMain->limit)->all();},false);
+        $mainPosts = Help::cquery(function($db)use($mainPostsQuery,$pagesMain,$carousel){return $mainPostsQuery->offset($pagesMain->offset + ($carousel ? 15 : 5))->limit($pagesMain->limit)->all();},false);
 
         //getting forum posts paginated
         if(!$carousel){
@@ -724,14 +724,12 @@ class MainController extends Controller
         if(!empty($query)){
             $q = Post::find()
                 ->alias('p')
-                ->andWhere(['p.status_id' => Constants::STATUS_ENABLED])
-                ->joinWith('postSearchIndices as psi');
+                ->andWhere(['p.status_id' => Constants::STATUS_ENABLED]);
 
             foreach($words as $index => $word){
-                $q->andWhere(['like','psi.text',$word]);
+                $q->andWhere(['like','p.search_keywords',$word]);
             }
 
-            $q->distinct();
             $q->orderBy('p.published_at DESC');
 
             $cq = clone $q;

@@ -195,5 +195,8 @@ return [
     'Refresh' => 'Обновить',
     'Please DO NOT close this page until updating be finished!' => 'Пожалуйста, НЕ ЗАКРЫВАЙТЕ эту страницу, пока обновление не будет завершено',
     'Need Finish' => 'Доработать пост',
-    'Forum' => 'Форум'
+    'Forum' => 'Форум',
+    'Sizes' => 'Размеры',
+    'Image size is too small. Minimal width is [min}' => 'Размер изображения слишком мал. Минимальная ширина {min}px',
+    'Image size is too big. Maximal width is [max}' => 'Размер изображения слишком велик. Максимальная ширина размер {max}px',
 ];

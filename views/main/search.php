@@ -56,30 +56,36 @@ $controller = $this->context;
                         <button class="btn" type="submit">Поиск</button>
                     </form>
 
-                    <?php foreach ($posts as $post): ?>
-                        <!-- card-->
-                        <div class="content__card">
-                            <div class="content__card__image">
-                                <a href="<?= $post->getUrl(); ?>">
-                                    <img class="img-fluid" src="<?= $post->getThumbnailUrl(484,276); ?>">
-                                </a>
-                            </div>
-                            <a class="content__card__title hidden-sm-up" href="#"><?= $post->trl->name; ?></a>
-                            <div class="content__card__content"><a class="content__card__title hidden-xs-down" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
-                                <div class="content__card__intro">
-                                    <p><?= $post->trl->small_text; ?></p>
-                                    <?php if(!empty($post->author)): ?>
-                                        <a href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
-                                            <?= $post->author->name.' '.$post->author->surname; ?>
-                                        </a>
-                                    <?php else: ?>
-                                        <a href=""><?= $post->author_custom_name; ?></a>
-                                    <?php endif; ?>
-                                    <span>• <?= substr($post->published_at,0,16); ?></span>
+                    <?php if(!empty($posts)): ?>
+                        <?php foreach ($posts as $post): ?>
+                            <!-- card-->
+                            <div class="content__card">
+                                <div class="content__card__image">
+                                    <a href="<?= $post->getUrl(); ?>">
+                                        <img class="img-fluid" src="<?= $post->getThumbnailUrl(484,276); ?>">
+                                    </a>
+                                </div>
+                                <a class="content__card__title hidden-sm-up" href="#"><?= $post->trl->name; ?></a>
+                                <div class="content__card__content"><a class="content__card__title hidden-xs-down" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
+                                    <div class="content__card__intro">
+                                        <p><?= $post->trl->small_text; ?></p>
+                                        <?php if(!empty($post->author)): ?>
+                                            <a href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
+                                                <?= $post->author->name.' '.$post->author->surname; ?>
+                                            </a>
+                                        <?php else: ?>
+                                            <a href=""><?= $post->author_custom_name; ?></a>
+                                        <?php endif; ?>
+                                        <span>• <?= substr($post->published_at,0,16); ?></span>
+                                    </div>
                                 </div>
                             </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="content__card">
+                            <p>Ничего не найдено</p>
                         </div>
-                    <?php endforeach; ?>
+                    <?php endif; ?>
 
                     <?= LinkPager::widget([
                         'pagination' => $pages,

@@ -93,7 +93,7 @@ class PostsController extends Controller
                         $trl -> isNewRecord ? $trl->save() : $trl->update();
                     }
 
-                    $model->updateSearchIndices([Constants::IND_R_CONTENT]);
+                    $model->updateSearchKeywords();
 
                     return $this->redirect(Url::to(['/admin/posts/update', 'id' => $model->id]));
                 }
@@ -185,7 +185,7 @@ class PostsController extends Controller
                 }
 
                 //update search indexes
-                $model->updateSearchIndices([Constants::IND_R_CONTENT,Constants::IND_R_CATEGORIES]);
+                $model->updateSearchKeywords();
 
                 //load all related stuff again
                 $model->refresh();
@@ -286,7 +286,7 @@ class PostsController extends Controller
         $image->delete();
 
         //update search index
-        $post->updateSearchIndices([Constants::IND_R_IMAGES]);
+        $post->updateSearchKeywords();
 
         return $this->actionListImages($postId);
     }
@@ -437,7 +437,7 @@ class PostsController extends Controller
                     $post->refresh();
 
                     //update search index
-                    $post->updateSearchIndices([Constants::IND_R_IMAGES]);
+                    $post->updateSearchKeywords();
 
                     //It's ok, can reload table
                     return 'OK';
@@ -525,7 +525,7 @@ class PostsController extends Controller
                     $post->refresh();
 
                     //update search index
-                    $post->updateSearchIndices([Constants::IND_R_IMAGES]);
+                    $post->updateSearchKeywords();
 
                     //It's ok, can reload table
                     return 'OK';
@@ -600,7 +600,7 @@ class PostsController extends Controller
                 }
 
                 //update search index
-                $post->updateSearchIndices([Constants::IND_R_ANSWERS]);
+                $post->updateSearchKeywords();
 
                 //OK message (to reload container)
                 return 'OK';
@@ -651,9 +651,6 @@ class PostsController extends Controller
 
         //delete
         $answer->delete();
-
-        //update search index
-        $post->updateSearchIndices([Constants::IND_R_ANSWERS]);
 
         return $this->actionListAnswers($postId);
     }

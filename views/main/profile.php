@@ -60,7 +60,7 @@ $controller = $this->context;
                             </div>
 
                             <?php if(!empty($user->fb_user_id)): ?>
-                                <a class="btn btn-fb" href="<?= "https://www.facebook.com/{$user->fb_user_id}/" ?>">
+                                <a target="_blank" class="btn btn-fb" href="<?= "https://www.facebook.com/{$user->fb_user_id}/" ?>">
                                     <i class="ico ico-fb"></i>
                                     <span>Профиль в facebook</span>
                                 </a>

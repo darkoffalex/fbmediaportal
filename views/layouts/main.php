@@ -63,6 +63,9 @@ $social = Yii::$app->getModule('social');
                     <a class="header__login" href="<?= Url::to(['/site/logout']); ?>">
                         <i class="ico ico-login"></i><span>Выйти</span>
                     </a>
+                    <a class="header__login" href="<?= Url::to(['/main/profile']); ?>">
+                        <span>Профиль</span>
+                    </a>
                 <?php endif; ?>
 
 

@@ -6,6 +6,9 @@ use app\helpers\Constants;
 use yii\helpers\ArrayHelper;
 use app\models\Category;
 use app\helpers\Help;
+use yii\imagine\BaseImage;
+use yii\imagine\Image;
+use Imagine\Image\ManipulatorInterface;
 
 /* @var $post \app\models\Post */
 /* @var $this \yii\web\View */
@@ -19,6 +22,7 @@ $languages = \app\models\Language::find()->orderBy('id ASC')->all();
 <tbody>
 <tr>
     <th><?= Yii::t('admin','Preview'); ?></th>
+    <th><?= Yii::t('admin','Sizes'); ?></th>
     <th><?= Yii::t('admin','Status'); ?></th>
     <th><?= Yii::t('admin','Actions'); ?></th>
 </tr>
@@ -28,6 +32,23 @@ $languages = \app\models\Language::find()->orderBy('id ASC')->all();
             <td>
                 <?php $name = $image->getATrl($languages[0]->prefix)->name;?>
                 <img title="<?= $name; ?>" alt="<?= $name; ?>" class="img-thumbnail" width="300" src="<?= $image->need_crop ? $image->getCroppedUrl().'?'.Help::rds(6) : $image->getFullUrl(); ?>">
+            </td>
+            <td>
+                <?php $filePath = $image->need_crop ? $image->getCroppedUrl(706,311,true,true) : $image->getFullPath(); ?>
+                <?php
+                if(!empty($filePath) && !$image->is_external){
+                    try{
+                        $img = Image::getImagine()->open($filePath);
+                        $w = $img->getSize()->getWidth();
+                        $h = $img->getSize()->getHeight();
+                        echo "{$w} x {$h}";
+                    }catch (Exception $ex){
+                        echo Yii::t('admin','Unknown');
+                    }
+                }else{
+                    echo Yii::t('admin','Unknown');
+                }
+                ?>
             </td>
             <td>
                 <?php if($image->status_id == Constants::STATUS_ENABLED): ?>

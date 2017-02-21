@@ -246,149 +246,54 @@ class Post extends PostDB
     }
 
     /**
-     * Updating indexes
-     * @param array $type
-     * @return bool
-     * @throws \yii\db\Exception
+     * Updating search keywords
      */
-    public function updateSearchIndices($type = [Constants::IND_R_ALL])
+    public function updateSearchKeywords()
     {
-        if(!is_array($type) || empty($type)){
-            return false;
-        }
-
-        if(in_array(Constants::IND_R_ALL,$type)){
-            PostSearchIndex::deleteAll(['post_id' => $this->id]);
-        }else{
-            PostSearchIndex::deleteAll(['type_id' => $type, 'post_id' => $this->id]);
-        }
-
-        $preparedValues = [];
+        //set encoding
+        mb_internal_encoding("UTF-8");
 
         /* @var $languages Language[] */
         $languages = Language::find()->all();
 
+        $words = "";
+
         //if languages not empty (for confidence)
-        if(!empty($languages)){
-            foreach($languages as $lng){
+        if(!empty($languages)) {
+            foreach ($languages as $lng) {
 
                 //get TRL object
                 $postTrl = $this->getATrl($lng->prefix);
 
-                if(in_array(Constants::IND_R_ALL,$type) || in_array(Constants::IND_R_CONTENT,$type)){
-                    if(!empty($postTrl->name)){
-                        $preparedValues[] = [
-                            $postTrl->name,
-                            $this->id,
-                            Constants::IND_R_CONTENT
-                        ];
-                    }
+                //append content text
+                $words .= !empty($postTrl->name) ? mb_strtolower($postTrl->name) : '';
+                $words .= !empty($postTrl->text) ? ' '.mb_strtolower($postTrl->text) : '';
+                $words .= !empty($postTrl->small_text) ? ' '.mb_strtolower($postTrl->small_text) : '';
 
-                    if(!empty($postTrl->small_text)){
-                        $preparedValues[] = [
-                            $postTrl->small_text,
-                            $this->id,
-                            Constants::IND_R_CONTENT
-                        ];
-                    }
-
-                    if(!empty($postTrl->text)){
-                        $preparedValues[] = [
-                            strip_tags($postTrl->text),
-                            $this->id,
-                            Constants::IND_R_CONTENT
-                        ];
-                    }
-
-                    if(!empty($postTrl->question)){
-                        $preparedValues[] = [
-                            $postTrl->question,
-                            $this->id,
-                            Constants::IND_R_CONTENT
-                        ];
-                    }
-                }
-
-                if(in_array(Constants::IND_R_ALL,$type) || in_array(Constants::IND_R_IMAGES,$type)){
-                    if(!empty($this->postImages)){
-                        foreach($this->postImages as $img){
-                            $imgTrl = $img->getATrl($lng->prefix);
-
-                            if(!empty($imgTrl->name)){
-                                $preparedValues[] = [
-                                    $imgTrl->name,
-                                    $this->id,
-                                    Constants::IND_R_IMAGES
-                                ];
-                            }
-
-                            if(!empty($imgTrl->signature)){
-                                $preparedValues[] = [
-                                    $imgTrl->signature,
-                                    $this->id,
-                                    Constants::IND_R_IMAGES
-                                ];
-                            }
-                        }
-                    }
-                }
-
-                if(in_array(Constants::IND_R_ALL,$type) || in_array(Constants::IND_R_ANSWERS,$type)){
-                    if(!empty($this->postVoteAnswers)){
-                        foreach($this->postVoteAnswers as $answer){
-                            $answerTrl = $answer->getATrl($lng->prefix);
-
-                            if(!empty($answerTrl->text)){
-                                $preparedValues[] = [
-                                    $answerTrl->text,
-                                    $this->id,
-                                    Constants::IND_R_ANSWERS
-                                ];
-                            }
-                        }
-                    }
-                }
-
-                if(in_array(Constants::IND_R_ALL,$type) || in_array(Constants::IND_R_CATEGORIES,$type)){
-                    if(!empty($this->categories)){
-                        foreach($this->categories as $cat){
-                            $catTrl = $cat->getATrl($lng->prefix);
-
-                            if(!empty($catTrl->name)){
-                                $preparedValues[] = [
-                                    $catTrl->name,
-                                    $this->id,
-                                    Constants::IND_R_CATEGORIES
-                                ];
-                            }
-                        }
-                    }
-                }
-
-                if(in_array(Constants::IND_R_ALL,$type) || in_array(Constants::IND_R_COMMENTS,$type)){
-                    if(!empty($this->comments)){
-                        foreach($this->comments as $comment){
-
-                            if(!empty($comment->text)){
-                                $preparedValues[] = [
-                                    $comment->text,
-                                    $this->id,
-                                    Constants::IND_R_COMMENTS
-                                ];
-                            }
-                        }
+                //append category text
+                if(!empty($this->categories)){
+                    foreach ($this->categories as $cat){
+                        $catTrl = $cat->getATrl($lng->prefix);
+                        $words .= ' '.!empty($catTrl->name) ? ' '.mb_strtolower($postTrl->name) : '';
                     }
                 }
             }
         }
 
-        $affectedRows = 0;
-        if(!empty($preparedValues)){
-            $affectedRows = Yii::$app->db->createCommand()->batchInsert(PostSearchIndex::tableName(),['text', 'post_id', 'type_id'],$preparedValues)->execute();
+        if(!empty($this->comments)) {
+            foreach ($this->comments as $comment) {
+                $words .= !empty($comment->text) ? ' '.mb_strtolower($comment->text) : '';
+            }
         }
 
-        return !empty($affectedRows);
+        if(!empty($this->author)) {
+            $words .= !empty($this->author->name) ? ' '.$this->author->name.' '.$this->author->surname : '';
+        }
+
+        $this->search_keywords = $words;
+        $this->update();
     }
+
 
     /**
      * Builds complexly sort query for selecting all posts depending on current categories

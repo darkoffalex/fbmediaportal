@@ -5,10 +5,12 @@ namespace app\components;
 use app\helpers\Constants;
 use app\helpers\Help;
 use app\models\Banner;
+use app\models\BannerDisplay;
 use app\models\Category;
 use app\models\CommonSettings;
 use Yii;
 use yii\caching\Cache;
+use yii\db\Expression;
 use yii\web\Controller as BaseController;
 use yii\base\Module;
 use yii\base\Action;
@@ -86,18 +88,14 @@ class Controller extends BaseController
 
 
         //Get all banners
-        $qBanners = Banner::find()
-            ->with('bannerDisplays.place')
-            ->joinWith('bannerDisplays as bd')
-            ->where('bd.start_at < :cur',['cur' => date('Y-m-d H:i:s',time())])
-            ->andWhere('bd.end_at > :cur',['cur' => date('Y-m-d H:i:s',time())]);
-        $banners = Help::cquery(function($db)use($qBanners){return $qBanners->all();},true);
+        $qBannerDisplays = BannerDisplay::find()
+            ->with(['banner','place'])
+            ->where(new Expression('start_at < :cur AND end_at > :cur',['cur' => date('Y-m-d H:i:s',time())]));
+        $bannerDisplays = Help::cquery(function($db)use($qBannerDisplays){return $qBannerDisplays->all();},true);
 
-        /* @var $banners Banner[] */
-        foreach ($banners as $banner){
-            foreach ($banner->bannerDisplays as $bds){
-                $this->banners[$bds->place->alias][] = $banner;
-            }
+        /* @var $bannerDisplays BannerDisplay[] */
+        foreach ($bannerDisplays as $bannerDisplay){
+            $this->banners[$bannerDisplay->place->alias][] = $bannerDisplay->banner;
         }
 
         //clear the cache

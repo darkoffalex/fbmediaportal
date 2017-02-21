@@ -16,8 +16,8 @@ $config = [
         'social' => [
             'class' => 'kartik\social\Module',
             'facebook' => [
-                'appId' => '915460531914741',
-                'secret' => 'c30ad2acc2d9bc3fc94b3dca82bdffbc',
+                'appId' => '',
+                'secret' => '',
             ],
         ],
     ],
@@ -103,6 +103,9 @@ $config = [
                 'admin/<controller>' => 'admin/<controller>/index',
                 'admin/<controller>/<action>/<id:\d+>' => 'admin/<controller>/<action>',
                 'admin/<controller>/<action>' => 'admin/<controller>/<action>',
+
+                'search/<q:\w+(-\w+)*>' => 'main/search',
+                'search' => 'main/search',
 
                 '/' => 'main/index',
                 '<controller>' => '<controller>/index',

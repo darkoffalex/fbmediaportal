@@ -46,7 +46,7 @@ $controller = $this->context;
 
             <div class="col-sm-8 col-lg-7 no-pad-r">
                 <div class="innerWrapper">
-                    <h1><?= ArrayHelper::getValue(['latest' => 'Последние', 'popular' => 'Популярные'],$type,'Последние'); ?></h1>
+                    <h1>Категория материалов</h1>
 
                     <div class="sorting">
                         <a class="btn btn-outline <?= $type=='latest' ? 'active' : ''; ?>" href="<?= Url::to(['main/all','type' => 'latest']); ?>">

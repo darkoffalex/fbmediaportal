@@ -54,8 +54,33 @@ class PostImage extends PostImageDB
     {
         $baseRules = parent::rules();
         $baseRules[] = [['image'], 'file', 'extensions' => ['png', 'jpg', 'gif'], 'maxSize' => 1024*1024*5];
+        $baseRules[] = [['image'], 'checkImgWidth', 'params' => ['minWidth' => 706, 'maxWidth' => 3000]];
         $baseRules[] = [['translations'],'safe'];
         return $baseRules;
+    }
+
+    /**
+     * Validate width
+     * @param $attribute
+     * @param $params
+     */
+    public function checkImgWidth($attribute, $params)
+    {
+        if(!$this->is_external && !$this->hasErrors()){
+            try{
+                $filePath = $this->$attribute->tempName;
+                $img = Image::getImagine()->open($filePath);
+                $min = ArrayHelper::getValue($params,'minWidth',706);
+                $max = ArrayHelper::getValue($params,'maxWidth',3000);
+                if($img->getSize()->getWidth() < $min){
+                    $this->addError($attribute,Yii::t('admin',"Image size is too small. Minimal width is [min}",['min' => $min]));
+                }elseif ($img->getSize()->getWidth() > $max){
+                    $this->addError($attribute,Yii::t('admin',"Image size is too big. Maximal width is [max}",['min' => $max]));
+                }
+            }catch (\Exception $ex){
+
+            }
+        }
     }
 
     /**
@@ -97,6 +122,14 @@ class PostImage extends PostImageDB
     }
 
     /**
+     * @return bool|string
+     */
+    public function getFullPath()
+    {
+        return Yii::getAlias('@webroot/uploads/img/'.$this->file_path);
+    }
+
+    /**
      * Returns url to thumbnail
      * @param $w
      * @param $h
@@ -118,9 +151,10 @@ class PostImage extends PostImageDB
      * @param int $w default width
      * @param int $h default height
      * @param bool $useWatermark add watermark
+     * @param bool $filePath
      * @return null|string
      */
-    public function getCroppedUrl($w = 706, $h = 311, $useWatermark = true)
+    public function getCroppedUrl($w = 706, $h = 311, $useWatermark = true, $filePath = false)
     {
         //if nothing to crop - return null
         if(empty($this->file_path) || !$this->hasFile()){
@@ -177,6 +211,10 @@ class PostImage extends PostImageDB
             }
 
             $imageUploaded->save(Yii::getAlias('@webroot/assets/cropped/'.$this->file_path),['quality' => 100]);
+        }
+
+        if($filePath){
+            return Yii::getAlias('@webroot/assets/cropped/'.$this->file_path);
         }
 
         return Url::to('@web/assets/cropped/'.$this->file_path);
