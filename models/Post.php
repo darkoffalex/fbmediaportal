@@ -267,8 +267,8 @@ class Post extends PostDB
 
                 //append content text
                 $words .= !empty($postTrl->name) ? mb_strtolower($postTrl->name) : '';
-                $words .= !empty($postTrl->text) ? ' '.mb_strtolower($postTrl->text) : '';
-                $words .= !empty($postTrl->small_text) ? ' '.mb_strtolower($postTrl->small_text) : '';
+                $words .= !empty($postTrl->text) ? ' '.mb_strtolower(strip_tags($postTrl->text)) : '';
+                $words .= !empty($postTrl->small_text) ? ' '.mb_strtolower(strip_tags($postTrl->small_text)) : '';
 
                 //append category text
                 if(!empty($this->categories)){

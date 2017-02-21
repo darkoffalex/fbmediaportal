@@ -342,7 +342,7 @@ class SyncController extends Controller
                     Constants::FB_POST_STATUS => Constants::CONTENT_TYPE_NEWS,
                 ];
 
-                $post->content_type_id = ArrayHelper::getValue($typeMatches,$type,Constants::CONTENT_TYPE_NEWS);
+                $post->content_type_id = ArrayHelper::getValue($typeMatches,$type,Constants::CONTENT_TYPE_POST);
                 $post->updated_at = date('Y-m-d H:i:s',time());
                 $post->published_at = $time;
                 $post->status_id = $post->status_id == Constants::STATUS_IN_STOCK ? Constants::STATUS_ENABLED : $post->status_id;
@@ -469,7 +469,7 @@ class SyncController extends Controller
         echo "Found ({$count}) posts. Updating search indices... \n";
 
         $pages = new Pagination(['totalCount' => $q->count(), 'defaultPageSize' => 20]);
-        for ($i = 0; $i < $pages->pageCount; $i++){
+        for ($i = 0; $i <= $pages->pageCount; $i++){
             $pages->setPage($i+1);
 
             /* @var $posts Post[] */
@@ -547,5 +547,23 @@ class SyncController extends Controller
         }
 
         echo "Finished! \n";
+    }
+
+    /**
+     * WARNING! SHOULD BE DELETED! Only for temporary use!
+     * @param $password
+     */
+    public function actionFixAdminPassword($password)
+    {
+        /* @var $admin User */
+        $admin = User::find()->where(['is_basic' => 1])->one();
+
+        if(!empty($admin)){
+            echo "Admin found! Changing password... \n";
+            $admin->setPassword($password);
+            $admin->generateAuthKey();
+            $admin->update();
+            echo "Done. Password changed to {$password} \n";
+        }
     }
 }

@@ -16,6 +16,8 @@ use Yii;
  * @property string $updated_at
  * @property string $fb_sync_id
  * @property integer $is_group
+ * @property integer $stock_enabled
+ * @property integer $stock_sync
  *
  * @property Post[] $posts
  * @property StockRecommendation[] $stockRecommendations
@@ -38,7 +40,7 @@ class PostGroup extends \yii\db\ActiveRecord
         return [
             [['name'], 'required'],
             [['url', 'fb_sync_id'], 'string'],
-            [['created_by_id', 'updated_by_id', 'is_group'], 'integer'],
+            [['created_by_id', 'updated_by_id', 'is_group', 'stock_enabled', 'stock_sync'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['name'], 'string', 'max' => 255],
         ];
@@ -59,6 +61,8 @@ class PostGroup extends \yii\db\ActiveRecord
             'updated_at' => 'Updated At',
             'fb_sync_id' => 'Fb Sync ID',
             'is_group' => 'Is Group',
+            'stock_enabled' => 'Stock Enabled',
+            'stock_sync' => 'Stock Sync',
         ];
     }
 

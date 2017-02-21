@@ -199,4 +199,8 @@ return [
     'Sizes' => 'Размеры',
     'Image size is too small. Minimal width is [min}' => 'Размер изображения слишком мал. Минимальная ширина {min}px',
     'Image size is too big. Maximal width is [max}' => 'Размер изображения слишком велик. Максимальная ширина размер {max}px',
+    'Source-gropus settings' => 'Параметры групп источников',
+    'Synchronize (refresh)' => 'Синхронизировать (обновить)',
+    'Not synchronized' => 'Не синхронизирован',
+    'Synchronized' => 'Синхронизирован'
 ];

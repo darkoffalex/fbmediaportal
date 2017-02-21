@@ -188,6 +188,7 @@ $gridColumns = [
             </div>
             <div class="box-footer">
                 <a data-target=".modal" data-toggle="modal" href="<?php echo Url::to(['/admin/stock/recommend-settings']); ?>" class="btn btn-primary"><?= Yii::t('admin','Recommend settings'); ?></a>
+                <a data-target=".modal" data-toggle="modal" href="<?php echo Url::to(['/admin/stock/groups']); ?>" class="btn btn-primary"><?= Yii::t('admin','Source-gropus settings'); ?></a>
             </div>
         </div>
     </div>

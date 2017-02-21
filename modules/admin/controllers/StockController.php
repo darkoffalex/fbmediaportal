@@ -2,13 +2,17 @@
 
 namespace app\modules\admin\controllers;
 
+use app\helpers\AdminizatorApi;
 use app\helpers\Constants;
+use app\helpers\Help;
 use app\models\Post;
 use app\models\PostCategory;
+use app\models\PostGroup;
 use app\models\StockRecommendation;
 use app\models\Language;
 use app\models\PostSearch;
 use yii\bootstrap\ActiveForm;
+use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use Yii;
@@ -84,6 +88,89 @@ class StockController extends Controller
         }
 
         return $this->actionRecommendSettings();
+    }
+
+    /**
+     * Change status of group (ajax)
+     * @param $id
+     * @param int $status
+     * @return string
+     */
+    public function actionGroupStatus($id,$status = 0)
+    {
+        /* @var $group PostGroup */
+        $group = PostGroup::find()->where(['id' => (int)$id])->one();
+
+        if(!empty($group)){
+            $group->stock_enabled = (int)$status;
+            $group->updated_by_id = Yii::$app->user->id;
+            $group->updated_at = date('Y-m-d H:i:s',time());
+            $group->update();
+            return 'OK';
+        }
+
+        return 'ERROR';
+    }
+
+    /**
+     * Synchronizes groups with adminizator
+     * @return string
+     */
+    public function actionSyncGroups()
+    {
+        //get groups from adminizator
+        $groupsArray = AdminizatorApi::getInstance()->getGroups();
+
+        //if group array is not empty - update
+        if(!empty($groupsArray)){
+            //set all as not synchronized
+            PostGroup::updateAll(['stock_sync' => 0]);
+
+            //pass through given groups
+            foreach ($groupsArray as $groupItem){
+                /* @var $group PostGroup */
+                $group = PostGroup::find()->where(['fb_sync_id' => $groupItem['facebook_id']])->one();
+                if(!empty($group)){
+                    $group->name = $groupItem['title'];
+                    $group->updated_at = date('Y-m-d H:i:s',time());
+                    $group->stock_sync = 1;
+                    $group->update();
+                }else{
+                    $group = new PostGroup();
+                    $group->fb_sync_id = $groupItem['facebook_id'];
+                    $group->is_group = 1;
+                    $group->stock_enabled = 0;
+                    $group->name = $groupItem['title'];
+                    $group->url = "https://www.facebook.com/groups/{$groupItem['facebook_id']}/";
+                    $group->created_at = date('Y-m-d H:i:s',time());
+                    $group->updated_at = date('Y-m-d H:i:s',time());
+                    $group->stock_sync = 1;
+                    $group->created_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
+                    $group->updated_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
+                    $group->save();
+                }
+            }
+
+            $groups = PostGroup::find()
+                ->where(['is_group' => 1])
+                ->all();
+        }
+
+
+        return $this->renderAjax('_sync_groups',compact('groups'));
+    }
+
+    /**
+     * Shows groups settings
+     * @return string
+     */
+    public function actionGroups()
+    {
+        $groups = PostGroup::find()
+            ->where(['is_group' => 1])
+            ->all();
+
+        return $this->renderAjax('_sync_groups',compact('groups'));
     }
 
     /**

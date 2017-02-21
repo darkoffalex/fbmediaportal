@@ -22,11 +22,13 @@ class AppAsset extends AssetBundle
 
     public $css = [
         'css/site.css',
-        'css/common.css'
+        'css/common.css',
+        'https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css'
     ];
 
     public $js = [
-        'js/common.js'
+        'js/common.js',
+        'https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js'
     ];
 
     public $depends = [
