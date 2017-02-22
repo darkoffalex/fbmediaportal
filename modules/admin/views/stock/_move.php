@@ -89,7 +89,15 @@ Yii::$app->view->registerJsFile('/js/nested-multi-sel.js');
             Constants::CONTENT_TYPE_PHOTO => Yii::t('admin','Photo'),
             Constants::CONTENT_TYPE_VIDEO => Yii::t('admin','Video'),
             Constants::CONTENT_TYPE_VOTING => Yii::t('admin','Voting'),
+            Constants::CONTENT_TYPE_POST => Yii::t('admin','Post'),
         ]); ?>
+
+        <?= $form->field($model, 'kind_id')->dropDownList([
+            Constants::KIND_INTERESTING_CONTENT => Yii::t('admin','Useful content'),
+            Constants::KIND_INTERESTING_COMMENTS => Yii::t('admin','Interesting discussion'),
+            Constants::KIND_FORUM => Yii::t('admin','Forum')
+        ],['prompt' => '']); ?>
+
     </div>
 
     <div class="modal-footer">

@@ -304,6 +304,46 @@ class Category extends CategoryDB
     }
 
     /**
+     * Recursive drop-down menu built array
+     * @param bool $onlyActive
+     * @return array
+     */
+    public function getChildrenForDropDownRecursive($onlyActive = false)
+    {
+        $children = $onlyActive ? $this->childrenActive : $this->children;
+        $items = [];
+
+        if(!empty($children)){
+            foreach($children as $child){
+                if(empty($child->children)){
+                    $items[] = [
+                        'label' => $child->name,
+                        'url' => '#',
+                        'options' => [
+                            'data-category-name' => $child->name,
+                            'data-category-add' => $child->id,
+                            'data-category-remove' => $child->parent_category_id,
+                            'data-no-click' => 'true'
+                        ]
+                    ];
+                }else{
+                    $items[] = [
+                        'label' => $child->name,
+                        'options' => [
+                            'data-category-name' => $child->name,
+                            'data-category-add' => $child->id,
+                            'data-category-remove' => $child->parent_category_id,
+                        ],
+                        'items' => $child->getChildrenForDropDownRecursive($onlyActive)
+                    ];
+                }
+            }
+        }
+
+        return $items;
+    }
+
+    /**
      * Build a recursive array for drop-down controls in forms
      * @param int $rootId
      * @param bool|false $justEnabled
@@ -316,36 +356,33 @@ class Category extends CategoryDB
 
         /* @var $items self[] */
         $q = self::find()->orderBy('priority ASC')->where(['parent_category_id' => $rootId]);
-        $q->with(['trl','children','children.trl']);
-
+        $q->with(['children.children']);
         if($justEnabled) $q->where(['status_id' => Constants::STATUS_ENABLED]);
         $items = $q->all();
 
-        foreach($items as $category){
-            if(empty($category->children)){
-                $tmp = [
-                    'label' => $category->name,
+        foreach($items as $item){
+            if(empty($item->children)){
+                $result[] = [
+                    'label' => $item->name,
                     'url' => '#',
                     'options' => [
-                        'data-category-name' => $category->name,
-                        'data-category-add' => $category->id,
-                        'data-category-remove' => $category->parent_category_id,
+                        'data-category-name' => $item->name,
+                        'data-category-add' => $item->id,
+                        'data-category-remove' => $item->parent_category_id,
                         'data-no-click' => 'true'
                     ]
                 ];
             }else{
-                $tmp = [
-                    'label' => $category->name,
+                $result[] = [
+                    'label' => $item->name,
                     'options' => [
-                        'data-category-name' => $category->name,
-                        'data-category-add' => $category->id,
-                        'data-category-remove' => $category->parent_category_id
+                        'data-category-name' => $item->name,
+                        'data-category-add' => $item->id,
+                        'data-category-remove' => $item->parent_category_id,
                     ],
-                    'items' => self::buildRecursiveArrayForDropDown($category->id,$justEnabled)
+                    'items' => $item->getChildrenForDropDownRecursive($justEnabled)
                 ];
             }
-
-            $result[] = $tmp;
         }
 
         return $result;

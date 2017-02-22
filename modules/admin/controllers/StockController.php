@@ -219,6 +219,19 @@ class StockController extends Controller
                 $model->updated_by_id = Yii::$app->user->id;
                 $model->update();
 
+                /* @var $firstLng Language */
+                $firstLng = Language::find()->orderBy('id ASC')->one();
+                if(!empty($firstLng)){
+                    $trl = $model->getATrl($firstLng->prefix);
+                    $trl -> name = $model->name;
+                    $trl -> isNewRecord ? $trl->save() : $trl->update();
+                }
+
+                $model->updateSearchKeywords();
+
+                //clear cache
+                Yii::$app->cache->flush();
+
                 return $this->redirect(Yii::$app->request->referrer);
             }
         }

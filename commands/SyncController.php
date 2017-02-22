@@ -384,7 +384,7 @@ class SyncController extends Controller
 
                         if($aType == 'photo'){
                             /* @var $image PostImage */
-                            $image = PostImage::find()->where(['fb_sync_id' => $user->id, 'post_id' => $post->id])->one();
+                            $image = PostImage::find()->where(['fb_sync_id' => $aFbId, 'post_id' => $post->id])->one();
 
                             if(empty($image)){
                                 echo "Creating photo attachment with FB ID {$aFbId} \n";

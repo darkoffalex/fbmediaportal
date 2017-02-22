@@ -68,6 +68,9 @@ class UsersController extends Controller
                 //insert it to database
                 $model->save();
 
+                //clear cache
+                Yii::$app->cache->flush();
+
                 //go to list
                 return $this->redirect(Url::to(['/admin/users/index']));
             }
@@ -125,6 +128,9 @@ class UsersController extends Controller
 
                 //update in database
                 $model->update();
+
+                //clear cache
+                Yii::$app->cache->flush();
             }
         }
 
@@ -153,6 +159,9 @@ class UsersController extends Controller
         //delete from db
         $model->delete();
 
+        //clear cache
+        Yii::$app->cache->flush();
+
         //back to list
         return $this->redirect(Yii::$app->request->referrer);
     }
@@ -180,6 +189,9 @@ class UsersController extends Controller
         $model->updated_by_id = Yii::$app->user->id;
         $model->updated_at = date('Y-m-d H:i:s',time());
         $model->update();
+
+        //clear cache
+        Yii::$app->cache->flush();
 
         //back to list
         return $this->redirect(Yii::$app->request->referrer);

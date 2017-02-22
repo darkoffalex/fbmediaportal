@@ -95,6 +95,9 @@ class PostsController extends Controller
 
                     $model->updateSearchKeywords();
 
+                    //clear cache
+                    Yii::$app->cache->flush();
+
                     return $this->redirect(Url::to(['/admin/posts/update', 'id' => $model->id]));
                 }
             }
@@ -210,6 +213,9 @@ class PostsController extends Controller
                         $model->author->update();
                     }
                 }
+
+                //clear the cache
+                Yii::$app->cache->flush();
             }
         }
 
@@ -241,6 +247,9 @@ class PostsController extends Controller
 
         //delete post itself
         $post->delete();
+
+        //clear cache
+        Yii::$app->cache->flush();
 
         //back to previous page
         return $this->redirect(Yii::$app->request->referrer);
@@ -288,6 +297,9 @@ class PostsController extends Controller
         //update search index
         $post->updateSearchKeywords();
 
+        //clear cache
+        Yii::$app->cache->flush();
+
         return $this->actionListImages($postId);
     }
 
@@ -309,6 +321,9 @@ class PostsController extends Controller
         }
 
         Sort::Move($image,$dir,PostImage::className(),['post_id' => $postId]);
+
+        //clear cache
+        Yii::$app->cache->flush();
 
         return $this->actionListImages($postId);
     }
@@ -345,6 +360,9 @@ class PostsController extends Controller
 
                 //remove cropped image
                 $model->clearCropped();
+
+                //clear cache
+                Yii::$app->cache->flush();
 
                 //It's ok, can reload table
                 return 'OK';
@@ -439,6 +457,9 @@ class PostsController extends Controller
                     //update search index
                     $post->updateSearchKeywords();
 
+                    //clear cache
+                    Yii::$app->cache->flush();
+
                     //It's ok, can reload table
                     return 'OK';
                 }
@@ -527,6 +548,9 @@ class PostsController extends Controller
                     //update search index
                     $post->updateSearchKeywords();
 
+                    //clear cache
+                    Yii::$app->cache->flush();
+
                     //It's ok, can reload table
                     return 'OK';
                 }
@@ -602,6 +626,9 @@ class PostsController extends Controller
                 //update search index
                 $post->updateSearchKeywords();
 
+                //clear the cache
+                Yii::$app->cache->flush();
+
                 //OK message (to reload container)
                 return 'OK';
 
@@ -652,6 +679,9 @@ class PostsController extends Controller
         //delete
         $answer->delete();
 
+        //clear cache
+        Yii::$app->cache->flush();
+
         return $this->actionListAnswers($postId);
     }
 
@@ -690,6 +720,9 @@ class PostsController extends Controller
                 $model->created_by_id = Yii::$app->user->id;
                 $model->updated_by_id = Yii::$app->user->id;
                 $model->save();
+
+                //clear cache
+                Yii::$app->cache->flush();
 
                 return 'OK';
             }
@@ -739,6 +772,9 @@ class PostsController extends Controller
             $author->counter_comments = Comment::find()->where(['author_id' => $author->id])->count();
             $author->update();
         }
+
+        //clear cache
+        Yii::$app->cache->flush();
 
         //back to previous page
         return $this->redirect(Yii::$app->request->referrer);

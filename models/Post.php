@@ -40,13 +40,18 @@ class Post extends PostDB
     public $categoriesStickyPositions = [];
 
     /**
+     * @var bool
+     */
+    public $translateLabels = true;
+
+    /**
      * @inheritdoc
      */
     public function attributeLabels()
     {
         $baseLabels = parent::attributeLabels();
         foreach($baseLabels as $attribute => $label){
-            $baseLabels[$attribute] = Yii::t('admin',$label);
+            $baseLabels[$attribute] = $this->translateLabels ? Yii::t('admin',$label) : $label;
         }
         return $baseLabels;
     }

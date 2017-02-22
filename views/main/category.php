@@ -82,9 +82,9 @@ $controller = $this->context;
                                     <span>• <?= substr($post->published_at,0,16); ?></span>
                                 </div>
                                 <?php if($post->content_type_id != \app\helpers\Constants::CONTENT_TYPE_VIDEO): ?>
-                                    <div class="content__card__comments"><span><?= count($post->comments); ?> комментариев</span></div>
+                                    <div class="content__card__comments"><span><?= $post->comment_count; ?> комментариев</span></div>
                                 <?php else: ?>
-                                    <div class="content__card__comments"><span><?= count($post->comments); ?></span></div>
+                                    <div class="content__card__comments"><span><?= $post->comment_count; ?></span></div>
                                 <?php endif; ?>
                             </div>
                         <?php else: ?>
@@ -229,9 +229,9 @@ $controller = $this->context;
                                     </div>
 
                                     <?php if($post->content_type_id != Constants::CONTENT_TYPE_VIDEO): ?>
-                                        <div class="content__card__comments"><span><?= count($post->comments); ?> комментариев</span></div>
+                                        <div class="content__card__comments"><span><?= $post->comment_count; ?> комментариев</span></div>
                                     <?php else: ?>
-                                        <div class="content__card__comments"><span><?= count($post->comments); ?></span></div>
+                                        <div class="content__card__comments"><span><?= $post->comment_count; ?></span></div>
                                     <?php endif; ?>
                                 </div>
                             <?php else: ?>

@@ -19,7 +19,7 @@ class PostSearch extends Post
     public function rules()
     {
         return [
-            [['name', 'content', 'published_at', 'created_at', 'need_finish'], 'string', 'max' => 255],
+            [['name', 'content', 'published_at', 'created_at', 'need_finish', 'need_update', 'is_parsed', 'fb_sync_id'], 'string', 'max' => 255],
             [['content_type_id', 'id', 'type_id', 'category_id', 'author_id', 'group_id', 'kind_id'], 'integer'],
         ];
     }
@@ -79,6 +79,10 @@ class PostSearch extends Post
                 $q->andWhere(['post.author_id' => $this->author_id]);
             }
 
+            if(!empty($this->fb_sync_id)){
+                $q->andWhere(['fb_sync_id' => $this->fb_sync_id]);
+            }
+
             if(!empty($this->kind_id)){
                 $q->andWhere(['post.kind_id' => $this->kind_id]);
             }
@@ -108,6 +112,22 @@ class PostSearch extends Post
                     $q->andWhere(['post.need_finish' => 1]);
                 }else{
                     $q->andWhere('post.need_finish = 0 OR post.need_finish IS NULL');
+                }
+            }
+
+            if(!empty($this->need_update)){
+                if($this->need_update == "YES"){
+                    $q->andWhere(['post.need_update' => 1]);
+                }else{
+                    $q->andWhere('post.need_update = 0 OR post.need_update IS NULL');
+                }
+            }
+
+            if(!empty($this->is_parsed)){
+                if($this->is_parsed == "YES"){
+                    $q->andWhere(['post.is_parsed' => 1]);
+                }else{
+                    $q->andWhere('post.is_parsed = 0 OR post.is_parsed IS NULL');
                 }
             }
 

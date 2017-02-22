@@ -60,32 +60,6 @@ $gridColumns = [
 
     [
         'attribute' => 'author_id',
-        'filter' => Select2::widget([
-            'model' => $searchModel,
-            'attribute' => 'author_id',
-            'initValueText' => !empty($searchModel->author) ? $searchModel->author->name.' '.$searchModel->author->surname : '',
-            'options' => ['placeholder' => Yii::t('admin','Search for a user...')],
-            'language' => Yii::$app->language,
-            'theme' => Select2::THEME_DEFAULT,
-            'pluginOptions' => [
-                'allowClear' => true,
-                'minimumInputLength' => 2,
-                'language' => [
-                    'noResults' => new JsExpression("function () { return '".Yii::t('admin','No results found')."'; }"),
-                    'searching' => new JsExpression("function () { return '".Yii::t('admin','Searching...')."'; }"),
-                    'inputTooShort' => new JsExpression("function(args) {return '".Yii::t('admin','Type more characters')."'}"),
-                    'errorLoading' => new JsExpression("function () { return '".Yii::t('admin','Waiting for results')."'; }"),
-                ],
-                'ajax' => [
-                    'url' => Url::to(['/admin/users/ajax-search']),
-                    'dataType' => 'json',
-                    'data' => new JsExpression('function(params) { return {q:params.term}; }')
-                ],
-                'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                'templateResult' => new JsExpression('function(user) { return user.text; }'),
-                'templateSelection' => new JsExpression('function (user) { return user.text; }'),
-            ],
-        ]),
         'format' => 'raw',
         'value' => function ($model, $key, $index, $column){
             /* @var $model \app\models\Post */
@@ -93,19 +67,19 @@ $gridColumns = [
         },
     ],
 
+
+    [
+        'attribute' => 'published_at',
+        'enableSorting' => true,
+        'format' => 'raw',
+        'value' => function ($model, $key, $index, $column){
+            /* @var $model \app\models\Post*/
+            return !empty($model->published_at) ? $model->published_at : Yii::t('admin','No data');
+        },
+    ],
+
     [
         'attribute' => 'created_at',
-        'filter' => \kartik\daterange\DateRangePicker::widget([
-            'model' => $searchModel,
-            'convertFormat' => true,
-            'attribute' => 'created_at',
-            'pluginOptions' => [
-                'locale' => [
-                    'format'=>'Y-m-d',
-                    'separator'=>' - ',
-                ],
-            ],
-        ]),
         'enableSorting' => true,
         'format' => 'raw',
         'value' => function ($model, $key, $index, $column){
@@ -138,6 +112,17 @@ $gridColumns = [
             }
 
             return !empty($recommendation) ? implode(', ',$recommendations) : Yii::t('admin','Нет');
+        },
+    ],
+
+    [
+        'attribute' => 'need_update',
+        'label' => Yii::t('admin','Updates'),
+        'enableSorting' => false,
+        'format' => 'raw',
+        'value' => function ($model, $key, $index, $column) use ($lng){
+            /* @var $model \app\models\Post */
+            return !empty($model->need_update) ? '<span class="label label-danger">'.Yii::t('admin','Waiting').'</span>' : '<span class="label label-success">'.Yii::t('admin','Updated').'</span>';
         },
     ],
 
@@ -179,8 +164,11 @@ $gridColumns = [
                 <h3 class="box-title"><?= Yii::t('admin','List'); ?></h3>
             </div>
             <div class="box-body" style="padding-top: 0;">
+
+                <?= $this->render('_filters',['model' => $searchModel]); ?>
+
                 <?= GridView::widget([
-                    'filterModel' => $searchModel,
+//                    'filterModel' => $searchModel,
                     'dataProvider' => $dataProvider,
                     'columns' => $gridColumns,
                     'pjax' => false,

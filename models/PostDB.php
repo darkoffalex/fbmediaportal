@@ -41,6 +41,7 @@ use Yii;
  * @property string $last_comment_at
  * @property string $search_keywords
  * @property integer $need_update
+ * @property integer $is_parsed
  *
  * @property Comment[] $comments
  * @property User $author
@@ -68,7 +69,7 @@ class PostDB extends \yii\db\ActiveRecord
     {
         return [
             [['fb_sync_id', 'fb_sync_token', 'video_key_yt', 'video_key_fb', 'voted_ips', 'offer_group_fb_id', 'search_keywords'], 'string'],
-            [['content_type_id', 'status_id', 'type_id', 'author_id', 'sticky_position_main', 'stats_after_vote', 'votes_only_authorized', 'created_by_id', 'updated_by_id', 'group_id', 'kind_id', 'need_finish', 'comment_count', 'about_turkey', 'need_update'], 'integer'],
+            [['content_type_id', 'status_id', 'type_id', 'author_id', 'sticky_position_main', 'stats_after_vote', 'votes_only_authorized', 'created_by_id', 'updated_by_id', 'group_id', 'kind_id', 'need_finish', 'comment_count', 'about_turkey', 'need_update', 'is_parsed'], 'integer'],
             [['name'], 'required'],
             [['published_at', 'created_at', 'updated_at', 'last_comment_at'], 'safe'],
             [['name', 'author_custom_name', 'offer_category_tag', 'offer_author_tag', 'video_preview_fb', 'video_preview_yt', 'video_attachment_id_fb'], 'string', 'max' => 255],
@@ -117,6 +118,7 @@ class PostDB extends \yii\db\ActiveRecord
             'last_comment_at' => 'Last Comment At',
             'search_keywords' => 'Search Keywords',
             'need_update' => 'Need Update',
+            'is_parsed' => 'Is Parsed',
         ];
     }
 

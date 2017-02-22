@@ -129,7 +129,7 @@ return [
     'Type more characters' => 'Введите больше символов',
     'No results found' => 'Ничего не найдено',
     'Searching...' => 'Поиск...',
-    'Kind ID' => 'Флаг сортировки',
+    'Kind ID' => 'Подтип',
     'View comments' => 'Просмотр комментариев',
     'No comments found for this post' => 'Нет комментариев к этому материалу',
     'Comments for' => 'Комментарии для',
@@ -202,5 +202,11 @@ return [
     'Source-gropus settings' => 'Параметры групп источников',
     'Synchronize (refresh)' => 'Синхронизировать (обновить)',
     'Not synchronized' => 'Не синхронизирован',
-    'Synchronized' => 'Синхронизирован'
+    'Synchronized' => 'Синхронизирован',
+    'Need update' => 'Ожидает обнов.',
+    'Waiting' => 'В ожидании',
+    'Updates' => 'Обновление',
+    'Fb Sync ID' => 'Facebook ID',
+    'Parsed' => 'Да (спаршен)',
+    'Is Parsed' => 'Из wikipedia-RA',
 ];

@@ -29,10 +29,8 @@ $controller = $this->context;
 
 <!-- OWL DESKTOP::START-->
 <section class="topCarousel hidden-xs-down">
-    <div id="owlTop">
-        <div id="owlTop" data-current-page="1" data-loading="<?= Url::to(['main/category-ajax','carousel' => 1]); ?>">
-            <?= $this->render('/common/_carousel',['posts' => $carouselPosts]); ?>
-        </div>
+    <div id="owlTop" data-current-page="1" data-loading="<?= Url::to(['main/category-ajax','carousel' => 1]); ?>">
+        <?= $this->render('/common/_carousel',['posts' => $carouselPosts]); ?>
     </div>
 </section>
 

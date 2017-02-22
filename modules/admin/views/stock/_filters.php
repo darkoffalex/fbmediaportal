@@ -24,20 +24,14 @@ use kartik\daterange\DateRangePicker;
     ]); ?>
 
     <div class="row">
-        <div class="col-md-2">
-            <?= $form->field($model,'content')->textInput()->error(false); ?>
+        <div class="col-md-3">
+            <?= $form->field($model,'name')->textInput()->error(false); ?>
         </div>
-        <div class="col-md-1">
+        <div class="col-md-2">
             <?= $form->field($model,'id')->textInput()->error(false); ?>
         </div>
         <div class="col-md-3">
-            <?= $form->field($model,'category_id')->dropDownList(ArrayHelper::map(Category::getRecursiveItemsEx(),'id',function($model,$defaultValue){
-                /* @var $model Category */
-                $result = "";
-                for($i=1;$i<$model->getDepth();$i++){$result.= "-";}
-                $result.= $model->name;
-                return $result;
-            }),['prompt' => ''])->label(Yii::t('admin','Category'))->error(false); ?>
+            <?= $form->field($model,'fb_sync_id')->textInput()->error(false); ?>
         </div>
         <div class="col-md-2">
             <?= $form->field($model,'author_id')->widget(Select2::classname(), [
@@ -66,26 +60,16 @@ use kartik\daterange\DateRangePicker;
             ])->error(false) ?>
         </div>
         <div class="col-md-2">
-            <?= $form->field($model,'content_type_id')->dropDownList([
-                Constants::CONTENT_TYPE_ARTICLE => Yii::t('admin','Article'),
-                Constants::CONTENT_TYPE_NEWS => Yii::t('admin','News'),
-                Constants::CONTENT_TYPE_PHOTO => Yii::t('admin','Photo'),
-                Constants::CONTENT_TYPE_VIDEO => Yii::t('admin','Video'),
-                Constants::CONTENT_TYPE_VOTING => Yii::t('admin','Voting'),
-                Constants::CONTENT_TYPE_POST => Yii::t('admin','Post')
-            ],['prompt' => '']); ?>
-        </div>
-        <div class="col-md-2">
-            <?= $form->field($model,'type_id')->dropDownList([
-                Constants::POST_TYPE_CREATED => Yii::t('admin','Created'),
-                Constants::POST_TYPE_IMPORTED => Yii::t('admin','Imported'),
-            ],['prompt' => ''])->label(Yii::t('admin','Imported')); ?>
+            <?= $form->field($model,'is_parsed')->dropDownList([
+                'YES' => Yii::t('admin','Parsed'),
+                'NO' => Yii::t('admin','Imported')
+            ],['prompt' => ''])->label(Yii::t('admin','Is Parsed'))->error(false); ?>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-md-2">
-            <?= $form->field($model, 'published_at')->widget(DateRangePicker::className(),[
+        <div class="col-md-3">
+            <?= $form->field($model, 'created_at')->widget(DateRangePicker::className(),[
                 'convertFormat' => true,
                 'pluginOptions' => [
                     'locale' => [
@@ -96,20 +80,24 @@ use kartik\daterange\DateRangePicker;
             ])->error(false); ?>
         </div>
         <div class="col-md-3">
-            <?= $form->field($model,'group_id')->dropDownList(ArrayHelper::map(PostGroup::find()->all(),'id','name'),['prompt' => ''])->error(false); ?>
-        </div>
-        <div class="col-md-3">
-            <?= $form->field($model, 'kind_id')->dropDownList([
-                Constants::KIND_INTERESTING_CONTENT => Yii::t('admin','Useful content'),
-                Constants::KIND_INTERESTING_COMMENTS => Yii::t('admin','Interesting discussion'),
-                Constants::KIND_FORUM => Yii::t('admin','Forum'),
-            ],['prompt' => ''])->error(false); ?>
+            <?= $form->field($model, 'published_at')->widget(DateRangePicker::className(),[
+                'convertFormat' => true,
+                'pluginOptions' => [
+                    'locale' => [
+                        'format'=>'Y-m-d',
+                        'separator'=>' - ',
+                    ],
+                ]
+            ])->error(false); ?>
         </div>
         <div class="col-md-2">
-            <?= $form->field($model, 'need_finish')->dropDownList([
-                "YES" => Yii::t('admin','Yes'),
-                "NO" => Yii::t('admin','No')
-            ],['prompt' => '']); ?>
+            <?= $form->field($model,'group_id')->dropDownList(ArrayHelper::map(PostGroup::find()->all(),'id','name'),['prompt' => ''])->error(false); ?>
+        </div>
+        <div class="col-md-2">
+            <?= $form->field($model, 'need_update')->dropDownList([
+                'YES' => Yii::t('admin','Waiting'),
+                'NO' => Yii::t('admin','Updated')
+            ],['prompt' => ''])->label(Yii::t('admin','Updates'))->error(false); ?>
         </div>
         <div class="col-md-2" style="margin-top: 25px;">
             <?= Html::submitButton(Yii::t('admin','Filter'), ['class' => 'btn btn-primary box-btn']) ?>
