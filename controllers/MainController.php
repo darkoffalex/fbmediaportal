@@ -48,6 +48,8 @@ class MainController extends Controller
      */
     public function actionCategory($id = null)
     {
+        //use cache for this action
+        $cache = true;
         //current category (can be empty, then show all items)
         /* @var $category Category */
         $category = null;
@@ -66,7 +68,7 @@ class MainController extends Controller
                     'childrenActive.childrenActive'
                 ]);
 
-            $category = Help::cquery(function($db)use($catQuery){return $catQuery->one();},false);
+            $category = Help::cquery(function($db)use($catQuery){return $catQuery->one();},$cache);
 
             if(empty($category)){
                 throw new NotFoundHttpException('Рубрика не найдена', 404);
@@ -125,9 +127,9 @@ class MainController extends Controller
         $popularPostsQuery->limit(7);
 
         //get main and forum posts posts for first page (next pages will be loaded via ajax)
-        $mainPosts = Help::cquery(function($db)use($mainPostsQuery){return $mainPostsQuery->all();},false);
-        $forumPosts = Help::cquery(function($db)use($forumPostsQuery){return $forumPostsQuery->all();},false);
-        $popularPosts = Help::cquery(function($db)use($popularPostsQuery){return $popularPostsQuery->all();},false);
+        $mainPosts = Help::cquery(function($db)use($mainPostsQuery){return $mainPostsQuery->all();},$cache);
+        $forumPosts = Help::cquery(function($db)use($forumPostsQuery){return $forumPostsQuery->all();},$cache);
+        $popularPosts = Help::cquery(function($db)use($popularPostsQuery){return $popularPostsQuery->all();},$cache);
 
         //rendering page
         return $this->render('category',compact('mainPosts','forumPosts','popularPosts','category'));
@@ -143,6 +145,8 @@ class MainController extends Controller
      */
     public function actionCategoryAjax($id = null, $page = 1, $carousel = 0)
     {
+        //use cache for this action
+        $cache = true;
         //current category (can be empty, then show all items)
         /* @var $category Category */
         $category = null;
@@ -161,7 +165,7 @@ class MainController extends Controller
                     'childrenActive.childrenActive'
                 ]);
 
-            $category = Help::cquery(function($db)use($catQuery){return $catQuery->one();},false);
+            $category = Help::cquery(function($db)use($catQuery){return $catQuery->one();},$cache);
 
             if(empty($category)){
                 throw new NotFoundHttpException('Рубрика не найдена', 404);
@@ -192,9 +196,9 @@ class MainController extends Controller
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]));
 
         $mainPostsQueryCount = clone $mainPostsQuery;
-        $mainPostsCount = Help::cquery(function($db)use($mainPostsQueryCount){return $mainPostsQueryCount->count();},false);
+        $mainPostsCount = Help::cquery(function($db)use($mainPostsQueryCount){return $mainPostsQueryCount->count();},$cache);
         $pagesMain = new Pagination(['totalCount' => $mainPostsCount, 'defaultPageSize' => ($carousel ? 1 : 3)]);
-        $mainPosts = Help::cquery(function($db)use($mainPostsQuery,$pagesMain,$carousel){return $mainPostsQuery->offset($pagesMain->offset + ($carousel ? 15 : 5))->limit($pagesMain->limit)->all();},false);
+        $mainPosts = Help::cquery(function($db)use($mainPostsQuery,$pagesMain,$carousel){return $mainPostsQuery->offset($pagesMain->offset + ($carousel ? 15 : 5))->limit($pagesMain->limit)->all();},$cache);
 
         //getting forum posts paginated
         if(!$carousel){
@@ -204,9 +208,9 @@ class MainController extends Controller
 //            ->andWhere(['kind_id' => Constants::KIND_FORUM]);
 
             $forumPostsQueryCount = clone $forumPostsQuery;
-            $forumPostsCount = Help::cquery(function($db)use($forumPostsQueryCount){return $forumPostsQueryCount->count();},false);
+            $forumPostsCount = Help::cquery(function($db)use($forumPostsQueryCount){return $forumPostsQueryCount->count();},$cache);
             $pagesForum = new Pagination(['totalCount' => $forumPostsCount, 'defaultPageSize' => 4]);
-            $forumPosts = Help::cquery(function($db)use($forumPostsQuery,$pagesForum){return $forumPostsQuery->offset($pagesForum->offset)->limit($pagesForum->limit)->all();},false);
+            $forumPosts = Help::cquery(function($db)use($forumPostsQuery,$pagesForum){return $forumPostsQuery->offset($pagesForum->offset)->limit($pagesForum->limit)->all();},$cache);
         }
 
         if($carousel){
@@ -227,6 +231,8 @@ class MainController extends Controller
      */
     public function actionPost($id)
     {
+        //use cache for this action
+        $cache = true;
         /* @var $user User */
         $user = Yii::$app->user->identity;
 
@@ -243,7 +249,7 @@ class MainController extends Controller
         ])->where(['id' => $id, 'status_id' => Constants::STATUS_ENABLED]);
 
         /* @var $post Post */
-        $post = Help::cquery(function($db)use($postQuery){return $postQuery->one();},false);
+        $post = Help::cquery(function($db)use($postQuery){return $postQuery->one();},$cache);
 
         if(empty($post)){
             throw  new NotFoundHttpException('Страница не найдена',404);
@@ -295,7 +301,7 @@ class MainController extends Controller
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
             ->limit(15);
 
-        $carouselPosts = Help::cquery(function($db)use($carouselPostsQuery){return $carouselPostsQuery->all();},false);
+        $carouselPosts = Help::cquery(function($db)use($carouselPostsQuery){return $carouselPostsQuery->all();},$cache);
 
         //if need - create new comment
         $newComment = $this->addCommentIfNeeded($post,$user);
@@ -311,9 +317,9 @@ class MainController extends Controller
             ->orderBy('created_at ASC');
 
         $cq = clone $q;
-        $count = Help::cquery(function($db)use($cq){return $cq->count();},false);
+        $count = Help::cquery(function($db)use($cq){return $cq->count();},$cache);
         $pages = new Pagination(['totalCount' => $count, 'defaultPageSize' => 10]);
-        $comments = Help::cquery(function($db)use($q,$pages){return $q->offset($pages->offset)->limit($pages->limit)->all();},false);
+        $comments = Help::cquery(function($db)use($q,$pages){return $q->offset($pages->offset)->limit($pages->limit)->all();},$cache);
 
         return $this->render('post',compact('post','comments','carouselPosts','newComment'));
     }
@@ -426,7 +432,7 @@ class MainController extends Controller
     }
 
     /**
-     * Adding comment suing data from POST request
+     * Adding comment using data from POST request
      * @param $post Post
      * @param $user User
      * @return Comment
@@ -483,6 +489,9 @@ class MainController extends Controller
      */
     public function actionProfile($id = null)
     {
+        //use cache for this action
+        $cache = false;
+
         /* @var $user User */
         $user = !Yii::$app->user->isGuest ? Yii::$app->user->identity : null;
 
@@ -499,18 +508,13 @@ class MainController extends Controller
         $this->view->registerMetaTag(['name' => 'description', 'content' => '']);
         $this->view->registerMetaTag(['name' => 'keywords', 'content' => '']);
 
-        $q = Post::find()->where(['author_id' => $user->id]);
-        $q->orderBy('published_at DESC');
-        $countQ = clone $q;
-        $count = Help::cquery(function($db)use($countQ){return $countQ->count();},false);
+        //query activity list
+        $sql = "SELECT post_id, comment_id, content, post_name, author_id, published_at, type, image_path, image_url, `user`.avatar_file, `user`.name, `user`.surname FROM (SELECT * FROM (SELECT  post.id as post_id, NULL as comment_id, post_trl.text as content, post_trl.name as post_name, author_id, published_at, 'post' as type, (SELECT file_path FROM post_image WHERE post_image.post_id = post.id ORDER BY priority ASC LIMIT 1) image_path,(SELECT file_url FROM post_image WHERE post_image.post_id = post.id ORDER BY priority ASC LIMIT 1) image_url FROM `post` JOIN post_trl ON post_trl.post_id = post.id AND post_trl.lng = :lng WHERE author_id = :user) p UNION SELECT * FROM (SELECT NULL as post_id, `comment`.id as comment_id, text as content, NULL as post_name, author_id, created_at as published_at, 'comment' as type, NULL as image_path, NULL as image_url FROM `comment` WHERE author_id = :user) c) activity_log JOIN `user` ON activity_log.author_id = `user`.id ORDER BY published_at DESC LIMIT :limit OFFSET :offset";
+        $sqlCount = "SELECT COUNT(*) FROM (SELECT * FROM (SELECT  post.id as post_id, NULL as comment_id, post_trl.text as content, author_id, published_at, 'post' as type, (SELECT file_path FROM post_image WHERE post_image.post_id = post.id ORDER BY priority ASC LIMIT 1) image_path,(SELECT file_url FROM post_image WHERE post_image.post_id = post.id ORDER BY priority ASC LIMIT 1) image_url FROM `post` JOIN post_trl ON post_trl.post_id = post.id AND post_trl.lng = :lng WHERE author_id = :user) p UNION SELECT * FROM (SELECT NULL as post_id, `comment`.id as comment_id, text as content, author_id, created_at as published_at, 'comment' as type, NULL as image_path, NULL as image_url FROM `comment` WHERE author_id = :user) c) activity_log JOIN `user` ON activity_log.author_id = `user`.id ORDER BY published_at";
 
+        $count = Yii::$app->db->createCommand($sqlCount,['user' => $user->id, 'lng' => Yii::$app->language])->queryScalar();
         $pages = new Pagination(['totalCount' => $count, 'defaultPageSize' => 20]);
-        $q->with(['trl','postImages','author'])
-            ->offset($pages->offset)
-            ->limit($pages->limit);
-
-        //user activity wall posts
-        $posts = Help::cquery(function($db)use($q){return $q->all();},false);
+        $items = Yii::$app->db->createCommand($sql,['user' => $user->id,'limit' => $pages->limit, 'offset' => $pages->offset, 'lng' => Yii::$app->language])->queryAll();
 
         //posts for carousel
         $carouselPostsQuery = Post::findSorted()
@@ -519,13 +523,13 @@ class MainController extends Controller
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
             ->limit(15);
 
-        $carouselPosts = Help::cquery(function($db)use($carouselPostsQuery){return $carouselPostsQuery->all();},false);
+        $carouselPosts = Help::cquery(function($db)use($carouselPostsQuery){return $carouselPostsQuery->all();},$cache);
 
         //counters
         $materialCount = Post::find()->where(['author_id' => $user->id, 'status_id' => Constants::STATUS_ENABLED])->andWhere('content_type_id != :type',['type' => Constants::CONTENT_TYPE_POST])->count();
         $postCount = Post::find()->where(['author_id' => $user->id, 'status_id' => Constants::STATUS_ENABLED, 'content_type_id' => Constants::CONTENT_TYPE_POST])->count();
 
-        return $this->render('profile', compact('posts','pages','user','carouselPosts','materialCount','postCount'));
+        return $this->render('profile', compact('items','pages','user','carouselPosts','materialCount','postCount'));
     }
 
     /**
@@ -537,6 +541,9 @@ class MainController extends Controller
      */
     public function actionProfileDetails($id = null, $type = 'posts')
     {
+        //use cache for this action
+        $cache = false;
+
         /* @var $user User */
         $user = !Yii::$app->user->isGuest ? Yii::$app->user->identity : null;
 
@@ -610,7 +617,7 @@ class MainController extends Controller
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
             ->limit(15);
 
-        $carouselPosts = Help::cquery(function($db)use($carouselPostsQuery){return $carouselPostsQuery->all();},false);
+        $carouselPosts = Help::cquery(function($db)use($carouselPostsQuery){return $carouselPostsQuery->all();},$cache);
 
         return $this->render('profile_details',compact('posts','comments','carouselPosts','pages','user','type'));
     }
@@ -626,6 +633,8 @@ class MainController extends Controller
      */
     public function actionAll($type, $id = null)
     {
+        //use cache for this action
+        $cache = false;
         //current category (can be empty, then show all items)
         /* @var $category Category */
         $category = null;
@@ -701,13 +710,13 @@ class MainController extends Controller
         $qc = clone $q;
 
         //get and paginate (15 per page)
-        $count = $count = Help::cquery(function($db)use($qc){return $qc->count();},false);
+        $count = $count = Help::cquery(function($db)use($qc){return $qc->count();},$cache);
         $pages = new Pagination(['totalCount' => $count, 'defaultPageSize' => 15]);
         $q->offset($pages->offset)->limit($pages->limit);
-        $posts = Help::cquery(function($db)use($q){return $q->all();},false);
+        $posts = Help::cquery(function($db)use($q){return $q->all();},$cache);
 
         //if current type is "popular" - use for carousel another query, if not - use current (per page must be 15! (because of carousel ajax loading offset)
-        $carouselPosts = $type == 'popular' ? Help::cquery(function($db)use($mainPostsQuery){return $mainPostsQuery->limit(15)->all();},false) : $posts;
+        $carouselPosts = $type == 'popular' ? Help::cquery(function($db)use($mainPostsQuery){return $mainPostsQuery->limit(15)->all();},$cache) : $posts;
 
         return $this->render('all',compact('category','posts','pages','type','carouselPosts'));
     }
@@ -720,6 +729,9 @@ class MainController extends Controller
      */
     public function actionSearch()
     {
+        //use cache for this action
+        $cache = false;
+
         $query = Yii::$app->request->get('q');
 
         $q = Post::find()
@@ -763,7 +775,7 @@ class MainController extends Controller
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
             ->limit(15);
 
-        $carouselPosts = Help::cquery(function($db)use($carouselPostsQuery){return $carouselPostsQuery->all();},false);
+        $carouselPosts = Help::cquery(function($db)use($carouselPostsQuery){return $carouselPostsQuery->all();},$cache);
 
         return $this->render('search',compact('posts','carouselPosts','query','pages'));
     }

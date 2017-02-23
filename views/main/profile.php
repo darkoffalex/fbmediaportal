@@ -1,14 +1,14 @@
 <?php
-use app\models\Post;
-use app\helpers\Constants;
+use himiklab\thumbnail\EasyThumbnailImage;
 use yii\helpers\Url;
 use yii\widgets\LinkPager;
 use yii\helpers\ArrayHelper;
+use yii\helpers\StringHelper;
 
 /* @var $this \yii\web\View */
 /* @var $user \app\models\User; */
 /* @var $controller \app\controllers\MainController */
-/* @var $posts \app\models\Post[] */
+/* @var $items array[] */
 /* @var $carouselPosts \app\models\Post[] */
 /* @var $pages \yii\data\Pagination */
 /* @var $type string */
@@ -68,34 +68,54 @@ $controller = $this->context;
                         </div>
                     </div>
 
-                    <?php if(!empty($posts)): ?>
+                    <?php if(!empty($items)): ?>
                         <div class="headingBorder">
                             <h2>Лента Активности: <b><?= $user->name.' '.$user->surname; ?></b></h2>
                         </div>
-                        <?php foreach ($posts as $post): ?>
-                            <!-- card-->
-                            <div class="content__card">
-                                <div class="content__card__image">
-                                    <a href="<?= $post->getUrl(); ?>">
-                                        <img class="img-fluid" src="<?= $post->getThumbnailUrl(484,276); ?>">
-                                    </a>
-                                </div>
-                                <a class="content__card__title hidden-sm-up" href="#"><?= $post->trl->name; ?></a>
-                                <div class="content__card__content"><a class="content__card__title hidden-xs-down" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
-                                    <div class="content__card__intro">
-                                        <p><?= $post->trl->small_text; ?></p>
-                                        <?php if(!empty($post->author)): ?>
-                                            <a href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
-                                                <?= $post->author->name.' '.$post->author->surname; ?>
+
+                        <div class="content__card">
+                            <?php foreach ($items as $item): ?>
+                                <?php if($item['type'] == 'post'): ?>
+                                    <!-- card-->
+                                    <div class="content__card">
+                                        <div class="content__card__image">
+                                            <a href="<?= Url::to(['main/post', 'id' => $item['post_id']]); ?>">
+                                                <?php if(!empty($item['image_path'] && file_exists(Yii::getAlias('@webroot/uploads/img/'.$item['image_path'])))): ?>
+                                                    <img class="img-fluid" src="<?= EasyThumbnailImage::thumbnailFileUrl(Yii::getAlias('@webroot/uploads/img/'.$item['image_path']),484,276); ?>">
+                                                <?php elseif (!empty($item['image_url'])): ?>
+                                                    <img class="img-fluid" src="<?= $item['image_url']; ?>">
+                                                <?php else: ?>
+                                                    <img class="img-fluid" src="http://placehold.it/484x276">
+                                                <?php endif; ?>
                                             </a>
-                                        <?php else: ?>
-                                            <a href=""><?= $post->author_custom_name; ?></a>
-                                        <?php endif; ?>
-                                        <span>• <?= substr($post->published_at,0,16); ?></span>
+                                        </div>
+                                        <a class="content__card__title hidden-sm-up" href="#"><?= $item['post_name']; ?></a>
+                                        <div class="content__card__content">
+                                            <a class="content__card__title hidden-xs-down" href="<?= Url::to(['main/post', 'id' => $item['post_id']]); ?>">
+                                                <?= $item['post_name']; ?>
+                                            </a>
+                                            <div class="content__card__intro">
+                                                <p><?= StringHelper::truncateWords(strip_tags($item['content']),20); ?></p>
+                                                <?php if(!empty($item['author_id'])): ?>
+                                                    <a href="<?= Url::to(['main/profile','id'=> $item['author_id']]); ?>">
+                                                        <?= $item['name'].' '.$item['surname']; ?>
+                                                    </a>
+                                                <?php endif; ?>
+                                                <span>• <?= substr($item['published_at'],0,16); ?></span>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
+                                <?php elseif ($item['type'] == 'comment'): ?>
+                                    <div class="contentComments__card content__card">
+                                        <img class="img-fluid" src="<?= $item['avatar_file']; ?>">
+                                        <div class="contentComments__card__content">
+                                            <b><a href="<?= Url::to(['main/profile','id'=> $item['author_id']]); ?>"><?= $item['name'].' '.$item['surname']; ?></a><span>-  <?= substr($item['published_at'],0,16); ?></span></b>
+                                            <p><?= $item['content']; ?></p>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </div>
 
                         <?= LinkPager::widget([
                             'pagination' => $pages,

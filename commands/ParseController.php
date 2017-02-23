@@ -278,4 +278,334 @@ class ParseController extends Controller
 
         echo "Importing finished successfully! \n";
     }
+
+    /**
+     * Fix all names of posts
+     */
+    public function actionFixNames()
+    {
+        mb_internal_encoding("UTF-8");
+
+        echo "Getting main page... \n";
+        $data = file_get_contents("http://navigator.russkievantalii.com/%d0%bf%d0%be%d0%bb%d0%b5%d0%b7%d0%bd%d0%b0%d1%8f-%d0%b8%d0%bd%d1%84%d0%be%d1%80%d0%bc%d0%b0%d1%86%d0%b8%d1%8f/");
+
+        echo "Parsing main page... \n";
+        $document = phpQuery::newDocumentHTML($data);
+        $links = $document->find('.entry-content')->find('a');
+
+
+        echo "Processing... \n";
+
+        foreach($links as $link){
+            $pqLink = pq($link);
+            $subUrl = $pqLink->attr('href');
+            $title = $pqLink->text();
+
+            if(!empty($title)){
+
+                $categoryNames[] = $title;
+                $data = file_get_contents($subUrl);
+                $document = phpQuery::newDocumentHTML($data);
+
+                $pTags = $document->find('.entry-content')->find('p');
+                $pParsedContent = [];
+                $pFirstLevelPosts = [];
+                $currentKey = null;
+
+                foreach($pTags as $tag){
+                    $html = pq($tag)->html();
+                    if(strpos($html, 'strong') !== false){
+                        $key = mb_strtolower($this->getBetween('<strong>','</strong>',$html));
+                        $currentKey = !empty($key) ? $this->mb_ucfirst(strip_tags($key)) : $currentKey;
+                    }elseif(!empty($currentKey) && strpos($html,'permalink') !== false){
+                        $title = str_replace('Подробнее…','',strip_tags($html));
+                        $key = $this->getBetween('permalink/','/"',$html);
+
+                        if(!empty($key) && !empty($title)){
+                            $pParsedContent[$currentKey][] = [
+                                'title' => str_replace('Подробнее…','',strip_tags($html)),
+                                'key' => $this->getBetween('permalink/','/"',$html)
+                            ];
+                        }
+                    }elseif(empty($currentKey) && strpos($html,'permalink') !== false){
+                        $title = str_replace('Подробнее…','',strip_tags($html));
+                        $key = $this->getBetween('permalink/','/"',$html);
+
+                        if(!empty($key) && !empty($title)){
+                            $pFirstLevelPosts[] = [
+                                'title' => str_replace('Подробнее…','',strip_tags($html)),
+                                'key' => $this->getBetween('permalink/','/"',$html)
+                            ];
+                        }
+                    }
+                }
+
+                if(!empty($pParsedContent)){
+                    foreach($pParsedContent as $categoryName => $p){
+                        if(!empty($categoryName)){
+                            foreach($p as $postInfo){
+                                $theKey = $postInfo['key'];
+                                $theKey = filter_var(explode('/',$theKey,2)[0], FILTER_SANITIZE_NUMBER_INT);
+
+                                /* @var $post Post */
+                                $post = Post::find()->where(['fb_sync_id' => $theKey])->one();
+                                if(!empty($post)){
+                                    //fix name
+                                    $post->name = $this->clearName($postInfo['title']);
+                                    $post->update();
+
+                                    //update translatable data
+                                    $trl = $post->getATrl('ru');
+                                    $trl->name = $post->name;
+                                    $trl->isNewRecord ? $trl->save() : $trl->update();
+
+                                    echo "Post {$post->id} | {$post->fb_sync_id} | {$post->name} fixed \n";
+                                }else{
+                                    echo "Not found post with ID {$theKey}";
+                                }
+                            }
+                        }
+                    }
+                }else{
+                    if(!empty($pFirstLevelPosts)){
+                        foreach($pFirstLevelPosts AS $postInfo) {
+                            $theKey = $postInfo['key'];
+                            $theKey = filter_var(explode('/',$theKey,2)[0], FILTER_SANITIZE_NUMBER_INT);
+
+                            /* @var $post Post */
+                            $post = Post::find()->where(['fb_sync_id' => $theKey])->one();
+                            if(!empty($post)){
+                                //fix name
+                                $post->name = $this->clearName($postInfo['title']);
+                                $post->update();
+
+                                //update translatable data
+                                $trl = $post->getATrl('ru');
+                                $trl->name = $post->name;
+                                $trl->isNewRecord ? $trl->save() : $trl->update();
+
+                                echo "Post {$post->id} | {$post->fb_sync_id} | {$post->name} fixed \n";
+                            }else{
+                                echo "Not found post with ID {$theKey}";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Reparses wikipedia-ra, finds only new posts
+     */
+    public function actionReParseFast()
+    {
+        mb_internal_encoding("UTF-8");
+
+        echo "Getting main page... \n";
+        $data = file_get_contents("http://navigator.russkievantalii.com/%d0%bf%d0%be%d0%bb%d0%b5%d0%b7%d0%bd%d0%b0%d1%8f-%d0%b8%d0%bd%d1%84%d0%be%d1%80%d0%bc%d0%b0%d1%86%d0%b8%d1%8f/");
+
+        echo "Parsing main page... \n";
+        $document = phpQuery::newDocumentHTML($data);
+        $links = $document->find('.entry-content')->find('a');
+
+        //list of prepared items that should be imported
+        $preparedItems = [];
+
+        echo "Importing first level categories... \n";
+        foreach($links as $link){
+
+            $categoryNames = [];
+            $pqLink = pq($link);
+
+            $subUrl = $pqLink->attr('href');
+            $title = $pqLink->text();
+
+
+            if(!empty($title)){
+
+                $categoryNames[] = $title;
+                echo "Category {$title} added to name list \n";
+
+                echo "Getting sub-page... \n";
+                $data = file_get_contents($subUrl);
+
+                echo "Parsing sub-page... \n";
+                $document = phpQuery::newDocumentHTML($data);
+
+                $pTags = $document->find('.entry-content')->find('p');
+                $pParsedContent = [];
+                $pFirstLevelPosts = [];
+                $currentKey = null;
+
+                foreach($pTags as $tag){
+                    $html = pq($tag)->html();
+                    if(strpos($html, 'strong') !== false){
+                        $key = mb_strtolower($this->getBetween('<strong>','</strong>',$html));
+                        $currentKey = !empty($key) ? $this->mb_ucfirst(strip_tags($key)) : $currentKey;
+                    }elseif(!empty($currentKey) && strpos($html,'permalink') !== false){
+                        $title = str_replace('Подробнее…','',strip_tags($html));
+                        $key = $this->getBetween('permalink/','/"',$html);
+
+                        if(!empty($key) && !empty($title)){
+                            $pParsedContent[$currentKey][] = [
+                                'title' => str_replace('Подробнее…','',strip_tags($html)),
+                                'key' => $this->getBetween('permalink/','/"',$html)
+                            ];
+                        }
+                    }elseif(empty($currentKey) && strpos($html,'permalink') !== false){
+                        $title = str_replace('Подробнее…','',strip_tags($html));
+                        $key = $this->getBetween('permalink/','/"',$html);
+
+                        if(!empty($key) && !empty($title)){
+                            $pFirstLevelPosts[] = [
+                                'title' => str_replace('Подробнее…','',strip_tags($html)),
+                                'key' => $this->getBetween('permalink/','/"',$html)
+                            ];
+                        }
+                    }
+                }
+
+                if(!empty($pParsedContent)){
+                    echo "Parsing sub-categories... \n";
+
+                    foreach($pParsedContent as $categoryName => $p){
+
+                        if(!empty($categoryName)){
+                            echo "Sub-category {$categoryName} added to name-list \n";
+
+                            echo "Storing new posts... \n";
+                            foreach($p as $postInfo){
+                                $theKey = $postInfo['key'];
+                                $theKey = filter_var(explode('/',$theKey,2)[0], FILTER_SANITIZE_NUMBER_INT);
+                                if(Post::find()->where(['fb_sync_id' => $theKey])->count() == 0){
+
+                                    $catNamesTmp = $categoryNames;
+                                    $catNamesTmp[] = $categoryName;
+
+                                    $postArr = [
+                                        'title' => $this->clearName($postInfo['title']),
+                                        'key' => $theKey,
+                                        'categories' => $catNamesTmp
+                                    ];
+
+                                    $preparedItems[] = $postArr;
+                                }else{
+                                    echo "Already added \n";
+                                }
+                            }
+                        }
+                    }
+                }else{
+                    echo "Parsing first-level posts... \n";
+                    if(!empty($pFirstLevelPosts)){
+                        foreach($pFirstLevelPosts AS $postInfo) {
+                            $theKey = $postInfo['key'];
+                            $theKey = filter_var(explode('/',$theKey,2)[0], FILTER_SANITIZE_NUMBER_INT);
+                            if (Post::find()->where(['fb_sync_id' => $theKey])->count() == 0) {
+
+                                $postArr = [
+                                    'title' => $this->clearName($postInfo['title']),
+                                    'key' => $theKey,
+                                    'categories' => $categoryNames
+                                ];
+
+                                $preparedItems[] = $postArr;
+                            }else{
+                                echo "Already added \n";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        exit('Finished!');
+
+        echo "ITEMS PREPARED \n\n";
+        echo "Importing...\n\n";
+
+        $total = count($preparedItems);
+        $added = 0;
+        $categoryAppended = 0;
+
+        foreach ($preparedItems as $item){
+
+            /* @var $category Category */
+            $category = null;
+
+            if(count($item['categories']) > 1){
+                $category = Category::find()
+                    ->alias('c')
+                    ->joinWith('parent as pc')
+                    ->andWhere(['like','c.name', $item['categories'][count($item['categories'])-1]])
+                    ->andWhere(['like','pc.name', $item['categories'][0]])
+                    ->one();
+            }elseif(count($item['categories']) != 0){
+                $category = Category::find()
+                    ->andWhere(['like','name', $item['categories'][0]])
+                    ->andWhere(['parent_category_id' => 0])
+                    ->one();
+            }
+
+            echo "Adding POST {$item['key']} \n";
+
+            //create a post
+            $post = new Post();
+            $post->name = $item['title'];
+            $post->fb_sync_id = $item['key'];
+            $post->content_type_id = Constants::CONTENT_TYPE_POST;
+            $post->status_id = Constants::STATUS_IN_STOCK;
+            $post->type_id = Constants::POST_TYPE_IMPORTED;
+            $post->is_parsed = 0;
+            $post->need_update = 1;
+            $post->created_at = date('Y-m-d H:i:s', time());
+            $post->updated_at = date('Y-m-d H:i:s', time());
+            $post->created_by_id = $this->getBasicAdmin()->id;
+            $post->updated_by_id = $this->getBasicAdmin()->id;
+
+            if($post->save()){
+
+                echo "POST {$item['key']} added\n";
+
+                $added++;
+
+                //update translatable data
+                $trl = $post->getATrl('ru');
+                $trl->name = $post->name;
+                $trl->isNewRecord ? $trl->save() : $trl->update();
+
+                //append category if needed
+                if(!empty($category)){
+                    $cp = new PostCategory();
+                    $cp->post_id = $post->id;
+                    $cp->category_id = $category->id;
+                    $cp->created_at = date('Y-m-d H:i:s', time());
+                    $cp->updated_at = date('Y-m-d H:i:s', time());
+                    $cp->created_by_id = $this->getBasicAdmin()->id;
+                    $cp->updated_by_id = $this->getBasicAdmin()->id;
+
+                    if($cp->save()){
+                        $categoryAppended++;
+                        echo "Category appended for post {$item['key']} added\n";
+                    }
+                }
+            }
+        }
+
+        echo "DONE! Added {$added} of {$total} posts.\nCategory has {$categoryAppended}\n";
+    }
+
+    /**
+     * Cleans fucked names
+     * @param $name
+     * @return mixed
+     */
+    private function clearName($name)
+    {
+        $parts = explode('(',$name);
+        $lastIndex = count($parts)-1;
+        $name = str_replace(' ('.$parts[$lastIndex],'',$name);
+        return $name;
+    }
 }

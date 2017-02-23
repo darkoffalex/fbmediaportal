@@ -53,8 +53,8 @@ class PostImage extends PostImageDB
     public function rules()
     {
         $baseRules = parent::rules();
-        $baseRules[] = [['image'], 'file', 'extensions' => ['png', 'jpg', 'gif'], 'maxSize' => 1024*1024*5];
-        $baseRules[] = [['image'], 'checkImgWidth', 'params' => ['minWidth' => 706, 'maxWidth' => 3000]];
+        $baseRules[] = [['image'], 'file', 'extensions' => ['png', 'jpg', 'gif'], 'maxSize' => 1024*1024*10];
+        $baseRules[] = [['image'], 'checkImgWidth', 'params' => ['minWidth' => 706]];
         $baseRules[] = [['translations'],'safe'];
         return $baseRules;
     }
@@ -71,11 +71,8 @@ class PostImage extends PostImageDB
                 $filePath = $this->$attribute->tempName;
                 $img = Image::getImagine()->open($filePath);
                 $min = ArrayHelper::getValue($params,'minWidth',706);
-                $max = ArrayHelper::getValue($params,'maxWidth',3000);
                 if($img->getSize()->getWidth() < $min){
-                    $this->addError($attribute,Yii::t('admin',"Image size is too small. Minimal width is [min}",['min' => $min]));
-                }elseif ($img->getSize()->getWidth() > $max){
-                    $this->addError($attribute,Yii::t('admin',"Image size is too big. Maximal width is [max}",['min' => $max]));
+                    $this->addError($attribute,Yii::t('admin',"Image size is too small. Minimal width is [min}px",['min' => $min]));
                 }
             }catch (\Exception $ex){
 

@@ -22,7 +22,11 @@ $imgAttributes = !empty($imgAttributes) ? $imgAttributes : [];
 
 <?php if(!empty($banners) && is_array($banners)): ?>
     <?php foreach($banners as $banner): ?>
-        <?php $url = Url::to(['site/banner-redirect','id' => $banner->id, 'title' => Help::slug($banner->name)]); ?>
-        <?= Html::a(Html::img('@web/uploads/img/'.$banner->image_filename,ArrayHelper::merge(['alt' => $banner->name],$imgAttributes)),$url,$attributes); ?>
+        <?php if($banner->type_id == \app\helpers\Constants::BANNER_TYPE_IMAGE): ?>
+            <?php $url = Url::to(['site/banner-redirect','id' => $banner->id, 'title' => Help::slug($banner->name)]); ?>
+            <?= Html::a(Html::img('@web/uploads/img/'.$banner->image_filename,ArrayHelper::merge(['alt' => $banner->name],$imgAttributes)),$url,$attributes); ?>
+        <?php elseif($banner->type_id == \app\helpers\Constants::BANNER_TYPE_CODE): ?>
+            <?= $banner->code; ?>
+        <?php endif; ?>
     <?php endforeach; ?>
 <?php endif; ?>
