@@ -48,7 +48,7 @@ $controller = $this->context;
                         <div class="content__card__title"><?= $post->trl->name; ?></div>
                         <div class="content__card__info">
                             <?php if(!empty($post->author)): ?>
-                                <a href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
+                                <a rel="canonical" href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
                                     <?= $post->author->name.' '.$post->author->surname; ?>
                                 </a>
                             <?php else: ?>
@@ -144,3 +144,11 @@ $controller = $this->context;
             </div>
         </div>
     </section>
+
+<?php foreach ($carouselPosts as $index => $p): ?>
+    <?php if($p->id == $post->id): ?>
+        <?php unset($carouselPosts[$index]); ?>
+    <?php endif; ?>
+<?php endforeach; ?>
+
+<?= $this->render('/common/_forum_posts',['posts' => array_slice($carouselPosts,0,4), 'label' => 'Похожие материалы']); ?>

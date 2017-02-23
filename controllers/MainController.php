@@ -8,6 +8,8 @@ use app\models\Category;
 use app\models\Comment;
 use app\models\Post;
 use app\models\User;
+use Facebook\Facebook;
+use kartik\social\Module as SocialModule;
 use Yii;
 use app\components\Controller;
 use yii\data\Pagination;
@@ -469,7 +471,16 @@ class MainController extends Controller
                     $user->counter_comments = count($user->comments);
                     $user->update();
 
-                    if(!empty($user->fb_user_id)){
+                    if(!empty($user->fb_user_id && !empty($user->fb_auth_token))){
+
+                        /* @var $social SocialModule */
+                        $social = Yii::$app->getModule('social');
+                        $fbConnection = new Facebook([
+                            'app_id' => $social->facebook['app_id'],
+                            'app_secret' => $social->facebook['app_secret']
+                        ]);
+                        $result = $fbConnection->post("/post/POST_ID/comments",['message' => $newComment->text],$user->fb_auth_token);
+
                         //TODO: Apply changes in FB
                     }
                 }
@@ -477,6 +488,29 @@ class MainController extends Controller
         }
 
         return $newComment;
+    }
+
+    /********************************************** T E S T S *********************************************************/
+
+    public function actionTestCommenting()
+    {
+        /* @var $user User */
+        $user = Yii::$app->user->identity;
+
+        if(!empty($user) && !Yii::$app->user->isGuest){
+            /* @var $social SocialModule */
+            $social = Yii::$app->getModule('social');
+            $fbConnection = new Facebook([
+                'app_id' => $social->facebook['app_id'],
+                'app_secret' => $social->facebook['app_secret']
+            ]);
+            $result = $fbConnection->post("/post/1296459587113274/comments",['message' => 'тестовый комментарий'],$user->fb_auth_token);
+            Help::debug($result);
+        }else{
+            return "Please login via Facebook";
+        }
+
+        exit('Done');
     }
 
     /********************************************* P R O F I L E ******************************************************/

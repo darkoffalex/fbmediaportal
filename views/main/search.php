@@ -59,7 +59,7 @@ $controller = $this->context;
                             <!-- card-->
                             <div class="content__card">
                                 <div class="content__card__image">
-                                    <a href="<?= $post->getUrl(); ?>">
+                                    <a rel="canonical" href="<?= $post->getUrl(); ?>">
                                         <img class="img-fluid" src="<?= $post->getThumbnailUrl(484,276); ?>">
                                     </a>
                                 </div>
@@ -68,11 +68,11 @@ $controller = $this->context;
                                     <div class="content__card__intro">
                                         <p><?= $post->trl->small_text; ?></p>
                                         <?php if(!empty($post->author)): ?>
-                                            <a href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
+                                            <a rel="canonical" href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
                                                 <?= $post->author->name.' '.$post->author->surname; ?>
                                             </a>
                                         <?php else: ?>
-                                            <a href=""><?= $post->author_custom_name; ?></a>
+                                            <a href="#"><?= $post->author_custom_name; ?></a>
                                         <?php endif; ?>
                                         <span>• <?= substr($post->published_at,0,16); ?></span>
                                     </div>

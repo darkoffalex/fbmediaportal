@@ -1,131 +1,105 @@
 <?php
 namespace app\commands;
 
+use app\helpers\Constants;
 use app\helpers\Help;
 use app\helpers\Sort;
 use app\models\Comment;
 use app\models\Post;
 use app\models\PostGroup;
 use app\models\PostImage;
-use yii\console\Controller;
-use Yii;
 use app\models\User;
-use app\helpers\Constants;
-use app\models\Language;
-use yii\console\Exception;
+use Yii;
+use yii\console\Controller;
+use app\helpers\AdminizatorApi;
 use yii\data\Pagination;
+use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\helpers\StringHelper;
-use linslin\yii2\curl\Curl;
 
 class SyncController extends Controller
 {
+    const WARNING_COUNT = 1000;
 
+    public $eld = 24;
+    public $from = null;
+    public $output = true;
+    public $lng = 'ru';
+    public $portion = 50;
+    public $parsed = 'no';
+    public $stock = 'no';
 
-    public $limit = null;
-    public $api = "https://adminizator.com/api/";
-    public $timeout = 15;
-    public $type = 'stock'; //available values : stock, non stock
     public function options($actionID)
     {
-        return ['limit', 'api', 'timeout', 'type'];
+        return ['eld', 'output', 'lng', 'portion', 'parsed', 'stock', 'from'];
     }
 
+    private $processId = null;
+
     /**
-     * @var User
+     * Get or create new post
+     * @param array $data
+     * @return Post
      */
-    private $_basicAdmin;
-    /**
-     * Get basic admin (singleton style)
-     * @return User
-     */
-    private function getBasicAdmin()
+    public function getPost($data)
     {
-        /* @var $basicAdmin User */
-        if(empty($this->_basicAdmin)){
-            $this->_basicAdmin = User::find()->where(['role_id' => Constants::ROLE_ADMIN, 'is_basic' => 1])->one();
-            $this->_basicAdmin = !empty($this->_basicAdmin) ? $this->_basicAdmin : new User();
+        /* @var $post Post */
+        $post = Post::find()->where(['fb_sync_id' => ArrayHelper::getValue($data,'id')])->one();
+
+        if(empty($post)){
+            $post = new Post();
+            $post->fb_sync_id = ArrayHelper::getValue($data,'id');
+            $post->content_type_id = Constants::CONTENT_TYPE_POST;
+            $post->status_id = Constants::STATUS_IN_STOCK;
+            $post->type_id = Constants::POST_TYPE_IMPORTED;
+
+            $name = StringHelper::truncateWords(strip_tags(ArrayHelper::getValue($data,'content')),3);
+            $post->name = !empty($name) ? $name : 'Не указано';
+
+            $post->published_at = ArrayHelper::getValue($data,'published_time',date('Y-m-d H:i:s', time()));
+            $post->updated_at = ArrayHelper::getValue($data,'updated_time',date('Y-m-d H:i:s', time()));
+            $post->created_at = date('Y-m-d H:i:s', time());
+            $post->created_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
+            $post->updated_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
+            $post->need_update = (int)true;
+        }else{
+            $post->updated_at = ArrayHelper::getValue($data,'updated_time',date('Y-m-d H:i:s', time()));
+            $post->updated_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
+            $post->need_update = (int)true;
         }
 
-        return $this->_basicAdmin;
-    }
-
-    /**
-     * @var Language
-     */
-    private $_firstLanguage = null;
-    /**
-     * Get first language (singleton style)
-     * @return Language
-     */
-    private function getFirstLanguage()
-    {
-        /* @var $language Language */
-        if(empty($this->_firstLanguage)){
-            $this->_firstLanguage = Language::find()->orderBy('id ASC')->one();
-        }
-
-        return $this->_firstLanguage;
-    }
-
-    /**
-     * Retrieves an api data
-     * @param $id
-     * @param $type
-     * @param array $params
-     * @return mixed
-     */
-    private function getApiPostData($id,$type,$params = [])
-    {
-        $url = $this->api.'post/'.$id.'/'.$type;
-        if(!empty($params)){
-            $url.='?'.http_build_query($params);
-        }
-
-        $curl = new Curl();
-        $curl->setOption(CURLOPT_TIMEOUT,$this->timeout);
-        $curl->setOption(CURLOPT_CONNECTTIMEOUT,$this->timeout);
-        $response = $curl->get($url);
-
-        if($curl->responseCode != 200){
-            echo "ERROR: connection error \n";
-            return null;
-        }
-
-        return json_decode($response,true);
+        return $post;
     }
 
     /**
      * Retrieve group by data
-     * @param $groupData
+     * @param $data
      * @return PostGroup|null
      */
-    private function getGroup($groupData)
+    private function getGroup($data)
     {
         /* @var $group PostGroup */
 
-        $fbId = ArrayHelper::getValue($groupData,'id');
-        $name = ArrayHelper::getValue($groupData,'name');
+        $fbId = ArrayHelper::getValue($data,'id');
+        $name = ArrayHelper::getValue($data,'name');
 
         if(!empty($fbId) && !empty($name)){
 
             $group = PostGroup::find()->where(['fb_sync_id' => $fbId])->one();
 
             if(empty($group)){
-                echo "Creating source group with FB ID {$fbId} for post \n";
-
                 $group = new PostGroup();
                 $group -> fb_sync_id = $fbId;
                 $group -> name = $name;
                 $group -> url = "https://www.facebook.com/groups/{$fbId}/";
                 $group -> is_group = (int)true;
-                $group -> created_by_id = $this->getBasicAdmin()->id;
-                $group -> updated_by_id = $this->getBasicAdmin()->id;
+                $group -> stock_enabled = (int)true;
+                $group -> stock_sync = (int)true;
+                $group -> created_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
+                $group -> updated_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
                 $group -> created_at = date('Y-m-d H:i:s',time());
                 $group -> updated_at = date('Y-m-d H:i:s',time());
                 $group -> save();
-            }else{
-                echo "Group with FB ID {$fbId} found \n";
             }
 
             return $group;
@@ -136,22 +110,20 @@ class SyncController extends Controller
 
     /**
      * Retrieve author-user by data
-     * @param $authorData
+     * @param $data
      * @return User|array|null|\yii\db\ActiveRecord
      */
-    private function getAuthor($authorData)
+    private function getAuthor($data)
     {
-        $fbId = ArrayHelper::getValue($authorData,'id');
-        $name = ArrayHelper::getValue($authorData,'name');
-        $surname = ArrayHelper::getValue($authorData,'surname');
-        $avatar_url = ArrayHelper::getValue($authorData,'avatar_url');
+        $fbId = ArrayHelper::getValue($data,'id');
+        $name = ArrayHelper::getValue($data,'name');
+        $surname = ArrayHelper::getValue($data,'surname');
+        $avatar_url = ArrayHelper::getValue($data,'avatar_url');
 
         if(!empty($fbId)){
             $user = User::find()->where(['fb_user_id' => $fbId])->one();
 
             if(empty($user)){
-                echo "Creating new author-user with FB ID (app context) {$fbId} \n";
-
                 try{
                     $user = new User();
                     $user->fb_user_id = $fbId;
@@ -163,24 +135,69 @@ class SyncController extends Controller
                     $user->fb_avatar_url = $avatar_url;
                     $user->email = null;
                     $user->updated_at = date('Y-m-d H:i:s',time());
-                    $user->updated_by_id = $this->getBasicAdmin()->id;
+                    $user->updated_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
                     $user->status_id = Constants::STATUS_ENABLED;
                     $user->role_id = Constants::ROLE_REGULAR_USER;
                     $user->type_id = Constants::USR_TYPE_IMPORTED;
                     $user->save();
                 }catch (\Exception $ex){
-                    echo "ERROR: ".$ex->getMessage()."\n";
                     return null;
                 }
-
-            }else{
-                echo "Author-user with FB ID (app context) {$fbId} found \n";
             }
 
             return $user;
         }
 
         return null;
+    }
+
+    /**
+     * Updating attachments for post
+     * @param Post $post
+     * @param array $data
+     * @param bool $update
+     * @param bool $grab
+     */
+    private function updateAttachments($post, $data, $update = false, $grab = false)
+    {
+        foreach($data as $attachment){
+            $aType = ArrayHelper::getValue($attachment,'type');
+            $aFbId = ArrayHelper::getValue($attachment,'id');
+            $aImageUrl = ArrayHelper::getValue($attachment,'image_url');
+            $aVideoUrl = ArrayHelper::getValue($attachment,'origin_url');
+
+            if($aType == 'photo' || $aType == 'share'){
+                /* @var $image PostImage */
+                $image = PostImage::find()->where(['fb_sync_id' => $aFbId, 'post_id' => $post->id])->one();
+
+                if(empty($image)){
+                    $image = new PostImage();
+                    $image -> fb_sync_id = $aFbId;
+                    $image -> is_external = (int)true;
+                    $image -> file_url = $aImageUrl;
+                    $image -> post_id = $post->id;
+                    $image -> status_id = Constants::STATUS_ENABLED;
+                    $image -> priority = Sort::GetNextPriority(PostImage::className(),['post_id' => $post->id]);
+                    $image -> created_at = date('Y-m-d H:i:s',time());
+                    $image -> updated_at = date('Y-m-d H:i:s',time());
+                    $image -> created_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
+                    $image -> updated_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
+                    $image -> save();
+                }elseif($update){
+                    if($image->file_url != $aImageUrl){
+                        $image -> file_url = $aImageUrl;
+                        $image -> updated_at = date('Y-m-d H:i:s',time());
+                        $image -> updated_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
+                        $image -> update();
+                    }
+                }
+            }elseif($aType == 'video'){
+                $post->video_key_fb = $aVideoUrl;
+                $post->video_preview_fb = $aImageUrl;
+                $post->video_attachment_id_fb = $aFbId;
+                $post->update();
+            }
+        }
     }
 
     /**
@@ -191,268 +208,387 @@ class SyncController extends Controller
     private function updateComments($post)
     {
         /* @var $post Post */
+        $meta = [];
+        $commentsArr = AdminizatorApi::getInstance()->getComments($post->fb_sync_id,1,$meta);
 
-        $pageProcessing = 1;
-        while(true){
-            echo "Querying adminizator API for comments (page {$pageProcessing}) \n";
-            $data = $this->getApiPostData($post->fb_sync_id,'comments',['page' => $pageProcessing]);
+        if(!empty($commentsArr)){
+            for ($i = 1; $i <= $meta['lastPage']; $i++){
+                //get comment list
+                $commentsArr = AdminizatorApi::getInstance()->getComments($post->fb_sync_id,$i,$meta);
 
-            $total = ArrayHelper::getValue($data,'total');
-            $currentPage = ArrayHelper::getValue($data,'currentPage');
-            $lastPage = ArrayHelper::getValue($data,'lastPage');
-            $perPage = ArrayHelper::getValue($data,'perPage');
-            $items = ArrayHelper::getValue($data,'items');
-            $onPage = count($items);
+                //pass through all comments
+                foreach ($commentsArr as $itemData){
 
-            if(empty($data) || empty($currentPage) || empty($items)){
-                echo "Can't retrieve data \n";
-                break;
-            }else{
-                echo "Found {$onPage} comments. Processing... \n";
-            }
+                    //get main fields
+                    $fbId = ArrayHelper::getValue($itemData,'id');
+                    $sysId = (int)ArrayHelper::getValue($itemData,'system_id');
+                    $answerToSysId = (int)ArrayHelper::getValue($itemData,'answer_to_id');
+                    $content = ArrayHelper::getValue($itemData,'content');
+                    $time = ArrayHelper::getValue($itemData,'published_time');
+                    $authorData = ArrayHelper::getValue($itemData,'author');
 
-            foreach($items as $itemData){
-                $fbId = ArrayHelper::getValue($itemData,'id');
-                $sysId = (int)ArrayHelper::getValue($itemData,'system_id');
-                $answerToSysId = (int)ArrayHelper::getValue($itemData,'answer_to_id');
-                $content = ArrayHelper::getValue($itemData,'content');
-                $time = ArrayHelper::getValue($itemData,'published_time');
-                $authorData = ArrayHelper::getValue($itemData,'author');
+                    //try to find comment
+                    $comment = Comment::find()->where(['fb_sync_id' => $fbId, 'post_id' => $post->id])->one();
 
-                /* @var $comment Comment */
-                $comment = Comment::find()->where(['fb_sync_id' => $fbId, 'post_id' => $post->id])->one();
-                if(empty($comment)){
-                    echo "Creating comment with FB ID {$fbId} for post {$post->id} \n";
-                    $comment = new Comment();
-                    $comment -> post_id = $post->id;
-                    $comment -> fb_sync_id = $fbId;
-                    $comment -> adm_id = $sysId;
-                    $comment -> answer_to_adm_id = $answerToSysId;
-                    $comment -> text = $content;
-                    $comment -> created_at = $time;
-                    $comment -> updated_at = date('Y-m-d H:i:s',time());
-                    $comment -> created_by_id = $this->getBasicAdmin()->id;
-                    $comment -> updated_by_id = $this->getBasicAdmin()->id;
+                    //if comment not found - create
+                    if(empty($comment)){
+                        $comment = new Comment();
+                        $comment -> post_id = $post->id;
+                        $comment -> fb_sync_id = $fbId;
+                        $comment -> adm_id = $sysId;
+                        $comment -> answer_to_adm_id = $answerToSysId;
+                        $comment -> text = $content;
+                        $comment -> created_at = $time;
+                        $comment -> updated_at = date('Y-m-d H:i:s',time());
+                        $comment -> created_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
+                        $comment -> updated_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
 
-                    $author = $this->getAuthor($authorData);
-                    $comment -> author_id = ArrayHelper::getValue($author,'id',null);
-
-                    if(!empty($post->author_id)){
-                        echo "Author {$author->id} with FB ID (app context) {$author->fb_user_id} assigned to comment \n";
-                    }else{
-                        echo "ERROR: Author not assigned \n";
-                    }
-
-                    if($comment->save()){
-                        echo "Comment with FB ID {$comment->fb_sync_id} added to post {$post->id} \n";
-                    }else{
-                        echo "ERROR: Can't add comment \n";
-                    }
-                }else{
-                    echo "Comment already added \n";
-                }
-            }
-
-            if($pageProcessing >= $lastPage){
-                $post->refresh();
-                $added = count($post->comments);
-
-                echo "Comments adding done. Post has {$added} comments \n";
-                break;
-            }
-
-            $pageProcessing++;
-        }
-
-        if(!empty($post->comments)){
-            echo "Building nested relations, updating... \n";
-            Yii::$app->db->createCommand("UPDATE `comment` c1 SET answer_to_id = (SELECT id FROM (SELECT id, adm_id FROM `comment` WHERE post_id = :post) as c2 WHERE c2.adm_id = c1.answer_to_adm_id LIMIT 1) WHERE c1.post_id = :post",['post' => $post->id])->query();
-            echo "Nested relations updated \n";
-        }
-
-        echo "Comment adding finished";
-    }
-
-    /**
-     * Updates all post which has facebook relation. Retrieves data, comments, images from adminizator
-     * @param string $lng
-     * @throws Exception
-     * @throws \Exception
-     */
-    public function actionIndex($lng = 'ru')
-    {
-        Yii::$app->db->createCommand('SET SESSION wait_timeout = 28800;')->execute();
-
-        if(!is_numeric($this->timeout)){
-            throw new Exception("Timeout should be numeric value");
-        }
-
-        $q = Post::find()->where('fb_sync_id IS NOT NULL');
-        if(!empty($this->limit)){
-            if(!is_numeric($this->limit)){
-                throw new Exception("Limit should be numeric value");
-            }
-            $q->limit($this->limit);
-        }
-
-        if($this->type != 'stock'){
-            $q->where('status_id != :status',['status' => Constants::STATUS_IN_STOCK]);
-        }else{
-            $q->where(['status_id' => Constants::STATUS_IN_STOCK]);
-        }
-
-        //get all posts related with facebook
-        $searchIn = $this->type == 'stock' ? 'STOCK' : 'NON STOCK';
-        echo "Getting all posts related with facebook ({$searchIn}) \n";
-        /* @var $posts Post[] */
-
-        $posts = $q->all();
-
-        //if found some posts in database
-        if(!empty($posts)){
-
-            $count = count($posts);
-            echo "Found {$count} posts. Processing... \n";
-
-            foreach($posts as $post){
-                echo "Processing post {$post->id} \n";
-
-                echo "Querying adminizator API for post details \n";
-                $data = $this->getApiPostData($post->fb_sync_id,'details');
-
-                if(empty($data)){
-                    echo "Not found data for post {$post->id} \n";
-                    echo "\n\n\n";
-                    continue;
-                }
-
-                $type = ArrayHelper::getValue($data,'type');
-                $content = ArrayHelper::getValue($data,'content');
-                $time = ArrayHelper::getValue($data,'published_time');
-                $groupData = ArrayHelper::getValue($data,'group');
-                $authorData = ArrayHelper::getValue($data,'author');
-                $attachments = ArrayHelper::getValue($data,'attachments');
-                $commentsCount = ArrayHelper::getValue($data,'comments_count');
-
-                $typeMatches = [
-                    Constants::FB_POST_EVENT => Constants::CONTENT_TYPE_NEWS,
-                    Constants::FB_POST_LINK => Constants::CONTENT_TYPE_NEWS,
-                    Constants::FB_POST_PHOTO => Constants::CONTENT_TYPE_PHOTO,
-                    Constants::FB_POST_VIDEO => Constants::CONTENT_TYPE_VIDEO,
-                    Constants::FB_POST_STATUS => Constants::CONTENT_TYPE_NEWS,
-                ];
-
-                $post->content_type_id = ArrayHelper::getValue($typeMatches,$type,Constants::CONTENT_TYPE_POST);
-                $post->updated_at = date('Y-m-d H:i:s',time());
-                $post->published_at = $time;
-                $post->status_id = $post->status_id == Constants::STATUS_IN_STOCK ? Constants::STATUS_ENABLED : $post->status_id;
-
-                $trl = $post->getATrl($lng);
-                $trl -> text = strip_tags($content);
-                $trl -> small_text = StringHelper::truncateWords($trl->text,20);
-                $trl -> isNewRecord ? $trl->save() : $trl->update();
-
-                $group = $this->getGroup($groupData);
-                $post -> group_id = ArrayHelper::getValue($group,'id',null);
-
-                if(!empty($post->group_id)){
-                    echo "Group {$post->group_id} with FB ID {$group->fb_sync_id} assigned to post \n";
-                }else{
-                    echo "ERROR: Group not assigned \n";
-                }
-
-                $user = $this->getAuthor($authorData);
-                $post -> author_id = ArrayHelper::getValue($user,'id',null);
-                if(!empty($user)) $post->author_custom_name = $user->name.' '.$user->surname;
-
-                if(!empty($post->author_id)){
-                    echo "Author {$user->id} with FB ID (app context) {$user->fb_user_id} assigned to post \n";
-                }else{
-                    echo "ERROR: Author not assigned \n";
-                }
-
-                echo "Updating post.. \n";
-                $post->update();
-
-                echo "Updating attachments.. \n";
-                if(!empty($attachments)){
-                    foreach($attachments as $attachment){
-                        $aType = ArrayHelper::getValue($attachment,'type');
-                        $aFbId = ArrayHelper::getValue($attachment,'id');
-                        $aImageUrl = ArrayHelper::getValue($attachment,'image_url');
-                        $aVideoUrl = ArrayHelper::getValue($attachment,'origin_url');
-
-                        if($aType == 'photo'){
-                            /* @var $image PostImage */
-                            $image = PostImage::find()->where(['fb_sync_id' => $aFbId, 'post_id' => $post->id])->one();
-
-                            if(empty($image)){
-                                echo "Creating photo attachment with FB ID {$aFbId} \n";
-                                $image = new PostImage();
-                                $image -> fb_sync_id = $aFbId;
-                                $image -> is_external = 1;
-                                $image -> file_url = $aImageUrl;
-                                $image -> post_id = $post->id;
-                                $image -> status_id = Constants::STATUS_ENABLED;
-                                $image -> priority = Sort::GetNextPriority(PostImage::className(),['post_id' => $post->id]);
-                                $image -> created_at = date('Y-m-d H:i:s',time());
-                                $image -> updated_at = date('Y-m-d H:i:s',time());
-                                $image -> created_by_id = $this->getBasicAdmin()->id;
-                                $image -> updated_by_id = $this->getBasicAdmin()->id;
-                                $image -> save();
-                            }else{
-                                if($image->file_url != $aImageUrl){
-                                    echo "Updating photo attachment with FB ID {$aFbId} \n";
-                                    $image -> file_url = $aImageUrl;
-                                    $image -> updated_at = date('Y-m-d H:i:s',time());
-                                    $image -> updated_by_id = $this->getBasicAdmin()->id;
-                                    $image -> save();
-                                }
-                            }
-                        }elseif($aType == 'video'){
-                            echo "Updating post's video information \n";
-                            $post->video_key_fb = $aVideoUrl;
-                            $post->video_preview_fb = $aImageUrl;
-                            $post->video_attachment_id_fb = $aFbId;
-                            $post->update();
+                        //get author and set it
+                        $author = $this->getAuthor($authorData);
+                        if(!empty($author)){
+                            $comment->author_id = $author->id;
                         }
+
+                        //save new comment
+                        $comment->save();
                     }
                 }
-
-                if($commentsCount > 0){
-                    echo "Updating comments... \n";
-                    $this->updateComments($post);
-                    echo "\n\n\n";
-                }
-
             }
 
-            //updating counters
-            $this->actionUpdateCounters();
+            //build relations for internal ID's using external (adminizator's) ID's
+            Yii::$app->db->createCommand("UPDATE `comment` c1 SET answer_to_id = (SELECT id FROM (SELECT id, adm_id FROM `comment` WHERE post_id = :post) as c2 WHERE c2.adm_id = c1.answer_to_adm_id LIMIT 1) WHERE c1.post_id = :post",['post' => $post->id])->query();
+        }
+    }
 
-        }else{
-            echo "Can't find any posts related with facebook \n";
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Checking for updates (creates new posts, or marks as "need update" already added)
+     */
+    public function actionIndex()
+    {
+        //log process start
+        $this->processId = Help::rds(10);
+        Help::log('updates.log',"Process {$this->processId} started");
+        //timezone
+        date_default_timezone_set('Europe/Moscow');
+        //mysql wait timeout
+        Yii::$app->db->createCommand('SET SESSION wait_timeout = 28800;')->execute();
+        //unlimited execution time
+        set_time_limit(0);
+
+        //time interval
+        $timeFrom = empty($this->from) ? date('Y-m-d H:i:s',(time() - (3600 * $this->eld))) : $this->from;
+        $timeTo = date('Y-m-d H:i:s',time());
+        if($this->output) echo "Checking interval ({$timeFrom} - {$timeTo})\n";
+
+        //getting groups
+        if($this->output) echo "Retrieving groups \n\n";
+
+        /* @var $groups PostGroup[] */
+        $groups = PostGroup::find()->where([
+            'is_group' => 1,
+            'stock_enabled' => 1,
+            'stock_sync' => 1]
+        )->all();
+
+        //end process if groups not found
+        if(empty($groups)){
+            Help::log('updates.log',"Process {$this->processId} terminated");
+            exit($this->output ? "No groups found. Precess terminated \n" : null);
+        }
+
+        //build array of ids
+        $countGroups = count($groups);
+        $groupsIds = [];
+
+        if($this->output) echo "Found {$countGroups} groups:\n";
+        foreach ($groups as $index => $group){
+            $groupsIds[] = $group->fb_sync_id;
+            if($this->output) echo "{$group->fb_sync_id}\n";
+            if($this->output && $index == (count($groups)-1)) echo "\n";
+        }
+
+        //query all posts
+        if($this->output) echo "Retrieving posts\n\n";
+        $meta = [];
+        $postsItemsArr = AdminizatorApi::getInstance()->getPosts($timeFrom,$timeTo,$groupsIds,1,$meta);
+
+        if(empty($postsItemsArr)){
+            Help::log('updates.log',"Process {$this->processId} terminated");
+            exit($this->output ? "Nothing found\n" : null);
+        }
+
+        //passing through all pages
+        if($this->output) echo "Found {$meta['total']} posts. Processing...\n";
+
+        if($meta['total'] > self::WARNING_COUNT){
+            Help::log('updates.log',"Process {$this->processId} paused by question");
+            $warn = self::WARNING_COUNT;
+            if(!$this->confirm("Found more than {$warn} posts ({$meta['total']}). Continue ?")){
+                Help::log('updates.log',"Process {$this->processId} terminated");
+                exit($this->output ? "Canceled by user\n" : null);
+            }
         }
 
 
-        echo "Finished! \n";
+        for ($i = 1; $i <= $meta['lastPage']; $i++){
+            $postsItemsArr = AdminizatorApi::getInstance()->getPosts($timeFrom,$timeTo,$groupsIds,$i,$meta);
+
+            //for each item of page
+            if(!empty($postsItemsArr)){
+                foreach ($postsItemsArr as $postArr){
+
+                    //find or create
+                    $post = $this->getPost($postArr);
+                    $post->translateLabels = false;
+
+                    //if not found - save new
+                    if($post->isNewRecord){
+                        if($this->output) echo "Post with id {$postArr['id']} not found. Creating...\n";
+
+                        $group = $this->getGroup($postArr['group']);
+                        $author = $this->getAuthor($postArr['author']);
+
+                        if(!empty($group)){
+                            if($this->output) echo "Group set\n";
+                            $post->group_id = $group->id;
+                        }else{
+                            if($this->output) echo "ERROR! Group not set\n";
+                        }
+
+                        if(!empty($author)){
+                            if($this->output) echo "Author set\n";
+                            $post->author_id = $author->id;
+                        }else{
+                            if($this->output) echo "ERROR! Author not set\n";
+                        }
+
+                        if($post->save()){
+                            if($this->output) echo "Post with id {$postArr['id']} saved.\nUpdating attachments...\n";
+
+                            if(!empty($postArr['attachments'])){
+                                $this->updateAttachments($post,$postArr['attachments']);
+                            }
+
+                            if($this->output) echo "Updating translatable content...\n";
+                            $trl = $post->getATrl($this->lng);
+                            $trl -> name = $post->name;
+                            $trl -> text = strip_tags($postArr['content']);
+                            $trl -> small_text = StringHelper::truncateWords($trl->text,20);
+                            $trl -> isNewRecord ? $trl->save() : $trl->update();
+
+                            if($this->output) echo "Post with id {$postArr['id']} completed.\n\n";
+                        }
+
+                    //if found - mark as 'need update'
+                    }else{
+                        if($this->output) echo "Post with id {$postArr['id']} already added.\nMarking as updating...\n";
+                        if($this->output) echo "Post with id {$postArr['id']} completed.\n\n";
+                        $post->update();
+                    }
+                }
+            }
+        }
+
+        //log process end
+        if($this->output) echo "Done.\n\n";
+        Help::log('updates.log',"Process {$this->processId} terminated");
     }
 
     /**
-     * Updates users's counters
+     * Updates all posts that needs to be updated
+     */
+    public function actionUpdate()
+    {
+        //log process start
+        $this->processId = Help::rds(10);
+        Help::log('updates.log',"Process {$this->processId} started");
+        //timezone
+        date_default_timezone_set('Europe/Moscow');
+        //mysql wait timeout
+        Yii::$app->db->createCommand('SET SESSION wait_timeout = 28800;')->execute();
+        //unlimited execution time
+        set_time_limit(0);
+
+
+        //build query
+        $q = Post::find()->where('status_id != :archived',['archived' => Constants::STATUS_DELETED]);
+
+        //what kind of posts we search for (parsed, parsed and awaiting updates, parsed only, or ignoring parsed)
+        switch ($this->parsed){
+            case 'no':
+                $q->andWhere(['need_update' => 1]);
+                $note = 'ALL';
+                break;
+            case 'yes':
+                $q->andWhere(['need_update' => 1, 'is_parsed' => 1]);
+                $note = 'PARSED';
+                break;
+            case 'only':
+                $q->andWhere(['is_parsed' => 1]);
+                $note = 'PARSED ONLY';
+                break;
+            case 'ignore':
+                $q->andWhere(new Expression('is_parsed = 0 OR is_parsed IS NULL'))->andWhere(['need_update' => 1]);
+                $note = 'IGNORE PARSED';
+                break;
+            default:
+                $q->andWhere(['need_update' => 1]);
+                $note = 'ALL';
+                break;
+        }
+
+        //if stock items only
+        if($this->stock == 'yes'){
+            $q->andWhere(['status_id' => Constants::STATUS_IN_STOCK]);
+            $note.= "|STOCK ONLY";
+        }
+
+        //get all posts which should be updated
+        if($this->output) echo "Querying posts ({$note})\n\n";
+
+        /* @var $posts Post[] */
+        $posts = $q->orderBy(new Expression('RAND()'))->limit($this->portion)->all();
+
+        if(empty($posts)){
+            Help::log('updates.log',"Process {$this->processId} terminated");
+            exit($this->output ? "Nothing found\n" : null);
+        }
+
+        $count = count($posts);
+        if($this->output) echo "Found {$count} posts (potion size {$this->portion})\n\n";
+
+        //update all posts
+        foreach ($posts as $post){
+
+            //get details for this post
+            if($this->output) echo "Processing {$post->fb_sync_id} post \n";
+            $details = AdminizatorApi::getInstance()->getDetails($post->fb_sync_id);
+
+            //if found some data
+            if(!empty($details)){
+
+                //update attachments if needed
+                if(!empty($details['attachments'])){
+                    if($this->output) echo "Updating attachments\n";
+                    $this->updateAttachments($post,$details['attachments']);
+                }
+
+                //update author if needed
+                if(empty($post->author_id)){
+                    $author = $this->getAuthor($details['author']);
+                    if(!empty($author)){
+                        if($this->output) echo "Author set\n";
+                        $post->author_id = $author->id;
+                    }else{
+                        if($this->output) echo "ERROR! Author not set\n";
+                    }
+                }else{
+                    if($this->output) echo "Author already set\n";
+                }
+
+                //update group if needed
+                if(empty($post->group_id)){
+                    $group = $this->getGroup($details['group']);
+                    if(!empty($group)){
+                        if($this->output) echo "Group set\n";
+                        $post->group_id = $group->id;
+                    }else{
+                        if($this->output) echo "ERROR! Group not set\n";
+                    }
+                }else{
+                    if($this->output) echo "Group already set\n";
+                }
+
+                //update content if post still in stock
+                if($post->status_id == Constants::STATUS_IN_STOCK){
+                    if($this->output) echo "Updating translatable content\n";
+
+                    $name = StringHelper::truncateWords(strip_tags(ArrayHelper::getValue($details,'content')),3);
+                    $post->name = $post->is_parsed ? $post->name : (!empty($name) ? $name : 'Не указано');
+
+                    $trl = $post->getATrl($this->lng);
+                    $trl -> name = $post->name;
+                    $trl -> text = strip_tags(ArrayHelper::getValue($details,'content'));
+                    $trl -> small_text = StringHelper::truncateWords($trl->text,20);
+                    $trl -> isNewRecord ? $trl->save() : $trl->update();
+
+                    if($post->is_parsed){
+                        if($this->output) echo "Updating search keywords\n";
+                        $post->updateSearchKeywords();
+                    }
+                }
+
+                //update comments
+                if($this->output) echo "Updating comments\n";
+                $this->updateComments($post);
+
+                //finalize updating
+                $post->published_at = ArrayHelper::getValue($details,'published_time',date('Y-m-d H:i:s', time()));
+                $post->updated_at = ArrayHelper::getValue($details,'updated_time',date('Y-m-d H:i:s', time()));
+                $post->created_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
+                $post->updated_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
+                $post->need_update = (int)false;
+
+                //if working with parsed - move to common list
+                if($post->is_parsed){
+                    $post->status_id = Constants::STATUS_ENABLED;
+                }
+
+                $post->update();
+            }else{
+                if($this->output) echo "No data found for post {$post->fb_sync_id}\n";
+            }
+
+            if($this->output) echo "Post {$post->fb_sync_id} (ID {$post->id}) done.\n\n";
+        }
+
+        //update all counters
+        $this->actionUpdateCounters();
+
+        //log process end
+        if($this->output) echo "Done.\n\n";
+        Help::log('updates.log',"Process {$this->processId} terminated");
+    }
+
+    /**
+     * Updates counters
      * @throws \Exception
      */
     public function actionUpdateCounters()
     {
         $db = Yii::$app->db;
 
-        echo "Updating post's counters... \n";
+        if($this->output) echo "Updating post's counters... \n";
         $db->createCommand("UPDATE post p SET p.comment_count = (SELECT COUNT(*) FROM `comment` WHERE `comment`.post_id = p.id), last_comment_at = (SELECT created_at FROM `comment` ORDER BY created_at LIMIT 1)")->query();
 
-        echo "Updating users's counters... \n";
+        if($this->output) echo "Updating users's counters... \n";
         $db->createCommand("UPDATE `user` u SET counter_comments = (SELECT COUNT(*) FROM `comment` WHERE `comment`.author_id = u.id), counter_posts = (SELECT COUNT(*) FROM post WHERE post.author_id = u.id)")->query();
 
         echo "Counters updated. \n";
+    }
+
+    /**
+     * Updates comments's nesting relations
+     * @throws \Exception
+     */
+    public function actionReRelateComments()
+    {
+        echo "Querying posts. Please wait... \n";
+        /* @var $posts Post[] */
+        $posts = Post::find()->all();
+        $count = count($posts);
+
+        echo "Found ({$count}) posts. Updating comment relations... \n";
+
+        foreach($posts as $index => $post){
+            Yii::$app->db->createCommand("UPDATE `comment` c1 SET answer_to_id = (SELECT id FROM (SELECT id, adm_id FROM `comment` WHERE post_id = :post) as c2 WHERE c2.adm_id = c1.answer_to_adm_id LIMIT 1) WHERE c1.post_id = :post",['post' => $post->id])->query();
+            $nr = $index+1;
+            echo "Done {$nr} of {$count} \n";
+        }
+
+        echo "Finished! \n";
     }
 
     /**
@@ -485,85 +621,5 @@ class SyncController extends Controller
         }
 
         echo "Finished! \n";
-    }
-
-    /**
-     * Updates comments's nesting relations
-     * @throws \Exception
-     */
-    public function actionReRelateComments()
-    {
-        echo "Querying posts. Please wait... \n";
-        /* @var $comments Comment[] */
-        $posts = Post::find()->all();
-        $count = count($posts);
-
-        echo "Found ({$count}) posts. Updating comment relations... \n";
-
-        foreach($posts as $index => $post){
-            Yii::$app->db->createCommand("UPDATE `comment` c1 SET answer_to_id = (SELECT id FROM (SELECT id, adm_id FROM `comment` WHERE post_id = :post) as c2 WHERE c2.adm_id = c1.answer_to_adm_id LIMIT 1) WHERE c1.post_id = :post",['post' => $post->id])->query();
-            $nr = $index+1;
-            echo "Done {$nr} of {$count} \n";
-        }
-
-        echo "Finished! \n";
-    }
-
-    /**
-     * Clean posts's names from custom dates in commas
-     * @param string $lngPrefix
-     * @throws \Exception
-     */
-    public function actionCleanNames($lngPrefix = 'ru')
-    {
-        /* @var $all Post[] */
-        echo "Querying posts. Please wait...";
-        $q = Post::find();
-        $count = $q->count();
-        $all = $q->all();
-
-        echo "Found ({$count}) posts. Cleaning names... \n";
-
-        foreach($all as $index => $post){
-            $trl = $post->getATrl($lngPrefix);
-            $name = $trl->name;
-            $parts = explode('(',$name);
-
-            if(count($parts) > 1){
-                $lastIndex = count($parts)-1;
-                if(!empty($parts[$lastIndex])){
-                    $name = str_replace(' ('.$parts[$lastIndex],'',$name);
-                    $trl->name = $name;
-                    $post->name = $name;
-                    $post->update();
-                    $trl->update();
-                    echo "Date in commas removed. ";
-                }
-            }
-
-
-            $nr = $index + 1;
-            echo "Post {$nr} of {$count} done. \n";
-        }
-
-        echo "Finished! \n";
-    }
-
-    /**
-     * WARNING! SHOULD BE DELETED! Only for temporary use!
-     * @param $password
-     */
-    public function actionFixAdminPassword($password)
-    {
-        /* @var $admin User */
-        $admin = User::find()->where(['is_basic' => 1])->one();
-
-        if(!empty($admin)){
-            echo "Admin found! Changing password... \n";
-            $admin->setPassword($password);
-            $admin->generateAuthKey();
-            $admin->update();
-            echo "Done. Password changed to {$password} \n";
-        }
     }
 }

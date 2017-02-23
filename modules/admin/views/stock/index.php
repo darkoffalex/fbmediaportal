@@ -17,6 +17,7 @@ use app\models\PostGroup;
 /* @var $controller \app\modules\admin\controllers\PostsController */
 /* @var $user \app\models\User */
 /* @var $lng string */
+/* @var $type string */
 
 /* @var $languages \app\models\Language[] */
 $languages = \app\models\Language::find()->all();
@@ -27,6 +28,8 @@ $user = Yii::$app->user->identity;
 $this->title = Yii::t('admin','Stock');
 $this->params['breadcrumbs'][] = $this->title;
 $currentView = $this;
+
+$batchMove = [];
 
 $gridColumns = [
     ['class' => 'yii\grid\SerialColumn'],
@@ -130,7 +133,7 @@ $gridColumns = [
         'class' => 'yii\grid\ActionColumn',
         'contentOptions'=>['style'=>'width: 100px; text-align: center;'],
         'header' => Yii::t('admin','Actions'),
-        'template' => '{delete} &nbsp; {move} &nbsp {comments} &nbsp {fb_link}',
+        'template' => '{delete} &nbsp; {move} &nbsp {comments} &nbsp {fb_link} &nbsp; {archive}',
         'buttons' => [
             'move' => function ($url,$model,$key) {
                 /* @var $model \app\models\Post */
@@ -146,6 +149,15 @@ $gridColumns = [
                 /* @var $model \app\models\Post */
                 return Html::a('<i class="fa fa-facebook-f"></i>', $model->getFbUrl(), ['title' => Yii::t('admin','View on facebook'), 'target' => '_blank']);
             },
+
+            'archive' => function ($url,$model,$key) use($type,&$batchMove) {
+                /* @var $model \app\models\Post */
+                $icon = $type == 'main' ? 'fa-sign-in' : 'fa-sign-out';
+                $title = $type == 'main' ? 'To archive' : 'From archive';
+                $batchMove[] = $model->id;
+                return Html::a('<i class="fa '.$icon.'"></i>', ['/admin/stock/status', 'id' => $model->id, 'status' => ($type == 'main'  ? Constants::STATUS_DELETED : Constants::STATUS_IN_STOCK)], ['title' => Yii::t('admin',$title)]);
+            },
+
         ],
         'visibleButtons' => [
             'delete' => function ($model, $key, $index) {return true;},
@@ -160,24 +172,36 @@ $gridColumns = [
 <div class="row">
     <div class="col-xs-12">
         <div class="box">
-            <div class="box-header">
-                <h3 class="box-title"><?= Yii::t('admin','List'); ?></h3>
+            <div class="box-header" style="padding-bottom: 0;">
+                <ul class="nav nav-tabs">
+                    <?php $type = empty($type) ? 'main' : $type; ?>
+                    <li class="<?= $type=='main' ? 'active' : ''; ?>">
+                        <a href="<?= Url::to(['/admin/stock/index','type' => 'main']); ?>"><?= Yii::t('admin','Main'); ?></a>
+                    </li>
+                    <li class="<?= $type=='archive' ? 'active' : ''; ?>">
+                        <a href="<?= Url::to(['/admin/stock/index','type' => 'archive']); ?>"><?= Yii::t('admin','Archive'); ?></a>
+                    </li>
+                </ul>
             </div>
             <div class="box-body" style="padding-top: 0;">
+                <div class="tab-content inner-block">
+                    <?= $this->render('_filters',['model' => $searchModel]); ?>
 
-                <?= $this->render('_filters',['model' => $searchModel]); ?>
-
-                <?= GridView::widget([
+                    <?= GridView::widget([
 //                    'filterModel' => $searchModel,
-                    'dataProvider' => $dataProvider,
-                    'columns' => $gridColumns,
-                    'pjax' => false,
-                ]); ?>
+                        'dataProvider' => $dataProvider,
+                        'columns' => $gridColumns,
+                        'pjax' => false,
+                    ]); ?>
+                </div>
             </div>
-            <div class="box-footer">
-                <a data-target=".modal" data-toggle="modal" href="<?php echo Url::to(['/admin/stock/recommend-settings']); ?>" class="btn btn-primary"><?= Yii::t('admin','Recommend settings'); ?></a>
-                <a data-target=".modal" data-toggle="modal" href="<?php echo Url::to(['/admin/stock/groups']); ?>" class="btn btn-primary"><?= Yii::t('admin','Source-gropus settings'); ?></a>
-            </div>
+            <?php if($type == 'main'): ?>
+                <div class="box-footer">
+                    <a href="<?= Url::to(['/admin/stock/batch-archive', 'ids' => implode(',',$batchMove)]); ?>" class="btn btn-primary"><?= Yii::t('admin','Move all items on page to archive'); ?></a>
+                    <a data-target=".modal" data-toggle="modal" href="<?php echo Url::to(['/admin/stock/recommend-settings']); ?>" class="btn btn-primary"><?= Yii::t('admin','Recommend settings'); ?></a>
+                    <a data-target=".modal" data-toggle="modal" href="<?php echo Url::to(['/admin/stock/groups']); ?>" class="btn btn-primary"><?= Yii::t('admin','Source-gropus settings'); ?></a>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>

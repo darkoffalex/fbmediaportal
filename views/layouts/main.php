@@ -49,7 +49,15 @@ $social = Yii::$app->getModule('social');
     <div class="container">
         <div class="row">
             <div class="col-xs-12 text-sm-center">
-                <a href="<?= Url::to(['main/index']); ?>"><i class="ico ico-logo"></i></a>
+                <?php $id = Yii::$app->request->get('id',null); ?>
+                <?php $actionId = Yii::$app->controller->action->id; ?>
+
+                <?php if(!empty($id) || in_array($actionId,['profile','all','profile-details'])):?>
+                    <a href="<?= Url::to(['main/index']); ?>"><i class="ico ico-logo"></i></a>
+                <?php else: ?>
+                    <i class="ico ico-logo"></i>
+                <?php endif; ?>
+
 
                 <form method="get" action="<?= Url::to(['main/search']); ?>" class="header__searchbar hidden-xs-down">
                     <input name="q" class="form-control" type="text">
@@ -58,14 +66,14 @@ $social = Yii::$app->getModule('social');
 
                 <?php if(Yii::$app->user->isGuest): ?>
                     <?php $callback = Url::to(['/site/fb-login'],true); ?>
-                    <?= $social->getFbLoginLink($callback,['class' => 'header__login'],['email']); ?>
+                    <?= $social->getFbLoginLink($callback,['class' => 'header__login'],['email','user_posts','publish_actions']); ?>
                 <?php else: ?>
                     <a class="header__login" href="<?= Url::to(['/site/logout']); ?>">
                         <i class="ico ico-login"></i><span>Выйти</span>
                     </a>
-                    <a class="header__login" href="<?= Url::to(['/main/profile']); ?>">
-                        <span>Профиль</span>
-                    </a>
+<!--                    <a class="header__login" href="--><?//= Url::to(['/main/profile']); ?><!--">-->
+<!--                        <span>Профиль</span>-->
+<!--                    </a>-->
                 <?php endif; ?>
 
 

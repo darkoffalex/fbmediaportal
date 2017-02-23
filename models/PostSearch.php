@@ -59,12 +59,19 @@ class PostSearch extends Post
      * @param array $params
      * @param string $lng
      * @param bool $stock
+     * @param string $stockType
      * @return ActiveDataProvider
      */
-    public function search($params, $lng, $stock = false)
+    public function search($params, $lng, $stock = false, $stockType = 'main')
     {
-        //all posts that aren't in stock
-        $q = parent::find()->where($stock ? 'post.status_id = :st' : 'post.status_id != :st', ['st' => Constants::STATUS_IN_STOCK]);
+        //all posts that aren't in stock and archive
+        if(!$stock){
+            $q = parent::find()->where('post.status_id != :stock AND post.status_id != :archive', ['stock' => Constants::STATUS_IN_STOCK, 'archive' => Constants::STATUS_DELETED]);
+        //only archived or stocked posts
+        }else{
+            $q = parent::find()->where(['status_id' => $stockType == 'main' ? Constants::STATUS_IN_STOCK : Constants::STATUS_DELETED]);
+        }
+
         $q -> with(['categories','author','comments','group']);
 
         $this->load($params);

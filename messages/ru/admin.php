@@ -209,4 +209,9 @@ return [
     'Fb Sync ID' => 'Facebook ID',
     'Parsed' => 'Да (спаршен)',
     'Is Parsed' => 'Из wikipedia-RA',
+    'Main' => 'Основной',
+    'Archive' => 'Архив',
+    'To archive' => 'Переместить в архив',
+    'From archive' => 'Переместить в поток',
+    'Move all items on page to archive' => 'Переместить все (на странице) в архив'
 ];

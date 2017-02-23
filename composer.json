@@ -37,7 +37,8 @@
         "electrolinux/phpquery": "^0.9.6",
         "himiklab/yii2-easy-thumbnail-image-helper": "^1.0",
         "linslin/yii2-curl": "^1.0",
-        "kartik-v/yii2-widget-datetimepicker": "^1.4"
+        "kartik-v/yii2-widget-datetimepicker": "^1.4",
+        "facebook/graph-sdk": "^5.4"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",

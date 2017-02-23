@@ -30,10 +30,10 @@ use kartik\daterange\DateRangePicker;
         <div class="col-md-2">
             <?= $form->field($model,'id')->textInput()->error(false); ?>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <?= $form->field($model,'fb_sync_id')->textInput()->error(false); ?>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-3">
             <?= $form->field($model,'author_id')->widget(Select2::classname(), [
                 'initValueText' => !empty($model->author) ? $model->author->name.' '.$model->author->surname : '',
                 'options' => ['placeholder' => Yii::t('admin','Search for a user...')],

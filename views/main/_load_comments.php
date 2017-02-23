@@ -16,11 +16,11 @@ $controller = $this->context;
     <div class="contentComments__card">
         <img class="img-fluid" src="<?= $comment->author->getAvatar(); ?>">
         <div class="contentComments__card__content">
-            <b><a href="<?= Url::to(['main/profile','id' => $comment->author_id]); ?>"><?= $comment->author->name.' '.$comment->author->surname; ?></a><span>-  <?= substr($comment->created_at,0,16); ?></span></b>
+            <b><a rel="canonical" href="<?= Url::to(['main/profile','id' => $comment->author_id]); ?>"><?= $comment->author->name.' '.$comment->author->surname; ?></a><span>-  <?= substr($comment->created_at,0,16); ?></span></b>
             <p><?= $comment->text; ?></p>
 
             <?php if(count($comment->children) > 0): ?>
-                <a class="reloading-comments" data-click-load="#children-for-<?= $comment->id; ?>" href="<?= Url::to(['main/children-comments-ajax', 'id' => $comment->id]); ?>">
+                <a rel="canonical" class="reloading-comments" data-click-load="#children-for-<?= $comment->id; ?>" href="<?= Url::to(['main/children-comments-ajax', 'id' => $comment->id]); ?>">
                     <?= count($comment->children); ?> ответов
                 </a>
             <?php endif; ?>

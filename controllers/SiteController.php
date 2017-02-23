@@ -134,6 +134,7 @@ class SiteController extends Controller
                     $user->status_id = Constants::STATUS_ENABLED;
                     $user->type_id = Constants::USR_TYPE_FB_AUTHORIZED;
                     $user->role_id = Constants::ROLE_REGULAR_USER;
+                    $user->fb_auth_token = $accessToken->getValue();
                     $ok = $user->save();
                 }else{
                     $ok = true;
@@ -141,6 +142,7 @@ class SiteController extends Controller
                     $user->updated_at = date('Y-m-d H:i:s',time());
                     $user->updated_by_id = $user->id;
                     $user->last_online_at = date('Y-m-d H:i:s',time());
+                    $user->fb_auth_token = $accessToken->getValue();
                     $user->update();
                 }
 
@@ -152,6 +154,8 @@ class SiteController extends Controller
                 //if admin or redactor - go to admin panel
                 if($user->role_id == Constants::ROLE_REDACTOR || $user->role_id == Constants::ROLE_ADMIN){
                     return $this->redirect(Url::to(['/admin/main/index']));
+                }else{
+                    return $this->redirect(Url::to(['/main/profile']));
                 }
             }
 

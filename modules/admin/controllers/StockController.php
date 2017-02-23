@@ -24,9 +24,10 @@ class StockController extends Controller
 {
     /**
      * Render list of all posts in the stock
+     * @param string $type
      * @return string
      */
-    public function actionIndex()
+    public function actionIndex($type = 'main')
     {
         /* @var $languages Language[] */
         $languages = Language::find()->all();
@@ -34,8 +35,47 @@ class StockController extends Controller
 
 
         $searchModel = new PostSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$lng,true);
-        return $this->render('index', compact('searchModel','dataProvider','lng'));
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$lng,true,$type);
+        return $this->render('index', compact('searchModel','dataProvider','lng','type'));
+    }
+
+    /**
+     * Change status
+     * @param $id
+     * @param $status
+     * @return Response
+     * @throws NotFoundHttpException
+     */
+    public function actionStatus($id, $status)
+    {
+        $availableStatuses = [
+            Constants::STATUS_DELETED,
+            Constants::STATUS_IN_STOCK
+        ];
+
+        /* @var $post Post */
+        $post = Post::find()->where(['id' => (int)$id])->one();
+
+        if(empty($post) || !in_array($status,$availableStatuses)){
+            throw new NotFoundHttpException('Post not found',404);
+        }
+
+        $post->status_id = $status;
+        $post->update();
+
+        return $this->redirect(Yii::$app->request->referrer);
+    }
+
+    /**
+     * Move to archive several items per one time
+     * @param $ids
+     * @return Response
+     */
+    public function actionBatchArchive($ids)
+    {
+        $ids = explode(',',$ids);
+        Post::updateAll(['status_id' => Constants::STATUS_DELETED],['id' => $ids]);
+        return $this->redirect(Yii::$app->request->referrer);
     }
 
     /**

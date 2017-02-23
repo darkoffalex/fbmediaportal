@@ -18,7 +18,7 @@ $user = Yii::$app->user->identity;
 <?php if(!empty($posts) && is_array($posts)): ?>
     <?php foreach ($posts as $post): ?>
         <div class="topCarousel__card">
-            <a href="<?= $post->getUrl(); ?>">
+            <a rel="canonical" href="<?= $post->getUrl(); ?>">
                 <img width="130" height="130" src="<?= $post->getThumbnailUrl(130,130); ?>">
                 <span><?= $post->trl->name; ?></span>
             </a>

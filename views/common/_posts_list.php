@@ -22,10 +22,10 @@ $user = Yii::$app->user->identity;
     <div class="categories__name"><i class="ico <?= !empty($ico) ? $ico : 'ico-cat-news'; ?>"></i><span><?= $label; ?></span></div>
     <ul class="categories__list">
         <?php foreach ($posts as $post): ?>
-            <li><a href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a></li>
+            <li><a rel="canonical" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a></li>
         <?php endforeach; ?>
     </ul>
     <?php if(!empty($type)): ?>
-        <a class="categories__more" href="<?= Url::to(['main/all','type' => $type]); ?>">Все материалы</a>
+        <a rel="canonical" class="categories__more" href="<?= Url::to(['main/all','type' => $type]); ?>">Все материалы</a>
     <?php endif; ?>
 </div>

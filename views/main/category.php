@@ -63,21 +63,21 @@ $controller = $this->context;
                         <?php if($index == 0): ?>
                             <div class="content__card content__card--wide">
                                 <div class="heading"><?= $category->trl->name; ?></div>
-                                <a href="<?= $post->getUrl(); ?>"><img width="706" class="img-fluid" src="<?= $post->getFirstImageUrlEx(706,311); ?>"></a>
+                                <a rel="canonical" href="<?= $post->getUrl(); ?>"><img width="706" class="img-fluid" src="<?= $post->getFirstImageUrlEx(706,311); ?>"></a>
                                 <?php if(!empty($post->postImages[0]->trl->signature)): ?>
                                     <div class="content__card__copy"><?= $post->postImages[0]->trl->signature; ?></div>
                                 <?php endif; ?>
-                                <a class="content__card__title" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
+                                <a rel="canonical" class="content__card__title" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
                                 <div class="content__card__intro">
                                     <p><?= $post->trl->small_text; ?></p>
                                 </div>
                                 <div class="content__card__info">
                                     <?php if(!empty($post->author)): ?>
-                                        <a href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
+                                        <a rel="canonical" href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
                                             <?= $post->author->name.' '.$post->author->surname; ?>
                                         </a>
                                     <?php else: ?>
-                                        <a href=""><?= $post->author_custom_name; ?></a>
+                                        <a href="#"><?= $post->author_custom_name; ?></a>
                                     <?php endif; ?>
                                     <span>• <?= substr($post->published_at,0,16); ?></span>
                                 </div>
@@ -90,21 +90,21 @@ $controller = $this->context;
                         <?php else: ?>
                             <div class="content__card">
                                 <div class="content__card__image">
-                                    <a href="<?= $post->getUrl(); ?>"><img width="484" class="img-fluid" src="<?= $post->getThumbnailUrl(484,276); ?>"></a>
+                                    <a rel="canonical" href="<?= $post->getUrl(); ?>"><img style="width: 240px; height: 136px;" class="img-fluid" src="<?= $post->getThumbnailUrl(484,276); ?>"></a>
                                 </div>
 
-                                <a class="content__card__title hidden-sm-up" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
+                                <a rel="canonical" class="content__card__title hidden-sm-up" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
 
                                 <div class="content__card__content">
-                                    <a class="content__card__title hidden-xs-down" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
+                                    <a rel="canonical" class="content__card__title hidden-xs-down" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
                                     <div class="content__card__intro">
                                         <p><?= $post->trl->small_text; ?></p>
                                         <?php if(!empty($post->author)): ?>
-                                            <a href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
+                                            <a rel="canonical" href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
                                                 <?= $post->author->name.' '.$post->author->surname; ?>
                                             </a>
                                         <?php else: ?>
-                                            <a href=""><?= $post->author_custom_name; ?></a>
+                                            <a href="#"><?= $post->author_custom_name; ?></a>
                                         <?php endif; ?>
                                         <span>• <?= substr($post->published_at,0,16); ?></span>
                                     </div>
@@ -153,21 +153,17 @@ $controller = $this->context;
                         </div>
 
                         <div class="content__sidebar__banner">
-                            <a href="#">
-                                <?= $this->render('/common/_banners',[
-                                    'imgAttributes' => ['class' => 'img-fluid'],
-                                    'banners' => ArrayHelper::getValue($controller->banners,'TOP_RIGHT_1')
-                                ]); ?>
-                            </a>
+                            <?= $this->render('/common/_banners',[
+                                'imgAttributes' => ['class' => 'img-fluid'],
+                                'banners' => ArrayHelper::getValue($controller->banners,'TOP_RIGHT_1')
+                            ]); ?>
                         </div>
 
                         <div class="content__sidebar__banner">
-                            <a href="#">
-                                <?= $this->render('/common/_banners',[
-                                    'imgAttributes' => ['class' => 'img-fluid'],
-                                    'banners' => ArrayHelper::getValue($controller->banners,'TOP_RIGHT_2')
-                                ]); ?>
-                            </a>
+                            <?= $this->render('/common/_banners',[
+                                'imgAttributes' => ['class' => 'img-fluid'],
+                                'banners' => ArrayHelper::getValue($controller->banners,'TOP_RIGHT_2')
+                            ]); ?>
                         </div>
                     </div>
                 </div>
@@ -209,21 +205,21 @@ $controller = $this->context;
                         <?php foreach ($slicedPart2 as $index => $post): ?>
                             <?php if($post->content_type_id == Constants::CONTENT_TYPE_VIDEO): ?>
                                 <div class="content__card content__card--wide">
-                                    <a href="<?= $post->getUrl(); ?>"><img width="706" class="img-fluid" src="<?= $post->getFirstImageUrlEx(706,311); ?>"></a>
+                                    <a rel="canonical" href="<?= $post->getUrl(); ?>"><img width="706" class="img-fluid" src="<?= $post->getFirstImageUrlEx(706,311); ?>"></a>
                                     <?php if(!empty($post->postImages[0]->trl->signature)): ?>
                                         <div class="content__card__copy"><?= $post->postImages[0]->trl->signature; ?></div>
                                     <?php endif; ?>
-                                    <a class="content__card__title" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
+                                    <a rel="canonical" class="content__card__title" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
                                     <div class="content__card__intro">
                                         <p><?= $post->trl->small_text; ?></p>
                                     </div>
                                     <div class="content__card__info">
                                         <?php if(!empty($post->author)): ?>
-                                            <a href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
+                                            <a rel="canonical" rel="canonical" href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
                                                 <?= $post->author->name.' '.$post->author->surname; ?>
                                             </a>
                                         <?php else: ?>
-                                            <a href=""><?= $post->author_custom_name; ?></a>
+                                            <a href="#"><?= $post->author_custom_name; ?></a>
                                         <?php endif; ?>
                                         <span>• <?= substr($post->published_at,0,16); ?></span>
                                     </div>
@@ -237,21 +233,21 @@ $controller = $this->context;
                             <?php else: ?>
                                 <div class="content__card">
                                     <div class="content__card__image">
-                                        <a href="<?= $post->getUrl(); ?>"><img width="484" class="img-fluid" src="<?= $post->getThumbnailUrl(484,276); ?>"></a>
+                                        <a rel="canonical" href="<?= $post->getUrl(); ?>"><img style="width: 240px; height: 136px;" class="img-fluid" src="<?= $post->getThumbnailUrl(484,276); ?>"></a>
                                     </div>
 
-                                    <a class="content__card__title hidden-sm-up" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
+                                    <a rel="canonical" class="content__card__title hidden-sm-up" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
 
                                     <div class="content__card__content">
-                                        <a class="content__card__title hidden-xs-down" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
+                                        <a rel="canonical" rel="canonical" class="content__card__title hidden-xs-down" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
                                         <div class="content__card__intro">
                                             <p><?= $post->trl->small_text; ?></p>
                                             <?php if(!empty($post->author)): ?>
-                                                <a href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
+                                                <a rel="canonical" href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
                                                     <?= $post->author->name.' '.$post->author->surname; ?>
                                                 </a>
                                             <?php else: ?>
-                                                <a href=""><?= $post->author_custom_name; ?></a>
+                                                <a href="#"><?= $post->author_custom_name; ?></a>
                                             <?php endif; ?>
                                             <span>• <?= substr($post->published_at,0,16); ?></span>
                                         </div>
