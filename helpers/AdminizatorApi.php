@@ -10,7 +10,7 @@ use yii\helpers\ArrayHelper;
 class AdminizatorApi
 {
     const API_BASE_URL = "https://adminizator.com/api/";
-    const API_CURL_TIMEOUT = 15;
+    const API_CURL_TIMEOUT = 30;
 
     /**
      * @var self

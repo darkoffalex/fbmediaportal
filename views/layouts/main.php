@@ -4,18 +4,21 @@ use app\assets\FrontendAsset;
 use yii\helpers\Url;
 use yii\helpers\Html;
 use yii\helpers\ArrayHelper;
+use Facebook\Facebook;
 
 /* @var $this \yii\web\View */
 /* @var $content string */
 /* @var $user \yii\web\User */
 /* @var $controller \app\components\Controller */
-/* @var $social kartik\social\Module */
 
 FrontendAsset::register($this);
 
 $user = Yii::$app->user->identity;
 $controller = $this->context;
-$social = Yii::$app->getModule('social');
+$fb = new Facebook([
+    'app_id' => Yii::$app->params['facebook']['app_id'],
+    'app_secret' => Yii::$app->params['facebook']['app_secret'],
+]);
 ?>
 
 <?php $this->beginPage(); ?>
@@ -66,7 +69,10 @@ $social = Yii::$app->getModule('social');
 
                 <?php if(Yii::$app->user->isGuest): ?>
                     <?php $callback = Url::to(['/site/fb-login'],true); ?>
-                    <?= $social->getFbLoginLink($callback,['class' => 'header__login'],['email','user_posts','publish_actions']); ?>
+                    <?php $loginUrl = $fb->getRedirectLoginHelper()->getLoginUrl($callback,['email','user_posts','publish_actions','manage_pages','publish_pages','user_posts']); ?>
+                    <a class="header__login" href="<?= $loginUrl; ?>">
+                        <i class="ico ico-login"></i><span>Войти</span>
+                    </a>
                 <?php else: ?>
                     <a class="header__login" href="<?= Url::to(['/site/logout']); ?>">
                         <i class="ico ico-login"></i><span>Выйти</span>

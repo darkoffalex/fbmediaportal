@@ -10,6 +10,7 @@ use app\models\PostGroup;
 use app\models\PostImage;
 use app\models\User;
 use Yii;
+use yii\base\Exception;
 use yii\console\Controller;
 use app\helpers\AdminizatorApi;
 use yii\data\Pagination;
@@ -23,15 +24,18 @@ class SyncController extends Controller
 
     public $eld = 24;
     public $from = null;
+    public $to = null;
     public $output = true;
     public $lng = 'ru';
     public $portion = 50;
     public $parsed = 'no';
     public $stock = 'no';
+    public $attachments = 'yes';
+    public $mark = 'yes';
 
     public function options($actionID)
     {
-        return ['eld', 'output', 'lng', 'portion', 'parsed', 'stock', 'from'];
+        return ['eld', 'output', 'lng', 'portion', 'parsed', 'stock', 'from', 'attachments', 'to', 'mark'];
     }
 
     private $processId = null;
@@ -279,7 +283,7 @@ class SyncController extends Controller
 
         //time interval
         $timeFrom = empty($this->from) ? date('Y-m-d H:i:s',(time() - (3600 * $this->eld))) : $this->from;
-        $timeTo = date('Y-m-d H:i:s',time());
+        $timeTo = empty($this->to) ? date('Y-m-d H:i:s',time()) : $this->to;
         if($this->output) echo "Checking interval ({$timeFrom} - {$timeTo})\n";
 
         //getting groups
@@ -339,53 +343,65 @@ class SyncController extends Controller
             if(!empty($postsItemsArr)){
                 foreach ($postsItemsArr as $postArr){
 
-                    //find or create
-                    $post = $this->getPost($postArr);
-                    $post->translateLabels = false;
+                    try{
+                        //find or create
+                        $post = $this->getPost($postArr);
+                        $post->translateLabels = false;
 
-                    //if not found - save new
-                    if($post->isNewRecord){
-                        if($this->output) echo "Post with id {$postArr['id']} not found. Creating...\n";
+                        //if not found - save new
+                        if($post->isNewRecord){
+                            if($this->output) echo "Post with id {$postArr['id']} not found. Creating...\n";
 
-                        $group = $this->getGroup($postArr['group']);
-                        $author = $this->getAuthor($postArr['author']);
+                            $group = $this->getGroup($postArr['group']);
+                            $author = $this->getAuthor($postArr['author']);
 
-                        if(!empty($group)){
-                            if($this->output) echo "Group set\n";
-                            $post->group_id = $group->id;
-                        }else{
-                            if($this->output) echo "ERROR! Group not set\n";
-                        }
-
-                        if(!empty($author)){
-                            if($this->output) echo "Author set\n";
-                            $post->author_id = $author->id;
-                        }else{
-                            if($this->output) echo "ERROR! Author not set\n";
-                        }
-
-                        if($post->save()){
-                            if($this->output) echo "Post with id {$postArr['id']} saved.\nUpdating attachments...\n";
-
-                            if(!empty($postArr['attachments'])){
-                                $this->updateAttachments($post,$postArr['attachments']);
+                            if(!empty($group)){
+                                if($this->output) echo "Group set\n";
+                                $post->group_id = $group->id;
+                            }else{
+                                if($this->output) echo "ERROR! Group not set\n";
                             }
 
-                            if($this->output) echo "Updating translatable content...\n";
-                            $trl = $post->getATrl($this->lng);
-                            $trl -> name = $post->name;
-                            $trl -> text = strip_tags($postArr['content']);
-                            $trl -> small_text = StringHelper::truncateWords($trl->text,20);
-                            $trl -> isNewRecord ? $trl->save() : $trl->update();
+                            if(!empty($author)){
+                                if($this->output) echo "Author set\n";
+                                $post->author_id = $author->id;
+                            }else{
+                                if($this->output) echo "ERROR! Author not set\n";
+                            }
+
+                            if($post->save()){
+                                if($this->output) echo "Post with id {$postArr['id']} saved.\n";
+
+                                if(!empty($postArr['attachments']) && $this->attachments == 'yes'){
+                                    if($this->output) echo "Updating attachments...\n";
+                                    $this->updateAttachments($post,$postArr['attachments']);
+                                }
+
+                                if($this->output) echo "Updating translatable content...\n";
+                                $trl = $post->getATrl($this->lng);
+                                $trl -> name = $post->name;
+                                $trl -> text = strip_tags($postArr['content']);
+                                $trl -> small_text = StringHelper::truncateWords($trl->text,20);
+                                $trl -> isNewRecord ? $trl->save() : $trl->update();
+
+                                if($this->output) echo "Post with id {$postArr['id']} completed.\n\n";
+                            }
+
+                        //if found - mark as 'need update'
+                        }else{
+                            if($this->output) echo "Post with id {$postArr['id']} already added.\n";
+
+                            if($this->mark == 'yes'){
+                                if($this->output) echo "Marking as updating...\n";
+                                $post->update();
+                            }
 
                             if($this->output) echo "Post with id {$postArr['id']} completed.\n\n";
-                        }
 
-                    //if found - mark as 'need update'
-                    }else{
-                        if($this->output) echo "Post with id {$postArr['id']} already added.\nMarking as updating...\n";
-                        if($this->output) echo "Post with id {$postArr['id']} completed.\n\n";
-                        $post->update();
+                        }
+                    }catch (Exception $ex){
+                        Help::log('updates.log',"Process {$this->processId} terminated by error");
+                        exit($this->output ? "ERROR: {$ex->getMessage()} \n" : null);
                     }
                 }
             }

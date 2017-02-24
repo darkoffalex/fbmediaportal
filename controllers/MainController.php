@@ -8,10 +8,12 @@ use app\models\Category;
 use app\models\Comment;
 use app\models\Post;
 use app\models\User;
+use Facebook\Exceptions\FacebookResponseException;
 use Facebook\Facebook;
 use kartik\social\Module as SocialModule;
 use Yii;
 use app\components\Controller;
+use yii\base\Exception;
 use yii\data\Pagination;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
@@ -472,15 +474,6 @@ class MainController extends Controller
                     $user->update();
 
                     if(!empty($user->fb_user_id && !empty($user->fb_auth_token))){
-
-                        /* @var $social SocialModule */
-                        $social = Yii::$app->getModule('social');
-                        $fbConnection = new Facebook([
-                            'app_id' => $social->facebook['app_id'],
-                            'app_secret' => $social->facebook['app_secret']
-                        ]);
-                        $result = $fbConnection->post("/post/POST_ID/comments",['message' => $newComment->text],$user->fb_auth_token);
-
                         //TODO: Apply changes in FB
                     }
                 }
@@ -498,14 +491,16 @@ class MainController extends Controller
         $user = Yii::$app->user->identity;
 
         if(!empty($user) && !Yii::$app->user->isGuest){
-            /* @var $social SocialModule */
-            $social = Yii::$app->getModule('social');
-            $fbConnection = new Facebook([
-                'app_id' => $social->facebook['app_id'],
-                'app_secret' => $social->facebook['app_secret']
+
+            $fb = new Facebook([
+                'app_id' => Yii::$app->params['facebook']['app_id'],
+                'app_secret' => Yii::$app->params['facebook']['app_secret'],
+                'default_access_token' => $user->fb_auth_token,
             ]);
-            $result = $fbConnection->post("/post/1296459587113274/comments",['message' => 'тестовый комментарий'],$user->fb_auth_token);
+
+            $result = $fb->post("/908733935885843_1296459587113274/comments",['message' => 'тестовый комментарий']);
             Help::debug($result);
+
         }else{
             return "Please login via Facebook";
         }

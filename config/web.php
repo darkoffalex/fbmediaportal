@@ -12,14 +12,6 @@ $config = [
     'modules' => [
         'gridview' =>  'kartik\grid\Module',
         'admin' => ['class' => 'app\modules\admin\AdminModule'],
-
-        'social' => [
-            'class' => 'kartik\social\Module',
-            'facebook' => [
-                'appId' => '',
-                'secret' => '',
-            ],
-        ],
     ],
 
     'components' => [
@@ -27,11 +19,6 @@ $config = [
         'i18n' => [
             'translations' => [
                 'admin' => [
-                    'class' => 'yii\i18n\PhpMessageSource',
-                    'basePath' => '@app/messages',
-                    'sourceLanguage' => 'en-US',
-                ],
-                'kvsocial' => [
                     'class' => 'yii\i18n\PhpMessageSource',
                     'basePath' => '@app/messages',
                     'sourceLanguage' => 'en-US',

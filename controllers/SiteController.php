@@ -8,6 +8,7 @@ use app\models\Banner;
 use app\models\Category;
 use app\models\Post;
 use Facebook\Exceptions\FacebookSDKException;
+use Facebook\Facebook;
 use Facebook\GraphNodes\GraphPicture;
 use Yii;
 use app\components\Controller;
@@ -94,9 +95,10 @@ class SiteController extends Controller
      */
     public function actionFbLogin()
     {
-        /* @var $social \kartik\social\Module */
-        $social = Yii::$app->getModule('social');
-        $fb = $social->getFb();
+        $fb = new Facebook([
+            'app_id' => Yii::$app->params['facebook']['app_id'],
+            'app_secret' => Yii::$app->params['facebook']['app_secret'],
+        ]);
 
         try {
             $helper = $fb->getRedirectLoginHelper();
