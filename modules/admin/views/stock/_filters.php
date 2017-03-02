@@ -91,7 +91,7 @@ use kartik\daterange\DateRangePicker;
             ])->error(false); ?>
         </div>
         <div class="col-md-2">
-            <?= $form->field($model,'group_id')->dropDownList(ArrayHelper::map(PostGroup::find()->all(),'id','name'),['prompt' => ''])->error(false); ?>
+            <?= $form->field($model,'group_id')->dropDownList(ArrayHelper::map(PostGroup::find()->where(['is_group' => 1, 'stock_enabled' => 1])->all(),'id','name'),['prompt' => ''])->error(false); ?>
         </div>
         <div class="col-md-2">
             <?= $form->field($model, 'need_update')->dropDownList([

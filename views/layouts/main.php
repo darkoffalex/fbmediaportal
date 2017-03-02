@@ -13,6 +13,10 @@ use Facebook\Facebook;
 
 FrontendAsset::register($this);
 
+if(!session_id()) {
+    session_start();
+}
+
 $user = Yii::$app->user->identity;
 $controller = $this->context;
 $fb = new Facebook([
@@ -55,7 +59,7 @@ $fb = new Facebook([
                 <?php $id = Yii::$app->request->get('id',null); ?>
                 <?php $actionId = Yii::$app->controller->action->id; ?>
 
-                <?php if(!empty($id) || in_array($actionId,['profile','all','profile-details'])):?>
+                <?php if(!empty($id) || in_array($actionId,['profile','all','profile-details','search','pages'])):?>
                     <a href="<?= Url::to(['main/index']); ?>"><i class="ico ico-logo"></i></a>
                 <?php else: ?>
                     <i class="ico ico-logo"></i>
@@ -68,11 +72,22 @@ $fb = new Facebook([
                 </form>
 
                 <?php if(Yii::$app->user->isGuest): ?>
+
                     <?php $callback = Url::to(['/site/fb-login'],true); ?>
-                    <?php $loginUrl = $fb->getRedirectLoginHelper()->getLoginUrl($callback,['email','user_posts','publish_actions','manage_pages','publish_pages','user_posts']); ?>
+
+                    <?php $loginUrl = $fb->getRedirectLoginHelper()->getLoginUrl($callback, [
+                        'email',
+                        'user_posts',
+                        'publish_actions',
+                        'manage_pages',
+                        'publish_pages',
+                        'user_managed_groups'
+                    ]); ?>
+
                     <a class="header__login" href="<?= $loginUrl; ?>">
                         <i class="ico ico-login"></i><span>Войти</span>
                     </a>
+
                 <?php else: ?>
                     <a class="header__login" href="<?= Url::to(['/site/logout']); ?>">
                         <i class="ico ico-login"></i><span>Выйти</span>
@@ -120,8 +135,17 @@ $fb = new Facebook([
             <div class="col-md-12 col-lg-10">
                 <div class="row">
                     <div class="col-sm-8">
-                        <div class="footer__navi"><a href="#">О проекте</a><a href="#">Реклама</a><a href="#">Спецпроекты</a><a href="#">iOS и Android</a></div>
-                        <div class="footer__navi"><a href="#">secret@vc.ru</a><a href="#">Карта сайта</a><a href="#">Вакансии</a><a href="#">ИД «Комитет»</a></div>
+                        <div class="footer__navi">
+                            <a href="<?= Url::to(['/main/pages','type' => 'about']); ?>">О проекте</a>
+                            <a href="<?= Url::to(['/main/pages','type' => 'advertising']); ?>">Реклама</a>
+                            <a href="<?= Url::to(['/main/pages','type' => 'politics']); ?>">Политика безопасности</a>
+                        </div>
+<!--                        <div class="footer__navi">-->
+<!--                            <a href="#">secret@vc.ru</a>-->
+<!--                            <a href="#">Карта сайта</a>-->
+<!--                            <a href="#">Вакансии</a-->
+<!--                            ><a href="#">ИД «Комитет»</a>-->
+<!--                        </div>-->
                     </div>
                     <div class="col-sm-4 text-sm-right"><a class="footer__alert" href="#"><i class="ico ico-alert"></i><span>Включить уведомления</span></a>
                         <div class="footer__socials"><a href="#"><i class="ico ico-gplus"></i></a><a href="#"><i class="ico ico-twitter"></i></a><a href="#"><i class="ico ico-vk"></i></a><a href="#"><i class="ico ico-fb"></i></a><a href="#"><i class="ico ico-rss"></i></a><a href="#"><i class="ico ico-ok"></i></a></div>

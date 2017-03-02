@@ -14,7 +14,6 @@ use yii\web\JsExpression;
 /* @var $controller \app\modules\admin\controllers\StockController */
 
 $controller = $this->context;
-Yii::$app->view->registerJsFile('/js/nested-multi-sel.js');
 ?>
 
     <div class="modal-header">
@@ -32,7 +31,7 @@ Yii::$app->view->registerJsFile('/js/nested-multi-sel.js');
     ],
 ]); ?>
 
-    <div class="modal-body">
+    <div class="modal-body" style="overflow-y: auto;">
         <?= $form->field($model, 'name')->textInput()->label(Yii::t('admin','Internal name')); ?>
 
         <div class="form-group dropdown inactive-links">
@@ -78,6 +77,9 @@ Yii::$app->view->registerJsFile('/js/nested-multi-sel.js');
             ],
         ]) ?>
 
+        <?php $model->author_custom_name = !empty($model->author) ? $model->author->name.' '.$model->author->surname : $model->author_custom_name; ?>
+        <?= $form->field($model,'author_custom_name')->textInput(); ?>
+
         <?= $form->field($model, 'status_id')->dropDownList([
             Constants::STATUS_ENABLED => Yii::t('admin','Enabled'),
             Constants::STATUS_DISABLED => Yii::t('admin','Disabled'),
@@ -106,3 +108,46 @@ Yii::$app->view->registerJsFile('/js/nested-multi-sel.js');
     </div>
 
 <?php ActiveForm::end(); ?>
+
+<script type="text/javascript">
+    var setTag = function(categoryId,categoryName,selector)
+    {
+        var tags = $(selector);
+        if(tags.find('[data-category-id='+categoryId+']').length == 0){
+            tags.append('<span class="label label-primary margin-r-5">'+categoryName+' <span class="fa fa-close icon-pointer" data-remove data-category-id="'+categoryId+'"></span><input type="hidden" name="Post[categoriesChecked][]" value="'+categoryId+'"></span>');
+        }else{
+            tags.find('[data-category-id='+categoryId+']').parent().remove();
+        }
+    };
+
+    setTimeout(function(){
+        //clicking on items with sub-items within
+        $('ul.dropdown-menu [data-toggle=dropdown]').off('click').on('mouseover', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            $(this).parent().siblings().removeClass('open');
+            $(this).parent().addClass('open');
+        }).on('click',function(event){
+            var categoryAdd = $(this).parent().data('category-add');
+            var categoryName = $(this).parent().data('category-name');
+
+            setTag(categoryAdd,categoryName,'.categories-tags');
+
+            return false;
+        });
+
+        //clicking on intems without sub-items
+        $('ul.dropdown-menu [data-no-click=true] a').on('click',function(event){
+            var categoryAdd = $(this).parent().data('category-add');
+            var categoryName = $(this).parent().data('category-name');
+
+            setTag(categoryAdd,categoryName,'.categories-tags');
+
+            return false;
+        }).on('mouseover',function(event){
+            $(this).parent().siblings().removeClass('open');
+        });
+
+    },10);
+</script>

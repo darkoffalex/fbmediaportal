@@ -2,6 +2,8 @@
 
 namespace app\helpers;
 
+use Facebook\Exceptions\FacebookResponseException;
+use Facebook\Facebook;
 use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 use Yii;
@@ -44,7 +46,7 @@ class Help
         $log = date('Y-m-d H:i:s',time()).' - '.$text."\n";
 
         try{
-            return file_put_contents($filename, $log, FILE_APPEND);
+            return file_put_contents(Yii::getAlias('@runtime/logs/'.$filename), $log, FILE_APPEND);
         }catch (\Exception $ex){
             return false;
         }
@@ -237,5 +239,30 @@ class Help
         $array[$index2] = $tmp;
 
         return true;
+    }
+
+    /**
+     * Makes request to facebook API fot posting comment
+     * @param $objectId
+     * @param $comment
+     * @return null|string
+     */
+    public static function fbcomment($objectId, $comment)
+    {
+        try{
+            $fb = new Facebook([
+                'app_id' => Yii::$app->params['facebook']['app_id'],
+                'app_secret' => Yii::$app->params['facebook']['app_secret'],
+                'default_access_token' => Yii::$app->params['facebook']['bot_token'],
+            ]);
+
+            $result = $fb->post('/'.$objectId.'/comments',['message' => $comment]);
+            $body = $result->getDecodedBody();
+
+        }catch (FacebookResponseException $ex){
+            return null;
+        }
+
+        return !empty($body['id']) ? $body['id'] : null;
     }
 }

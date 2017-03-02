@@ -42,7 +42,7 @@ $gridColumns = [
     [
         'attribute' => 'content',
         'format' => 'raw',
-        'contentOptions'=>['style'=>'font-size:12px; width: 300px;'],
+        'contentOptions'=>['style'=>'font-size:12px; width: 300px;', 'class' => 'break-it-all'],
         'value' => function ($model, $key, $index, $column) use ($lng, $currentView){
             /* @var $model \app\models\Post */
             return $currentView->render('/posts/_cell_preview',compact('model','lng'));
@@ -53,7 +53,7 @@ $gridColumns = [
         'attribute' => 'group_id',
         'label' => Yii::t('admin','Group'),
         'enableSorting' => false,
-        'filter' => ArrayHelper::map(PostGroup::find()->where(['is_group' => 1])->all(),'id','name'),
+        'filter' => ArrayHelper::map(PostGroup::find()->where(['is_group' => 1, 'stock_enabled' => 1])->all(),'id','name'),
         'format' => 'raw',
         'value' => function ($model, $key, $index, $column) use ($lng){
             /* @var $model \app\models\Post */
@@ -91,32 +91,32 @@ $gridColumns = [
         },
     ],
 
-    [
-        'label' => Yii::t('admin','Recommendations'),
-        'enableSorting' => false,
-        'filter' => false,
-        'format' => 'raw',
-        'value' => function ($model, $key, $index, $column) use ($lng){
-            /* @var $model \app\models\Post */
-            $recommendations = [];
-
-            if(!empty($model->author->stockRecommendations)){
-                foreach($model->author->stockRecommendations as $recommendation){
-                    $recommendations[] = $recommendation->category->name;
-                }
-            }
-
-            if(!empty($model->group->stockRecommendations)){
-                foreach($model->author->stockRecommendations as $recommendation){
-                    if(!in_array($recommendation->category->name,$recommendations)){
-                        $recommendations[] = $recommendation->category->name;
-                    }
-                }
-            }
-
-            return !empty($recommendation) ? implode(', ',$recommendations) : Yii::t('admin','Нет');
-        },
-    ],
+//    [
+//        'label' => Yii::t('admin','Recommendations'),
+//        'enableSorting' => false,
+//        'filter' => false,
+//        'format' => 'raw',
+//        'value' => function ($model, $key, $index, $column) use ($lng){
+//            /* @var $model \app\models\Post */
+//            $recommendations = [];
+//
+//            if(!empty($model->author->stockRecommendations)){
+//                foreach($model->author->stockRecommendations as $recommendation){
+//                    $recommendations[] = $recommendation->category->name;
+//                }
+//            }
+//
+//            if(!empty($model->group->stockRecommendations)){
+//                foreach($model->author->stockRecommendations as $recommendation){
+//                    if(!in_array($recommendation->category->name,$recommendations)){
+//                        $recommendations[] = $recommendation->category->name;
+//                    }
+//                }
+//            }
+//
+//            return !empty($recommendation) ? implode(', ',$recommendations) : Yii::t('admin','Нет');
+//        },
+//    ],
 
     [
         'attribute' => 'need_update',
@@ -133,16 +133,16 @@ $gridColumns = [
         'class' => 'yii\grid\ActionColumn',
         'contentOptions'=>['style'=>'width: 100px; text-align: center;'],
         'header' => Yii::t('admin','Actions'),
-        'template' => '{delete} &nbsp; {move} &nbsp {comments} &nbsp {fb_link} &nbsp; {archive}',
+        'template' => '{delete} &nbsp; &nbsp {comments} {move} &nbsp {fb_link} &nbsp; {archive}',
         'buttons' => [
-            'move' => function ($url,$model,$key) {
-                /* @var $model \app\models\Post */
-                return Html::a('<span class="glyphicon glyphicon-filter"></span>', ['/admin/stock/move', 'id' => $model->id], ['title' => Yii::t('admin','Move to posts'), 'data-toggle'=>'modal', 'data-target'=>'.modal']);
-            },
-
             'comments' => function ($url,$model,$key) {
                 /* @var $model \app\models\Post */
                 return Html::a('<span class="glyphicon glyphicon-comment"></span> <span style="font-size: 12px; position: relative; top: -3px;">('.count($model->comments).')</span>', ['/admin/posts/comments', 'id' => $model->id], ['title' => Yii::t('admin','View comments'), 'data-toggle'=>'modal', 'data-target'=>'.modal']);
+            },
+
+            'move' => function ($url,$model,$key) {
+                /* @var $model \app\models\Post */
+                return Html::a('<span class="glyphicon glyphicon-filter"></span>', ['/admin/stock/move', 'id' => $model->id], ['title' => Yii::t('admin','Move to posts'), 'data-toggle'=>'modal', 'data-backdrop' => 'static', 'data-keyboard' => 'false', 'data-target'=>'.modal']);
             },
 
             'fb_link' => function ($url,$model,$key) {
@@ -205,3 +205,12 @@ $gridColumns = [
         </div>
     </div>
 </div>
+
+<style type="text/css">
+    .table-bordered > thead > tr > th.break-it-all, .table-bordered > tbody > tr > th.break-it-all,
+    .table-bordered > tfoot > tr > th.break-it-all, .table-bordered > thead > tr > td.break-it-all,
+    .table-bordered > tbody > tr > td.break-it-all, .table-bordered > tfoot > tr > td.break-it-all
+    {
+        word-break: break-all;
+    }
+</style>

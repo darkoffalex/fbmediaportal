@@ -95,6 +95,10 @@ class SiteController extends Controller
      */
     public function actionFbLogin()
     {
+        if(!session_id()) {
+            session_start();
+        }
+
         $fb = new Facebook([
             'app_id' => Yii::$app->params['facebook']['app_id'],
             'app_secret' => Yii::$app->params['facebook']['app_secret'],

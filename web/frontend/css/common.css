@@ -33,3 +33,28 @@
 {
     background: none;
 }
+
+.content__menu ul li.active.active-2
+{
+    background-color: #cbcbcb;
+}
+
+.content__menu ul li.active.active-2 a
+{
+    color: #373a3c;
+}
+
+.topCarousel__card span{opacity: 0} .topCarousel__card:hover span{opacity: 1}
+
+.content__card__comments:after {left: 10px}
+
+.content__card__comments.small-box
+{
+    position: absolute;
+    right: 10px;
+    bottom: -9px;
+}
+.weather-title
+{
+    font-size: 17px;
+}

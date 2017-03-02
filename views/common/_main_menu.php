@@ -22,10 +22,10 @@ $user = Yii::$app->user->identity;
                 <li class="<?= !empty($category->childrenActive) ? 'have-ul' : ''; ?> <?= $active == $category->id || in_array($active,ArrayHelper::map($category->childrenActive,'id','id')) ? 'active' : ''; ?>">
                     <a rel="canonical" href="<?= empty($category->childrenActive) ? $category->getUrl() : '#'; ?>"><?= $category->trl->name; ?></a>
                     <?php if(!empty($category->childrenActive)): ?>
-                        <ul>
+                        <ul <?= $active == $category->id || in_array($active,ArrayHelper::map($category->childrenActive,'id','id')) ? 'style="display: block;"' : ''; ?>>
                             <?php foreach ($category->childrenActive as $child): ?>
-                                <li class="<?= !empty($child->childrenActive) ? 'have-ul-second' : ''; ?> <?= $active == $child->id ? 'active' : ''; ?>">
-                                    <a href="<?= $active == $child->id ? '#' : $child->getUrl(); ?>"><?= $child->trl->name; ?></a>
+                                <li class="<?= !empty($child->childrenActive) ? 'have-ul-second' : ''; ?> <?= $active == $child->id ? 'active active-2' : ''; ?>">
+                                    <a rel="canonical" href="<?= $active == $child->id ? '#' : $child->getUrl(); ?>"><?= $child->trl->name; ?></a>
                                     <?php if(!empty($child->childrenActive)): ?>
                                         <ul>
                                             <?php foreach ($child->childrenActive as $subChild): ?>

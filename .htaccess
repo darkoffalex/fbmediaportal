@@ -4,6 +4,9 @@
 </IfModule>
 
 <IfModule mod_rewrite.c>
+    RewriteCond %{HTTP_HOST} ^www.rusturkey\.com
+    RewriteRule ^(.*)$ http://rusturkey.com/$1 [R=301,L]
+
     RewriteCond %{REQUEST_URI} ^/.*
     RewriteRule ^(.*)$ web/$1 [L]
 

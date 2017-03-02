@@ -10,7 +10,6 @@ use app\models\Post;
 use app\models\User;
 use Facebook\Exceptions\FacebookResponseException;
 use Facebook\Facebook;
-use kartik\social\Module as SocialModule;
 use Yii;
 use app\components\Controller;
 use yii\base\Exception;
@@ -68,6 +67,7 @@ class MainController extends Controller
                 ->where(['id' => $id, 'status_id' => Constants::STATUS_ENABLED])
                 ->with([
                     'trl',
+                    'parent.trl',
                     'parent.childrenActive.childrenActive',
                     'childrenActive.childrenActive'
                 ]);
@@ -79,15 +79,12 @@ class MainController extends Controller
             }
         }
 
-        //get all category ids which should be included in search query
-        if(!empty($category)){
+        //set meta data
+        $this->view->title = !empty($category) ? $category->trl->name .' - '.(!empty($category->parent) ? $category->parent->trl->name.' - '.$this->view->title : $this->view->title) : $this->view->title;
+        $this->view->registerMetaTag(['name' => 'description', 'content' => '']);
+        $this->view->registerMetaTag(['name' => 'keywords', 'content' => '']);
 
-            //set meta data
-            $this->view->title = !empty($category) ? $category->trl->name : $this->view->title;
-            $this->view->registerMetaTag(['name' => 'description', 'content' => !empty($category->trl->meta_description) ? $category->trl->meta_description : $this->commonSettings->meta_description]);
-            $this->view->registerMetaTag(['name' => 'keywords', 'content' => !empty($category->trl->meta_keywords) ? $category->trl->meta_keywords : $this->commonSettings->meta_keywords]);
-
-            //open-graph meta tags
+        //open-graph meta tags
 //            $this->view->registerMetaTag(['property' => 'og:description', 'content' => ""]);
 //            $this->view->registerMetaTag(['property' => 'og:url', 'content' => ""]);
 //            $this->view->registerMetaTag(['property' => 'og:site_name', 'content' => ""]);
@@ -95,6 +92,9 @@ class MainController extends Controller
 //            $this->view->registerMetaTag(['property' => 'og:image', 'content' => ""]);
 //            $this->view->registerMetaTag(['property' => 'og:image:width', 'content' => '200']);
 //            $this->view->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
+
+        //get all category ids which should be included in search query
+        if(!empty($category)){
 
             /* @var $children Category[] */
             $children = $category->getChildrenRecursive(true);
@@ -124,7 +124,7 @@ class MainController extends Controller
         $popularPostsQuery = Post::findSortedPopular(!empty($category) ? $id : null,$currentIds,$siblingIds)
             ->with(['trl'])
             ->andWhere(new Expression('comment_count > :minCount',['minCount' => 200]))
-            ->andWhere(new Expression('published_at > :minDate', ['minDate' => date('Y-m-d H:i:s',(time()-(86400*100)))]));
+            ->andWhere(new Expression('published_at > :minDate', ['minDate' => date('Y-m-d',(time()-(86400*100)))]));
 
         $mainPostsQuery->limit(15);
         $forumPostsQuery->limit(4);
@@ -201,7 +201,7 @@ class MainController extends Controller
 
         $mainPostsQueryCount = clone $mainPostsQuery;
         $mainPostsCount = Help::cquery(function($db)use($mainPostsQueryCount){return $mainPostsQueryCount->count();},$cache);
-        $pagesMain = new Pagination(['totalCount' => $mainPostsCount, 'defaultPageSize' => ($carousel ? 1 : 3)]);
+        $pagesMain = new Pagination(['totalCount' => $mainPostsCount, 'defaultPageSize' => ($carousel ? 3 : 3)]);
         $mainPosts = Help::cquery(function($db)use($mainPostsQuery,$pagesMain,$carousel){return $mainPostsQuery->offset($pagesMain->offset + ($carousel ? 15 : 5))->limit($pagesMain->limit)->all();},$cache);
 
         //getting forum posts paginated
@@ -260,9 +260,9 @@ class MainController extends Controller
         }
 
         //set meta data
-        $this->view->title = !empty($category) ? $post->trl->name : $this->view->title;
-        $this->view->registerMetaTag(['name' => 'description', 'content' => !empty($post->trl->name) ? $post->trl->name : $this->commonSettings->meta_description]);
-        $this->view->registerMetaTag(['name' => 'keywords', 'content' => !empty($post->trl->name) ? $post->trl->name : $this->commonSettings->meta_keywords]);
+        $this->view->title = !empty($post) ? $post->trl->name.' - '.$this->view->title : $this->view->title;
+        $this->view->registerMetaTag(['name' => 'description', 'content' => !empty($post->trl->name) ? $post->trl->small_text : $this->commonSettings->meta_description]);
+        $this->view->registerMetaTag(['name' => 'keywords', 'content' => '']);
 
         //open-graph meta tags
 //            $this->view->registerMetaTag(['property' => 'og:description', 'content' => ""]);
@@ -425,8 +425,15 @@ class MainController extends Controller
                     $user->counter_comments = count($user->comments);
                     $user->update();
 
-                    if(!empty($user->fb_user_id)){
-                        //TODO: Apply changes in FB
+                    if(!empty($user->fb_user_id) && !empty($comment->fb_sync_id)){
+                        $name = $user->name.' '.$user->surname;
+                        $message = "Пользователем {$name} был добавлен комментарий: «{$model->text}»";
+                        $fbId = Help::fbcomment($comment->fb_sync_id,$message);
+
+                        if(!empty($fbId)){
+                            $model->fb_sync_id = $fbId;
+                            $model->update();
+                        }
                     }
                 }
             }
@@ -473,8 +480,15 @@ class MainController extends Controller
                     $user->counter_comments = count($user->comments);
                     $user->update();
 
-                    if(!empty($user->fb_user_id && !empty($user->fb_auth_token))){
-                        //TODO: Apply changes in FB
+                    if(!empty($user->fb_user_id) && !empty($post->fb_sync_id)){
+                        $name = $user->name.' '.$user->surname;
+                        $message = "Пользователем {$name} был добавлен комментарий: «{$newComment->text}»";
+                        $fbId = Help::fbcomment($post->fb_sync_id,$message);
+
+                        if(!empty($fbId)){
+                            $newComment->fb_sync_id = $fbId;
+                            $newComment->update();
+                        }
                     }
                 }
             }
@@ -483,30 +497,6 @@ class MainController extends Controller
         return $newComment;
     }
 
-    /********************************************** T E S T S *********************************************************/
-
-    public function actionTestCommenting()
-    {
-        /* @var $user User */
-        $user = Yii::$app->user->identity;
-
-        if(!empty($user) && !Yii::$app->user->isGuest){
-
-            $fb = new Facebook([
-                'app_id' => Yii::$app->params['facebook']['app_id'],
-                'app_secret' => Yii::$app->params['facebook']['app_secret'],
-                'default_access_token' => $user->fb_auth_token,
-            ]);
-
-            $result = $fb->post("/908733935885843_1296459587113274/comments",['message' => 'тестовый комментарий']);
-            Help::debug($result);
-
-        }else{
-            return "Please login via Facebook";
-        }
-
-        exit('Done');
-    }
 
     /********************************************* P R O F I L E ******************************************************/
 
@@ -533,7 +523,7 @@ class MainController extends Controller
         }
 
         //set meta data
-        $this->view->title = "Профиль участника ".$user->name.' '.$user->surname;
+        $this->view->title = $user->name.' '.$user->surname.' - Профиль участника - '.$this->view->title;
         $this->view->registerMetaTag(['name' => 'description', 'content' => '']);
         $this->view->registerMetaTag(['name' => 'keywords', 'content' => '']);
 
@@ -585,7 +575,7 @@ class MainController extends Controller
         }
 
         //set meta data
-        $this->view->title = "Профиль участника ".$user->name.' '.$user->surname;
+        $this->view->title = $user->name.' '.$user->surname.' - Записи участника - '.$this->view->title;
         $this->view->registerMetaTag(['name' => 'description', 'content' => '']);
         $this->view->registerMetaTag(['name' => 'keywords', 'content' => '']);
 
@@ -663,7 +653,7 @@ class MainController extends Controller
     public function actionAll($type, $id = null)
     {
         //use cache for this action
-        $cache = false;
+        $cache = true;
         //current category (can be empty, then show all items)
         /* @var $category Category */
         $category = null;
@@ -689,14 +679,17 @@ class MainController extends Controller
             }
         }
 
+        $titles = [
+            'latest' => 'Последнее',
+            'popular' => 'Популярное'
+        ];
+
+        $this->view->title = ArrayHelper::getValue($titles,$type,'Последние').' - '.$this->view->title;
+        $this->view->registerMetaTag(['name' => 'description', 'content' => '']);
+        $this->view->registerMetaTag(['name' => 'keywords', 'content' => '']);
+
         //get all category ids which should be included in search query
         if(!empty($category)){
-
-            //set meta data
-            $this->view->title = !empty($category) ? $category->trl->name : $this->view->title . ' |  все материалы';
-            $this->view->registerMetaTag(['name' => 'description', 'content' => !empty($category->trl->meta_description) ? $category->trl->meta_description : $this->commonSettings->meta_description]);
-            $this->view->registerMetaTag(['name' => 'keywords', 'content' => !empty($category->trl->meta_keywords) ? $category->trl->meta_keywords : $this->commonSettings->meta_keywords]);
-
 
             /* @var $children Category[] */
             $children = $category->getChildrenRecursive(true);
@@ -793,9 +786,9 @@ class MainController extends Controller
         }
 
         //set meta data
-        $this->view->title = 'Поиск';
-        $this->view->registerMetaTag(['name' => 'description', 'content' => 'Поиск']);
-        $this->view->registerMetaTag(['name' => 'keywords', 'content' => 'Поиск']);
+        $this->view->title = $query.' - '.$this->view->title;
+        $this->view->registerMetaTag(['name' => 'description', 'content' => '']);
+        $this->view->registerMetaTag(['name' => 'keywords', 'content' => '']);
 
         //posts for carousel
         $carouselPostsQuery = Post::findSorted()
@@ -807,5 +800,46 @@ class MainController extends Controller
         $carouselPosts = Help::cquery(function($db)use($carouselPostsQuery){return $carouselPostsQuery->all();},$cache);
 
         return $this->render('search',compact('posts','carouselPosts','query','pages'));
+    }
+
+    /**
+     * Static pages
+     * @param $type
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionPages($type)
+    {
+
+        $cache = true;
+
+        //set meta data
+        $titles = [
+            'about' => 'О проекте',
+            'advertising' => 'Реклама',
+            'politics' => 'Политика безопасности'
+        ];
+
+        $this->view->title = ArrayHelper::getValue($titles,$type,'Безымянная страница').' - '.$this->view->title;
+        $this->view->registerMetaTag(['name' => 'description', 'content' => '']);
+        $this->view->registerMetaTag(['name' => 'keywords', 'content' => '']);
+
+        //posts for carousel
+        $carouselPostsQuery = Post::findSorted()
+            ->with(['trl', 'postImages.trl'])
+            ->andWhere(['status_id' => Constants::STATUS_ENABLED])
+            ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
+            ->limit(15);
+
+//        $carouselPosts = Help::cquery(function($db)use($carouselPostsQuery){return $carouselPostsQuery->all();},$cache);
+
+        try{
+            $title = ArrayHelper::getValue($titles,$type,'Безымянная страница');
+            $rendered = $this->render('static_'.$type, compact('carouselPosts', 'title'));
+        }catch (\Exception $ex){
+            throw new NotFoundHttpException('Страница не найдена',404);
+        }
+
+        return $rendered;
     }
 }

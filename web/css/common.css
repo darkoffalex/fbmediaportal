@@ -73,3 +73,18 @@
 {
     display: none !important;
 }
+
+.dropdown-menu
+{
+    font-size: 11px;
+}
+
+.dropdown-submenu > a::after
+{
+    margin-top: 2px !important;
+}
+
+.dropdown-menu > li > a
+{
+    padding: 2px 20px;
+}

@@ -122,7 +122,9 @@ $(document).ready(function () {
     /**
      * When changed carousel
      */
+    var counter = 0;
     $('.topCarousel > div').on('beforeChange', function(event, slick, currentSlide, nextSlide){
+
 
         var url = $(this).data('loading');
         var page = parseInt($(this).data('current-page'));
@@ -132,6 +134,16 @@ $(document).ready(function () {
         if(delta > 1){
             //TODO: prevent
         }
+
+        if(delta < 0){
+            return true;
+        }
+
+        if(counter < 3){
+            counter++;
+            return true;
+        }
+
 
         if(!carousel.hasClass('no-load')) {
             carousel.addClass('no-load');
@@ -148,6 +160,8 @@ $(document).ready(function () {
                 }
             });
         }
+
+        counter = 1;
     });
 
     /**

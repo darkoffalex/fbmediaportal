@@ -30,7 +30,7 @@ $controller = $this->context;
 
     </head>
     <!-- sidebar-collapse-->
-    <body class="hold-transition <?= \dmstr\helpers\AdminLteHelper::skinClass(); ?> sidebar-mini">
+    <body class="hold-transition <?= \dmstr\helpers\AdminLteHelper::skinClass(); ?> sidebar-mini sidebar-collapse">
     <?php $this->beginBody() ?>
 
     <div class="wrapper">
@@ -51,6 +51,7 @@ $controller = $this->context;
     <script type="text/javascript">
         $('.modal').on('hide.bs.modal', function() {
             $(this).removeData();
+            $(this).find('.modal-content').html('');
         });
     </script>
 

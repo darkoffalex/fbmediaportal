@@ -44,7 +44,7 @@ class Controller extends BaseController
     public function __construct($id, $module, $config = [])
     {
         //title of pages
-        $this->view->title = "RusTurkey";
+        $this->view->title = "RusTurkey.com";
 
         //timezone
         date_default_timezone_set('Europe/Moscow');

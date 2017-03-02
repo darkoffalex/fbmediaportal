@@ -60,56 +60,10 @@ $controller = $this->context;
 
                     <?php foreach ($slicedPart1 as $index => $post): ?>
 
-                        <?php if($index == 0): ?>
-                            <div class="content__card content__card--wide">
-                                <div class="heading"><?= $category->trl->name; ?></div>
-                                <a rel="canonical" href="<?= $post->getUrl(); ?>"><img width="706" class="img-fluid" src="<?= $post->getFirstImageUrlEx(706,311); ?>"></a>
-                                <?php if(!empty($post->postImages[0]->trl->signature)): ?>
-                                    <div class="content__card__copy"><?= $post->postImages[0]->trl->signature; ?></div>
-                                <?php endif; ?>
-                                <a rel="canonical" class="content__card__title" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
-                                <div class="content__card__intro">
-                                    <p><?= $post->trl->small_text; ?></p>
-                                </div>
-                                <div class="content__card__info">
-                                    <?php if(!empty($post->author)): ?>
-                                        <a rel="canonical" href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
-                                            <?= $post->author->name.' '.$post->author->surname; ?>
-                                        </a>
-                                    <?php else: ?>
-                                        <a href="#"><?= $post->author_custom_name; ?></a>
-                                    <?php endif; ?>
-                                    <span>• <?= substr($post->published_at,0,16); ?></span>
-                                </div>
-                                <?php if($post->content_type_id != \app\helpers\Constants::CONTENT_TYPE_VIDEO): ?>
-                                    <div class="content__card__comments"><span><?= $post->comment_count; ?> комментариев</span></div>
-                                <?php else: ?>
-                                    <div class="content__card__comments"><span><?= $post->comment_count; ?></span></div>
-                                <?php endif; ?>
-                            </div>
+                        <?php if($index == 0 || $post->content_type_id == Constants::CONTENT_TYPE_VIDEO): ?>
+                            <?= $this->render('_post_big',['category' => $category, 'post' => $post]); ?>
                         <?php else: ?>
-                            <div class="content__card">
-                                <div class="content__card__image">
-                                    <a rel="canonical" href="<?= $post->getUrl(); ?>"><img style="width: 240px; height: 136px;" class="img-fluid" src="<?= $post->getThumbnailUrl(484,276); ?>"></a>
-                                </div>
-
-                                <a rel="canonical" class="content__card__title hidden-sm-up" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
-
-                                <div class="content__card__content">
-                                    <a rel="canonical" class="content__card__title hidden-xs-down" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
-                                    <div class="content__card__intro">
-                                        <p><?= $post->trl->small_text; ?></p>
-                                        <?php if(!empty($post->author)): ?>
-                                            <a rel="canonical" href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
-                                                <?= $post->author->name.' '.$post->author->surname; ?>
-                                            </a>
-                                        <?php else: ?>
-                                            <a href="#"><?= $post->author_custom_name; ?></a>
-                                        <?php endif; ?>
-                                        <span>• <?= substr($post->published_at,0,16); ?></span>
-                                    </div>
-                                </div>
-                            </div>
+                            <?= $this->render('_post_small',['category' => $category, 'post' => $post]); ?>
                         <?php endif; ?>
 
                         <?php if($index == 0): ?>
@@ -128,28 +82,17 @@ $controller = $this->context;
                 <div class="col-sm-4 col-lg-3 no-pad-l">
                     <div class="content__sidebar content__sidebar--top">
                         <div class="content__sidebar__metrics text-xs-center">
-                            <div class="content__sidebar__metricCurrency"><span>USD 59.3</span><i class="ico ico-growth-up"></i></div>
-                            <div class="content__sidebar__metricCurrency"><span>EUR 63.12</span><i class="ico ico-growth-down"></i></div>
+                            <?= $this->render('/common/_banners',[
+                                'imgAttributes' => ['class' => 'img-fluid'],
+                                'banners' => ArrayHelper::getValue($controller->banners,'CURRENCY')
+                            ]); ?>
                         </div>
                         <div class="content__sidebar__metrics">
-                            <div class="content__sidebar__metricWeather"><span>Погода в <b>Анталии</b></span>
-                                <div class="content__sidebar__metricWeather__row">
-                                    <div class="content__sidebar__metricWeather__left"><i class="ico ico-weather-rain"></i></div>
-                                    <div class="content__sidebar__metricWeather__right"><span>+31 C</span>
-                                        <p>Временами дожди</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="content__sidebar__metrics">
-                            <div class="content__sidebar__metricWeather"><span>Погода в <b>Стамбуле</b></span>
-                                <div class="content__sidebar__metricWeather__row">
-                                    <div class="content__sidebar__metricWeather__left"><i class="ico ico-weather-rain"></i></div>
-                                    <div class="content__sidebar__metricWeather__right"><span>+31 C</span>
-                                        <p>Временами дожди</p>
-                                    </div>
-                                </div>
-                            </div>
+                            <p class="weather-title">Погода в <b>Турции</b></p>
+                            <?= $this->render('/common/_banners',[
+                                'imgAttributes' => ['class' => 'img-fluid'],
+                                'banners' => ArrayHelper::getValue($controller->banners,'WEATHER')
+                            ]); ?>
                         </div>
 
                         <div class="content__sidebar__banner">
@@ -204,55 +147,9 @@ $controller = $this->context;
 
                         <?php foreach ($slicedPart2 as $index => $post): ?>
                             <?php if($post->content_type_id == Constants::CONTENT_TYPE_VIDEO): ?>
-                                <div class="content__card content__card--wide">
-                                    <a rel="canonical" href="<?= $post->getUrl(); ?>"><img width="706" class="img-fluid" src="<?= $post->getFirstImageUrlEx(706,311); ?>"></a>
-                                    <?php if(!empty($post->postImages[0]->trl->signature)): ?>
-                                        <div class="content__card__copy"><?= $post->postImages[0]->trl->signature; ?></div>
-                                    <?php endif; ?>
-                                    <a rel="canonical" class="content__card__title" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
-                                    <div class="content__card__intro">
-                                        <p><?= $post->trl->small_text; ?></p>
-                                    </div>
-                                    <div class="content__card__info">
-                                        <?php if(!empty($post->author)): ?>
-                                            <a rel="canonical" rel="canonical" href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
-                                                <?= $post->author->name.' '.$post->author->surname; ?>
-                                            </a>
-                                        <?php else: ?>
-                                            <a href="#"><?= $post->author_custom_name; ?></a>
-                                        <?php endif; ?>
-                                        <span>• <?= substr($post->published_at,0,16); ?></span>
-                                    </div>
-
-                                    <?php if($post->content_type_id != Constants::CONTENT_TYPE_VIDEO): ?>
-                                        <div class="content__card__comments"><span><?= $post->comment_count; ?> комментариев</span></div>
-                                    <?php else: ?>
-                                        <div class="content__card__comments"><span><?= $post->comment_count; ?></span></div>
-                                    <?php endif; ?>
-                                </div>
+                                <?= $this->render('_post_big',['category' => $category, 'post' => $post]); ?>
                             <?php else: ?>
-                                <div class="content__card">
-                                    <div class="content__card__image">
-                                        <a rel="canonical" href="<?= $post->getUrl(); ?>"><img style="width: 240px; height: 136px;" class="img-fluid" src="<?= $post->getThumbnailUrl(484,276); ?>"></a>
-                                    </div>
-
-                                    <a rel="canonical" class="content__card__title hidden-sm-up" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
-
-                                    <div class="content__card__content">
-                                        <a rel="canonical" rel="canonical" class="content__card__title hidden-xs-down" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
-                                        <div class="content__card__intro">
-                                            <p><?= $post->trl->small_text; ?></p>
-                                            <?php if(!empty($post->author)): ?>
-                                                <a rel="canonical" href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
-                                                    <?= $post->author->name.' '.$post->author->surname; ?>
-                                                </a>
-                                            <?php else: ?>
-                                                <a href="#"><?= $post->author_custom_name; ?></a>
-                                            <?php endif; ?>
-                                            <span>• <?= substr($post->published_at,0,16); ?></span>
-                                        </div>
-                                    </div>
-                                </div>
+                                <?= $this->render('_post_small',['category' => $category, 'post' => $post]); ?>
                             <?php endif; ?>
                         <?php endforeach; ?>
                     <?php endif; ?>

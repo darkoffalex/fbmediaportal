@@ -46,18 +46,4 @@ setTimeout(function(){
         $(this).parent().siblings().removeClass('open');
     });
 
-    /*
-     $(document).mousemove(function(e)
-     {
-     var tg = $(e.target);
-     var classNames = tg.attr('class');
-
-     if(classNames != 'dropdown-menu' &&
-     classNames != 'dropdown-toggle' && classNames != 'dropdown'
-     && classNames != 'categories-tags' && classNames != undefined){
-     $('.dropdown-menu').dropdown('toggle');
-     }
-     });
-     */
-
-},2);
+},10);

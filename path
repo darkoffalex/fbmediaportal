@@ -1,0 +1,2 @@
+#!/usr/bin/env php
+<?php echo "Full path to directory is - ".__DIR__."\n"; exit(); ?>

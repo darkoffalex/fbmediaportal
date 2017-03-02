@@ -2,6 +2,7 @@
 use yii\helpers\Url;
 use yii\helpers\Html;
 use yii\helpers\ArrayHelper;
+use app\helpers\Constants;
 
 /* @var $this \yii\web\View */
 /* @var $user \app\models\User */
@@ -45,7 +46,11 @@ $controller = $this->context;
                 <div class="col-sm-8 col-lg-7 no-pad-r">
                     <!-- cards-->
                     <div class="content__card content__card--inner content__card--wide">
-                        <div class="content__card__title"><?= $post->trl->name; ?></div>
+
+                        <h1 class="content__card__title">
+                            <?= $post->trl->name; ?>
+                        </h1>
+
                         <div class="content__card__info">
                             <?php if(!empty($post->author)): ?>
                                 <a rel="canonical" href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
@@ -58,25 +63,44 @@ $controller = $this->context;
                         </div>
 
                         <div class="content__card__crumbs">
-                            <a href="<?= Url::to(['main/index']); ?>">Главная</a><span class="crumb-seprator">-</span><?php if(!empty($post->categories[0])): ?><?php $crumbs = $post->categories[0]->getBreadCrumbs(true); ?><?php foreach ($crumbs as $cid => $name): ?><a href="<?= Url::to(['main/category', 'id' => $cid, 'title' => \app\helpers\Help::slug($name)]); ?>"><?= $name; ?></a><span class="crumb-seprator">-</span><?php endforeach; ?><?php endif; ?><span class="current"><?= $post->trl->name; ?></span>
+                            <a rel="canonical" href="<?= Url::to(['main/index']); ?>">Главная</a><span class="crumb-seprator">-</span><?php if(!empty($post->categories[0])): ?><?php $crumbs = $post->categories[0]->getBreadCrumbs(true); ?><?php foreach ($crumbs as $cid => $name): ?><a rel="canonical" href="<?= Url::to(['main/category', 'id' => $cid, 'title' => \app\helpers\Help::slug($name)]); ?>"><?= $name; ?></a><span class="crumb-seprator">-</span><?php endforeach; ?><?php endif; ?><span class="current"><?= $post->trl->name; ?></span>
                         </div>
 
                         <div class="content__card__share">
-                            <span>Поделиться</span>
+                            <!-- uSocial -->
+                            <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.1" data-script="usocial" charset="utf-8"></script>
+                            <div class="uSocial-Share" data-pid="4ef9f797785c35e48331c7832aa0d5eb" data-type="share" data-options="round-rect,style1,absolute,horizontal,upArrow-left,size24,eachCounter0,counter1,counter-after" data-social="fb,vk,ok,bookmarks" data-mobile="vi,wa,telegram,sms"></div><!-- /uSocial -->
                         </div>
 
-                        <div>
-                            <img class="img-fluid" src="<?= $post->getFirstImageUrlEx(706,311); ?>">
-                        </div>
+                        <?php if($post->content_type_id == Constants::CONTENT_TYPE_VIDEO && (!empty($post->video_key_fb) || !empty($post->video_key_yt))): ?>
+                            <?php if(!empty($post->video_key_fb)): ?>
+                                <video width="100%" controls style="background-color: rgb(204,204,204);">
+                                    <source src="<?= $post->video_key_fb; ?>" type="video/mp4">
+                                </video>
+                            <?php endif; ?>
+                            <?php if(!empty($post->video_key_yt)): ?>
+                                <iframe width="100%" src="<?= $post->video_key_yt; ?>" frameborder="0" allowfullscreen></iframe>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <div>
+                                <?php $titleAlt = !empty($post->postImages[0]->trl) ? $post->postImages[0]->trl->name : ''; ?>
+                                <img title="<?= $titleAlt ?>" alt="<?= $titleAlt; ?>" class="img-fluid" src="<?= $post->getFirstImageUrlEx(706,311); ?>">
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if(!empty($post->postImages[0]->trl->signature)): ?>
+                            <div class="content__card__copy"><?= $post->postImages[0]->trl->signature; ?></div>
+                        <?php endif; ?>
 
                         <div class="content__card__pageContent">
                             <?= $post->trl->text; ?>
                         </div>
 
                         <div class="content__card__share">
-                            <span>Поделиться</span>
+                            <!-- uSocial -->
+                            <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.1" data-script="usocial" charset="utf-8"></script>
+                            <div class="uSocial-Share" data-pid="4ef9f797785c35e48331c7832aa0d5eb" data-type="share" data-options="round-rect,style1,absolute,horizontal,upArrow-left,size24,eachCounter0,counter1,counter-after" data-social="fb,vk,ok,bookmarks" data-mobile="vi,wa,telegram,sms"></div><!-- /uSocial -->
                         </div>
-
 
                         <!-- Comment section-->
                         <div class="contentComments" data-current-page="1" data-postload="<?= Url::to(['main/comments-ajax', 'id' => $post->id]); ?>">
@@ -102,30 +126,22 @@ $controller = $this->context;
                 <!--sidebar-->
                 <div class="col-sm-4 col-lg-3 no-pad-l">
                     <div class="content__sidebar content__sidebar--top">
+
                         <div class="content__sidebar__metrics text-xs-center">
-                            <div class="content__sidebar__metricCurrency"><span>USD 59.3</span><i class="ico ico-growth-up"></i></div>
-                            <div class="content__sidebar__metricCurrency"><span>EUR 63.12</span><i class="ico ico-growth-down"></i></div>
+                            <?= $this->render('/common/_banners',[
+                                'imgAttributes' => ['class' => 'img-fluid'],
+                                'banners' => ArrayHelper::getValue($controller->banners,'CURRENCY')
+                            ]); ?>
                         </div>
+
                         <div class="content__sidebar__metrics">
-                            <div class="content__sidebar__metricWeather"><span>Погода в <b>Анталии</b></span>
-                                <div class="content__sidebar__metricWeather__row">
-                                    <div class="content__sidebar__metricWeather__left"><i class="ico ico-weather-rain"></i></div>
-                                    <div class="content__sidebar__metricWeather__right"><span>+31 C</span>
-                                        <p>Временами дожди</p>
-                                    </div>
-                                </div>
-                            </div>
+                            <p class="weather-title">Погода в <b>Турции</b></p>
+                            <?= $this->render('/common/_banners',[
+                                'imgAttributes' => ['class' => 'img-fluid'],
+                                'banners' => ArrayHelper::getValue($controller->banners,'WEATHER')
+                            ]); ?>
                         </div>
-                        <div class="content__sidebar__metrics">
-                            <div class="content__sidebar__metricWeather"><span>Погода в <b>Стамбуле</b></span>
-                                <div class="content__sidebar__metricWeather__row">
-                                    <div class="content__sidebar__metricWeather__left"><i class="ico ico-weather-rain"></i></div>
-                                    <div class="content__sidebar__metricWeather__right"><span>+31 C</span>
-                                        <p>Временами дожди</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+
                         <div class="content__sidebar__banner">
                             <?= $this->render('/common/_banners',[
                                 'imgAttributes' => ['class' => 'img-fluid'],

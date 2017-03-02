@@ -8,6 +8,7 @@ use app\models\Comment;
 use app\models\Post;
 use app\models\PostGroup;
 use app\models\PostImage;
+use app\models\PostImageDB;
 use app\models\User;
 use Yii;
 use yii\base\Exception;
@@ -32,10 +33,11 @@ class SyncController extends Controller
     public $stock = 'no';
     public $attachments = 'yes';
     public $mark = 'yes';
+    public $order = 'random';
 
     public function options($actionID)
     {
-        return ['eld', 'output', 'lng', 'portion', 'parsed', 'stock', 'from', 'attachments', 'to', 'mark'];
+        return ['eld', 'output', 'lng', 'portion', 'parsed', 'stock', 'from', 'attachments', 'to', 'mark', 'order'];
     }
 
     private $processId = null;
@@ -172,10 +174,10 @@ class SyncController extends Controller
 
             if($aType == 'photo' || $aType == 'share'){
                 /* @var $image PostImage */
-                $image = PostImage::find()->where(['fb_sync_id' => $aFbId, 'post_id' => $post->id])->one();
+                $image = PostImageDB::find()->where(['fb_sync_id' => $aFbId, 'post_id' => $post->id])->one();
 
                 if(empty($image)){
-                    $image = new PostImage();
+                    $image = new PostImageDB();
                     $image -> fb_sync_id = $aFbId;
                     $image -> is_external = (int)true;
                     $image -> file_url = $aImageUrl;
@@ -298,7 +300,7 @@ class SyncController extends Controller
 
         //end process if groups not found
         if(empty($groups)){
-            Help::log('updates.log',"Process {$this->processId} terminated");
+            Help::log('updates.log',"Process {$this->processId} terminated. No groups found");
             exit($this->output ? "No groups found. Precess terminated \n" : null);
         }
 
@@ -461,11 +463,32 @@ class SyncController extends Controller
             $note.= "|STOCK ONLY";
         }
 
+        /* @var $posts Post[] */
+        switch ($this->order){
+            case 'random':
+            case 'RAND':
+                $order = new Expression('RAND()');
+                $note.="|RANDOM";
+                break;
+            case 'asc':
+            case 'ASC':
+                $order = new Expression('published_at ASC');
+                $note.="|ASC";
+                break;
+            case 'desc':
+            case 'DESC':
+                $order = new Expression('published_at DESC');
+                $note.="|DESC";
+                break;
+            default:
+                $order = new Expression('RAND()');
+                $note.="|RANDOM";
+        }
+
         //get all posts which should be updated
         if($this->output) echo "Querying posts ({$note})\n\n";
 
-        /* @var $posts Post[] */
-        $posts = $q->orderBy(new Expression('RAND()'))->limit($this->portion)->all();
+        $posts = $q->orderBy($order)->limit($this->portion)->all();
 
         if(empty($posts)){
             Help::log('updates.log',"Process {$this->processId} terminated");
@@ -478,90 +501,105 @@ class SyncController extends Controller
         //update all posts
         foreach ($posts as $post){
 
-            //get details for this post
-            if($this->output) echo "Processing {$post->fb_sync_id} post \n";
-            $details = AdminizatorApi::getInstance()->getDetails($post->fb_sync_id);
+            try{
+                //get details for this post
+                if($this->output) echo "Processing {$post->fb_sync_id} post \n";
+                $details = AdminizatorApi::getInstance()->getDetails($post->fb_sync_id);
 
-            //if found some data
-            if(!empty($details)){
+                //disable translatable labels
+                $post->translateLabels = false;
 
-                //update attachments if needed
-                if(!empty($details['attachments'])){
-                    if($this->output) echo "Updating attachments\n";
-                    $this->updateAttachments($post,$details['attachments']);
-                }
+                //if found some data
+                if(!empty($details)){
 
-                //update author if needed
-                if(empty($post->author_id)){
-                    $author = $this->getAuthor($details['author']);
-                    if(!empty($author)){
-                        if($this->output) echo "Author set\n";
-                        $post->author_id = $author->id;
-                    }else{
-                        if($this->output) echo "ERROR! Author not set\n";
+                    //update attachments if needed
+                    if(!empty($details['attachments'])){
+                        if($this->output) echo "Updating attachments\n";
+                        $this->updateAttachments($post,$details['attachments']);
                     }
-                }else{
-                    if($this->output) echo "Author already set\n";
-                }
 
-                //update group if needed
-                if(empty($post->group_id)){
-                    $group = $this->getGroup($details['group']);
-                    if(!empty($group)){
-                        if($this->output) echo "Group set\n";
-                        $post->group_id = $group->id;
+                    //update author if needed
+                    if(empty($post->author_id)){
+                        if($this->output) echo "Setting author\n";
+                        $author = $this->getAuthor($details['author']);
+                        if(!empty($author)){
+                            if($this->output) echo "Author set\n";
+                            $post->author_id = $author->id;
+                        }else{
+                            if($this->output) echo "ERROR! Author not set\n";
+                        }
                     }else{
-                        if($this->output) echo "ERROR! Group not set\n";
+                        if($this->output) echo "Author already set\n";
                     }
-                }else{
-                    if($this->output) echo "Group already set\n";
-                }
 
-                //update content if post still in stock
-                if($post->status_id == Constants::STATUS_IN_STOCK){
-                    if($this->output) echo "Updating translatable content\n";
+                    //update group if needed
+                    if(empty($post->group_id)){
+                        $group = $this->getGroup($details['group']);
+                        if(!empty($group)){
+                            if($this->output) echo "Group set\n";
+                            $post->group_id = $group->id;
+                        }else{
+                            if($this->output) echo "ERROR! Group not set\n";
+                        }
+                    }else{
+                        if($this->output) echo "Group already set\n";
+                    }
 
-                    $name = StringHelper::truncateWords(strip_tags(ArrayHelper::getValue($details,'content')),3);
-                    $post->name = $post->is_parsed ? $post->name : (!empty($name) ? $name : 'Не указано');
+                    //update content if post still in stock
+                    if($post->status_id == Constants::STATUS_IN_STOCK){
+                        if($this->output) echo "Updating translatable content\n";
 
-                    $trl = $post->getATrl($this->lng);
-                    $trl -> name = $post->name;
-                    $trl -> text = strip_tags(ArrayHelper::getValue($details,'content'));
-                    $trl -> small_text = StringHelper::truncateWords($trl->text,20);
-                    $trl -> isNewRecord ? $trl->save() : $trl->update();
+                        $name = StringHelper::truncateWords(strip_tags(ArrayHelper::getValue($details,'content')),3);
+                        $post->name = $post->is_parsed ? $post->name : (!empty($name) ? $name : 'Не указано');
 
+                        $trl = $post->getATrl($this->lng);
+                        $trl -> name = $post->name;
+                        $trl -> text = strip_tags(ArrayHelper::getValue($details,'content'));
+                        $trl -> small_text = StringHelper::truncateWords($trl->text,20);
+                        $trl -> isNewRecord ? $trl->save() : $trl->update();
+
+                        if($post->is_parsed){
+                            if($this->output) echo "Updating search keywords\n";
+                            $post->updateSearchKeywords();
+                        }
+                    }
+
+                    //update comments
+                    if($this->output) echo "Updating comments\n";
+                    $this->updateComments($post);
+
+                    //finalize updating
+                    $post->published_at = ArrayHelper::getValue($details,'published_time',date('Y-m-d H:i:s', time()));
+                    $post->updated_at = ArrayHelper::getValue($details,'updated_time',date('Y-m-d H:i:s', time()));
+                    $post->created_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
+                    $post->updated_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
+                    $post->need_update = (int)false;
+
+                    //if working with parsed - move to common list
                     if($post->is_parsed){
-                        if($this->output) echo "Updating search keywords\n";
-                        $post->updateSearchKeywords();
+                        $post->status_id = Constants::STATUS_ENABLED;
                     }
+
+                    $post->update();
+                }else{
+                    if($this->output) echo "No data found for post {$post->fb_sync_id}\n";
                 }
 
-                //update comments
-                if($this->output) echo "Updating comments\n";
-                $this->updateComments($post);
+                if($this->output) echo "Post {$post->fb_sync_id} (ID {$post->id}) done.\n\n";
 
-                //finalize updating
-                $post->published_at = ArrayHelper::getValue($details,'published_time',date('Y-m-d H:i:s', time()));
-                $post->updated_at = ArrayHelper::getValue($details,'updated_time',date('Y-m-d H:i:s', time()));
-                $post->created_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
-                $post->updated_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
-                $post->need_update = (int)false;
-
-                //if working with parsed - move to common list
-                if($post->is_parsed){
-                    $post->status_id = Constants::STATUS_ENABLED;
-                }
-
-                $post->update();
-            }else{
-                if($this->output) echo "No data found for post {$post->fb_sync_id}\n";
+            }catch (Exception $ex){
+                Help::log('updates.log',"Process {$this->processId} terminated by error");
+                exit($this->output ? "ERROR: {$ex->getMessage()} \n" : null);
             }
-
-            if($this->output) echo "Post {$post->fb_sync_id} (ID {$post->id}) done.\n\n";
         }
 
-        //update all counters
-        $this->actionUpdateCounters();
+        try{
+            //update all counters
+            $this->actionUpdateCounters();
+        }catch (Exception $ex){
+            Help::log('updates.log',"Process {$this->processId} terminated by error");
+            exit($this->output ? "ERROR: {$ex->getMessage()} \n" : null);
+        }
 
         //log process end
         if($this->output) echo "Done.\n\n";
@@ -582,7 +620,7 @@ class SyncController extends Controller
         if($this->output) echo "Updating users's counters... \n";
         $db->createCommand("UPDATE `user` u SET counter_comments = (SELECT COUNT(*) FROM `comment` WHERE `comment`.author_id = u.id), counter_posts = (SELECT COUNT(*) FROM post WHERE post.author_id = u.id)")->query();
 
-        echo "Counters updated. \n";
+        if($this->output) echo "Counters updated. \n";
     }
 
     /**

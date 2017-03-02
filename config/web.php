@@ -99,6 +99,7 @@ $config = [
 
                 'post/<id:\d+>/<title:\w+(-\w+)*>' => 'main/post',
                 'category/<id:\d+>/<title:\w+(-\w+)*>' => 'main/category',
+                'pages/<type:\w+(-\w+)*>' => 'main/pages',
 
                 '<controller>/<action>/<id:\d+>/<title:\w+(-\w+)*>' => '<controller>/<action>',
                 '<controller>/<action>/<id:\d+>/<status:\d+>' => '<controller>/<action>',

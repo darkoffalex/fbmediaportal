@@ -51,7 +51,7 @@ $controller = $this->context;
             <div class="col-sm-8 col-lg-7 no-pad-r">
                 <div class="innerWrapper">
                     <div class="headingBorder">
-                        <h2>Запись участника: <b><?= $user->name.' '.$user->surname; ?></b></h2>
+                        <h2>Записи участника: <b><?= $user->name.' '.$user->surname; ?></b></h2>
                     </div>
                     <div class="profileControl">
                         <a href="<?= Url::to(['main/profile','id' => $user->id]); ?>">Вернуться к профилю</a><b> Показать </b>
@@ -121,29 +121,20 @@ $controller = $this->context;
             <!--sidebar-->
             <div class="col-sm-4 col-lg-3 no-pad-l">
                 <div class="content__sidebar content__sidebar--top">
+
                     <div class="content__sidebar__metrics text-xs-center">
-                        <div class="content__sidebar__metricCurrency"><span>USD 59.3</span><i class="ico ico-growth-up"></i></div>
-                        <div class="content__sidebar__metricCurrency"><span>EUR 63.12</span><i class="ico ico-growth-down"></i></div>
+                        <?= $this->render('/common/_banners',[
+                            'imgAttributes' => ['class' => 'img-fluid'],
+                            'banners' => ArrayHelper::getValue($controller->banners,'CURRENCY')
+                        ]); ?>
                     </div>
+
                     <div class="content__sidebar__metrics">
-                        <div class="content__sidebar__metricWeather"><span>Погода в <b>Анталии</b></span>
-                            <div class="content__sidebar__metricWeather__row">
-                                <div class="content__sidebar__metricWeather__left"><i class="ico ico-weather-rain"></i></div>
-                                <div class="content__sidebar__metricWeather__right"><span>+31 C</span>
-                                    <p>Временами дожди</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="content__sidebar__metrics">
-                        <div class="content__sidebar__metricWeather"><span>Погода в <b>Стамбуле</b></span>
-                            <div class="content__sidebar__metricWeather__row">
-                                <div class="content__sidebar__metricWeather__left"><i class="ico ico-weather-rain"></i></div>
-                                <div class="content__sidebar__metricWeather__right"><span>+31 C</span>
-                                    <p>Временами дожди</p>
-                                </div>
-                            </div>
-                        </div>
+                        <p class="weather-title">Погода в <b>Турции</b></p>
+                        <?= $this->render('/common/_banners',[
+                            'imgAttributes' => ['class' => 'img-fluid'],
+                            'banners' => ArrayHelper::getValue($controller->banners,'WEATHER')
+                        ]); ?>
                     </div>
 
                     <div class="content__sidebar__banner">
