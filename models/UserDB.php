@@ -35,6 +35,7 @@ use Yii;
  * @property Comment[] $comments
  * @property Post[] $posts
  * @property StockRecommendation[] $stockRecommendations
+ * @property UserTimeLine[] $userTimeLines
  */
 class UserDB extends \yii\db\ActiveRecord
 {
@@ -114,5 +115,13 @@ class UserDB extends \yii\db\ActiveRecord
     public function getStockRecommendations()
     {
         return $this->hasMany(StockRecommendation::className(), ['author_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUserTimeLines()
+    {
+        return $this->hasMany(UserTimeLine::className(), ['user_id' => 'id']);
     }
 }

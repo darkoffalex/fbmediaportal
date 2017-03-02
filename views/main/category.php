@@ -10,7 +10,8 @@ use app\helpers\Help;
 
 /* @var $mainPosts \app\models\Post[] */
 /* @var $forumPosts \app\models\Post[] */
-/* @var $popularPosts  */
+/* @var $popularPosts \app\models\Post[] */
+/* @var $turkeyPosts \app\models\Post[] */
 /* @var $category \app\models\Category */
 
 /* @var $currentIds int[] */
@@ -123,7 +124,7 @@ $controller = $this->context;
                     <div class="row">
                         <?= $this->render('/common/_posts_list',['posts' => $mainPosts, 'label' => 'Последнее', 'type' => 'latest']); ?>
                         <?= $this->render('/common/_posts_list',['posts' => $popularPosts, 'label' => 'Популярное', 'type' => 'popular', 'ico' => 'ico-cat-hot']); ?>
-                        <?= $this->render('/common/_posts_list',['posts' => $mainPosts, 'label' => 'Полезное о Турции', 'ico' => 'ico-cat-turkey']); ?>
+                        <?= $this->render('/common/_posts_list',['posts' => $turkeyPosts, 'label' => 'Полезное о Турции', 'type' => 'turkey', 'ico' => 'ico-cat-turkey']); ?>
                     </div>
                 </div>
             </div>

@@ -48,9 +48,12 @@ use Yii;
  * @property PostGroup $group
  * @property PostCategory[] $postCategories
  * @property Category[] $categories
+ * @property PostCategoryTurkey[] $postCategoryTurkeys
+ * @property Category[] $categories0
  * @property PostImage[] $postImages
  * @property PostTrl[] $postTrls
  * @property PostVoteAnswer[] $postVoteAnswers
+ * @property UserTimeLine[] $userTimeLines
  */
 class PostDB extends \yii\db\ActiveRecord
 {
@@ -165,6 +168,22 @@ class PostDB extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getPostCategoryTurkeys()
+    {
+        return $this->hasMany(PostCategoryTurkey::className(), ['post_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCategories0()
+    {
+        return $this->hasMany(Category::className(), ['id' => 'category_id'])->viaTable('post_category_turkey', ['post_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getPostImages()
     {
         return $this->hasMany(PostImage::className(), ['post_id' => 'id']);
@@ -184,5 +203,13 @@ class PostDB extends \yii\db\ActiveRecord
     public function getPostVoteAnswers()
     {
         return $this->hasMany(PostVoteAnswer::className(), ['post_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUserTimeLines()
+    {
+        return $this->hasMany(UserTimeLine::className(), ['post_id' => 'id']);
     }
 }

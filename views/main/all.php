@@ -55,6 +55,9 @@ $controller = $this->context;
                         <a rel="canonical" class="btn btn-outline <?= $type=='popular' ? 'active' : ''; ?>" href="<?= Url::to(['main/all','type' => 'popular']); ?>">
                             <span>Популярное</span>
                         </a>
+                        <a rel="canonical" class="btn btn-outline <?= $type=='turkey' ? 'active' : ''; ?>" href="<?= Url::to(['main/all','type' => 'turkey']); ?>">
+                            <span>Полезное о Турции</span>
+                        </a>
                     </div>
 
                     <?php foreach ($posts as $post): ?>

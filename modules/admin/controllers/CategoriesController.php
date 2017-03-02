@@ -6,9 +6,14 @@ use app\helpers\Sort;
 use app\helpers\Help;
 use app\models\Category;
 use app\models\CategorySearch;
+use app\models\Post;
+use app\models\PostCategoryTurkey;
+use Codeception\Util\Debug;
 use kartik\form\ActiveForm;
 use Yii;
 use app\helpers\Constants;
+use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -167,9 +172,81 @@ class CategoriesController extends Controller
                     $trl->isNewRecord ? $trl->save() : $trl->update();
                 }
 
+
+                //turkey posts
+                PostCategoryTurkey::deleteAll(['category_id' => $model->id]);
+                if(!empty($model->turkey_posts)){
+                    foreach ($model->turkey_posts as $postId){
+                        $pct = new PostCategoryTurkey();
+                        $pct->category_id = $model->id;
+                        $pct->post_id = $postId;
+                        $pct->created_by_id = Yii::$app->user->id;
+                        $pct->updated_by_id = Yii::$app->user->id;
+                        $pct->created_at = date('Y-m-d H:i:s',time());
+                        $pct->updated_at = date('Y-m-d H:i:s',time());
+                        $pct->save();
+                    }
+
+                }
             }
         }
 
-        return $this->render('edit',compact('model'));
+        $model->refresh();
+        $model->turkey_posts = array_values(ArrayHelper::map($model->posts0,'id','id'));
+
+        if(!empty($model->turkey_posts)){
+            $selectedTurkey = ArrayHelper::map($model->posts0,'id','name');
+            foreach ($selectedTurkey as $id => $name){
+                $selectedTurkey[$id] = "($id) $name";
+            }
+        }else{
+            $selectedTurkey = [];
+        }
+
+
+        return $this->render('edit',compact('model','selectedTurkey'));
+    }
+
+    /**
+     * Ajax search method for auto-complete fields
+     * @param null $q
+     * @param null $id
+     * @return array
+     */
+    public function actionAjaxPostSearch($q = null, $id = null)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $out = ['results' => ['id' => '', 'text' => '']];
+
+        if (!is_null($q)) {
+            $query = new Query();
+            $query->select('id, name')->from('post');
+
+            if(is_numeric($q)){
+                $query->where(['id' => $q])
+                    ->limit(20);
+            }else{
+                $query->where(['like','name', $q])
+                    ->limit(20);
+            }
+
+            $command = $query->createCommand();
+            $data = array_values($command->queryAll());
+            $tmp = [];
+
+            foreach($data as $index => $arr){
+                $tmp[] = ['id' => $arr['id'], 'text' => '('.$arr['id'].') '.$arr['name']];
+            }
+
+            $out['results'] = $tmp;
+        }
+        elseif ($id > 0) {
+            $user = Post::findOne((int)$id);
+            if(!empty($user)){
+                $out['results'] = ['id' => $id, 'text' => $user->name];
+            }
+        }
+        return $out;
     }
 }

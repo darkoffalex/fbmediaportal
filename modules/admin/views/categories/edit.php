@@ -7,13 +7,17 @@ use app\models\User;
 use app\helpers\Constants;
 use yii\helpers\ArrayHelper;
 use app\models\Category;
+use kartik\select2\Select2;
+use yii\web\JsExpression;
+
+/* @var $model Category */
+/* @var $languages \app\models\Language[] */
+/* @var $selectedTurkey array */
 
 $this->title = Yii::t('admin',$model->isNewRecord ? 'Create category' : 'Update category');
 $this->params['breadcrumbs'][] = ['label' => Yii::t('admin','Categories'), 'url' => Url::to(['/admin/categories/index'])];
 $this->params['breadcrumbs'][] = $this->title;
 
-/* @var $model Category */
-/* @var $languages \app\models\Language[] */
 $languages = \app\models\Language::find()->all();
 ?>
 
@@ -64,6 +68,36 @@ $languages = \app\models\Language::find()->all();
                 <?php endif; ?>
 
                 <?= $form->field($model, 'parent_category_id')->dropDownList([0 => Yii::t('admin','[NONE]')]+$all); ?>
+
+                <?= $form->field($model, 'turkey_posts')->widget(Select2::className(),[
+                    'showToggleAll' => false,
+                    'theme' => Select2::THEME_DEFAULT,
+                    'maintainOrder' => false,
+                    'data' => $selectedTurkey,
+                    'options' => [
+                        'placeholder' => 'Выбрать',
+                        'multiple' => true,
+                    ],
+                    'pluginOptions' => [
+                        'multiple' => true,
+                        'allowClear' => true,
+                        'minimumInputLength' => 2,
+                        'language' => [
+                            'noResults' => new JsExpression("function () { return '".Yii::t('admin','No results found')."'; }"),
+                            'searching' => new JsExpression("function () { return '".Yii::t('admin','Searching...')."'; }"),
+                            'inputTooShort' => new JsExpression("function(args) {return '".Yii::t('admin','Type more characters')."'}"),
+                            'errorLoading' => new JsExpression("function () { return '".Yii::t('admin','Waiting for results')."'; }"),
+                        ],
+                        'ajax' => [
+                            'url' => Url::to(['/admin/categories/ajax-post-search']),
+                            'dataType' => 'json',
+                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                        ],
+                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                        'templateResult' => new JsExpression('function(user) { return user.text; }'),
+                        'templateSelection' => new JsExpression('function (user) { return user.text; }'),
+                    ],
+                ])->label(Yii::t('admin','Useful about turkey'));?>
             </div>
 
             <div class="box-footer">

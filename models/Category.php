@@ -31,6 +31,11 @@ class Category extends CategoryDB
     public $translations = [];
 
     /**
+     * @var array (only for rusturkey.com project)
+     */
+    public $turkey_posts = [];
+
+    /**
      * @inheritdoc
      */
     public function attributeLabels()
@@ -50,6 +55,7 @@ class Category extends CategoryDB
         $baseRules = parent::rules();
         $baseRules[] = [['name'],'required'];
         $baseRules[] = [['translations'],'safe'];
+        $baseRules[] = [['turkey_posts'], 'safe'];
         return $baseRules;
     }
 

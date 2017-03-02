@@ -213,5 +213,6 @@ return [
     'Archive' => 'Архив',
     'To archive' => 'Переместить в архив',
     'From archive' => 'Переместить в поток',
-    'Move all items on page to archive' => 'Переместить все (на странице) в архив'
+    'Move all items on page to archive' => 'Переместить все (на странице) в архив',
+    'Useful about turkey' => 'Полезное о турции'
 ];

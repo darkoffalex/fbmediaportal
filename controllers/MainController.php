@@ -126,17 +126,22 @@ class MainController extends Controller
             ->andWhere(new Expression('comment_count > :minCount',['minCount' => 200]))
             ->andWhere(new Expression('published_at > :minDate', ['minDate' => date('Y-m-d',(time()-(86400*100)))]));
 
+        $turkeyPostsQuery = Post::findSortedAboutTurkey(!empty($category) ? $id : null,$currentIds,$siblingIds)
+            ->with(['trl']);
+
         $mainPostsQuery->limit(15);
         $forumPostsQuery->limit(4);
         $popularPostsQuery->limit(7);
+        $turkeyPostsQuery->limit(7);
 
         //get main and forum posts posts for first page (next pages will be loaded via ajax)
         $mainPosts = Help::cquery(function($db)use($mainPostsQuery){return $mainPostsQuery->all();},$cache);
         $forumPosts = Help::cquery(function($db)use($forumPostsQuery){return $forumPostsQuery->all();},$cache);
         $popularPosts = Help::cquery(function($db)use($popularPostsQuery){return $popularPostsQuery->all();},$cache);
+        $turkeyPosts = Help::cquery(function($db)use($turkeyPostsQuery){return $turkeyPostsQuery->all();},$cache);
 
         //rendering page
-        return $this->render('category',compact('mainPosts','forumPosts','popularPosts','category'));
+        return $this->render('category',compact('mainPosts','forumPosts','popularPosts','turkeyPosts','category'));
     }
 
     /**
@@ -681,7 +686,8 @@ class MainController extends Controller
 
         $titles = [
             'latest' => 'Последнее',
-            'popular' => 'Популярное'
+            'popular' => 'Популярное',
+            'turkey' => 'Полезное о Турции'
         ];
 
         $this->view->title = ArrayHelper::getValue($titles,$type,'Последние').' - '.$this->view->title;
@@ -717,12 +723,18 @@ class MainController extends Controller
             ->andWhere(new Expression('comment_count > :minCount',['minCount' => 200]))
             ->andWhere(new Expression('published_at > :minDate', ['minDate' => date('Y-m-d H:i:s',(time()-(86400*100)))]));
 
+        $turkeyPostsQuery = Post::findSortedAboutTurkey(!empty($category) ? $id : null,$currentIds,$siblingIds)
+            ->with(['trl']);
+
         switch ($type){
             case 'latest':
                 $q = $mainPostsQuery;
                 break;
             case 'popular':
                 $q = $popularPostsQuery;
+                break;
+            case 'turkey':
+                $q = $turkeyPostsQuery;
                 break;
             default:
                 $q = $mainPostsQuery;
@@ -737,8 +749,7 @@ class MainController extends Controller
         $q->offset($pages->offset)->limit($pages->limit);
         $posts = Help::cquery(function($db)use($q){return $q->all();},$cache);
 
-        //if current type is "popular" - use for carousel another query, if not - use current (per page must be 15! (because of carousel ajax loading offset)
-        $carouselPosts = $type == 'popular' ? Help::cquery(function($db)use($mainPostsQuery){return $mainPostsQuery->limit(15)->all();},$cache) : $posts;
+        $carouselPosts = Help::cquery(function($db)use($mainPostsQuery){return $mainPostsQuery->limit(15)->all();},$cache);
 
         return $this->render('all',compact('category','posts','pages','type','carouselPosts'));
     }
@@ -831,7 +842,7 @@ class MainController extends Controller
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
             ->limit(15);
 
-//        $carouselPosts = Help::cquery(function($db)use($carouselPostsQuery){return $carouselPostsQuery->all();},$cache);
+        $carouselPosts = Help::cquery(function($db)use($carouselPostsQuery){return $carouselPostsQuery->all();},$cache);
 
         try{
             $title = ArrayHelper::getValue($titles,$type,'Безымянная страница');

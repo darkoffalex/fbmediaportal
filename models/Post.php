@@ -375,4 +375,41 @@ class Post extends PostDB
 
         return $mainPostsQuery;
     }
+
+    /**
+     * Builds complexly sort query for selecting all turkey posts depending on current categories
+     * @param null $curCatId
+     * @param null $curCatIds
+     * @param null $sibIds
+     * @return ActiveQuery
+     */
+    public static function findSortedAboutTurkey($curCatId = null, $curCatIds = null, $sibIds = null)
+    {
+        //implode for using in queries
+        $currentIdsStr = !empty($curCatIds) ? implode(',',$curCatIds) : null;
+        $siblingIdsStr = !empty($sibIds) ? implode(',',$sibIds) : null;
+
+        //get all basic posts data
+        /* @var $posts Post[] */
+        $mainPostsQuery = Post::find()
+            ->alias('p')
+            ->joinWith('postCategoryTurkeys as pc')
+            ->andWhere(new Expression("pc.post_id IS NOT NULL AND pc.post_id != ''"));
+
+        //build ordering condition
+        $orderPriorities = [];
+        if(!empty($curCatId)){
+            $orderPriorities[] = "IF(pc.category_id IN ({$currentIdsStr}), 0, 2147483647) ASC";
+            if(!empty($sibIds)) : $orderPriorities[] = "IF(pc.category_id IN ({$siblingIdsStr}), 0, 2147483647) ASC"; endif;
+        }
+        $orderPriorities[] = "p.published_at DESC";
+
+
+        //finalize query
+        $orderParams = ['lowestPriorityType' => Constants::CONTENT_TYPE_POST];
+        if(!empty($curCatId)) : $orderParams['cat'] = $curCatId; endif;
+        $mainPostsQuery->orderBy(new Expression(implode(', ',$orderPriorities), $orderParams));
+
+        return $mainPostsQuery;
+    }
 }
