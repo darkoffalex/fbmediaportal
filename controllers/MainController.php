@@ -14,9 +14,11 @@ use Facebook\Facebook;
 use Yii;
 use app\components\Controller;
 use yii\base\Exception;
+use yii\caching\DbDependency;
 use yii\data\Pagination;
 use yii\db\Expression;
 use yii\db\Query;
+use yii\filters\PageCache;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 
@@ -42,6 +44,35 @@ class MainController extends Controller
             ],
         ];
     }
+
+    /*
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => PageCache::className(),
+                'only' => [
+                    'index',
+                    'category',
+                    'category-ajax',
+                    'post',
+                    'all',
+                    'profile',
+                    'profile-details',
+                    'pages'
+                ],
+//                'duration' => 60,
+//                'variations' => [
+//                    \Yii::$app->language,
+//                ],
+//                'dependency' => [
+//                    'class' => DbDependency::className(),
+//                    'sql' => 'SELECT COUNT(*) FROM post',
+//                ],
+            ],
+        ];
+    }
+    */
 
     /********************************************** C A T E G O R Y ***************************************************/
 
@@ -528,7 +559,7 @@ class MainController extends Controller
     public function actionProfile($id = null)
     {
         //use cache for this action
-        $cache = false;
+        $cache = true;
 
         /* @var $user User */
         $user = !Yii::$app->user->isGuest ? Yii::$app->user->identity : null;
@@ -584,7 +615,7 @@ class MainController extends Controller
     public function actionProfileDetails($id = null, $type = 'posts')
     {
         //use cache for this action
-        $cache = false;
+        $cache = true;
 
         /* @var $user User */
         $user = !Yii::$app->user->isGuest ? Yii::$app->user->identity : null;
@@ -781,7 +812,7 @@ class MainController extends Controller
     public function actionSearch()
     {
         //use cache for this action
-        $cache = false;
+        $cache = true;
 
         $query = Yii::$app->request->get('q');
 
