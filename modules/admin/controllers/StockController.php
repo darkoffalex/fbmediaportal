@@ -269,6 +269,10 @@ class StockController extends Controller
 
                 $model->updateSearchKeywords();
 
+                if(!empty($model->author)){
+                    $model->author->refreshTimeLine();
+                }
+
                 //clear cache
                 Yii::$app->cache->flush();
 

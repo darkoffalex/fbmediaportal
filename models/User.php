@@ -2,8 +2,11 @@
 
 namespace app\models;
 
+use app\helpers\Help;
 use Yii;
 use yii\base\NotSupportedException;
+use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\web\IdentityInterface;
 use app\helpers\Constants;
@@ -176,5 +179,49 @@ class User extends UserDB implements IdentityInterface
     public function getAvatar()
     {
         return !empty($this->avatar_file) ? $this->avatar_file : Url::to('@web/img/no_user.png');
+    }
+
+    /**
+     * Updates user's time-line (full refresh, deletes old data and creates new)
+     */
+    public function refreshTimeLine()
+    {
+        UserTimeLine::deleteAll(['user_id' => $this->id]);
+
+        $commentQuery = new Query();
+        $comments = $commentQuery->select('comment.id, comment.created_at as published_at')
+            ->from('comment')->leftJoin('post','comment.post_id = post.id')
+            ->where('comment.author_id = :author AND post.status_id = :status',['author' => $this->id, 'status' => Constants::STATUS_ENABLED])
+            ->createCommand()->queryAll();
+
+        $postsQuery = new Query();
+        $posts = $postsQuery->select('id, published_at')
+            ->from('post')
+            ->where(['status_id' => Constants::STATUS_ENABLED, 'author_id' => $this->id])
+            ->createCommand()->queryAll();
+
+        $rows = [];
+        foreach ($comments as $row){
+            $rows[] = [
+                'user_id' => $this->id,
+                'post_id' => null,
+                'comment_id' => $row['id'],
+                'published_at' => $row['published_at']
+            ];
+        }
+        foreach ($posts as $row){
+            $rows[] = [
+                'user_id' => $this->id,
+                'post_id' => $row['id'],
+                'comment_id' => null,
+                'published_at' => $row['published_at']
+            ];
+        }
+
+        if(!empty($rows)){
+            Yii::$app->db->createCommand()
+                ->batchInsert(UserTimeLine::tableName(),['user_id','post_id','comment_id','published_at'],$rows)
+                ->execute();
+        }
     }
 }

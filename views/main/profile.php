@@ -8,7 +8,7 @@ use yii\helpers\StringHelper;
 /* @var $this \yii\web\View */
 /* @var $user \app\models\User; */
 /* @var $controller \app\controllers\MainController */
-/* @var $items array[] */
+/* @var $items \app\models\UserTimeLine[] */
 /* @var $carouselPosts \app\models\Post[] */
 /* @var $pages \yii\data\Pagination */
 /* @var $type string */
@@ -75,42 +75,15 @@ $controller = $this->context;
 
                         <div class="content__card">
                             <?php foreach ($items as $item): ?>
-                                <?php if($item['type'] == 'post'): ?>
+                                <?php if(!empty($item->post)): ?>
                                     <!-- card-->
-                                    <div class="content__card">
-                                        <div class="content__card__image">
-                                            <a rel="canonical" href="<?= Url::to(['main/post', 'id' => $item['post_id']]); ?>">
-                                                <?php if(!empty($item['image_path'] && file_exists(Yii::getAlias('@webroot/uploads/img/'.$item['image_path'])))): ?>
-                                                    <img class="img-fluid" src="<?= EasyThumbnailImage::thumbnailFileUrl(Yii::getAlias('@webroot/uploads/img/'.$item['image_path']),484,276); ?>">
-                                                <?php elseif (!empty($item['image_url'])): ?>
-                                                    <img class="img-fluid" src="<?= $item['image_url']; ?>">
-                                                <?php else: ?>
-                                                    <img class="img-fluid" src="http://placehold.it/484x276">
-                                                <?php endif; ?>
-                                            </a>
-                                        </div>
-                                        <a class="content__card__title hidden-sm-up" href="#"><?= $item['post_name']; ?></a>
-                                        <div class="content__card__content">
-                                            <a rel="canonical" class="content__card__title hidden-xs-down" href="<?= Url::to(['main/post', 'id' => $item['post_id']]); ?>">
-                                                <?= $item['post_name']; ?>
-                                            </a>
-                                            <div class="content__card__intro">
-                                                <p><?= StringHelper::truncateWords(strip_tags($item['content']),20); ?></p>
-                                                <?php if(!empty($item['author_id'])): ?>
-                                                    <a rel="canonical" href="<?= Url::to(['main/profile','id'=> $item['author_id']]); ?>">
-                                                        <?= $item['name'].' '.$item['surname']; ?>
-                                                    </a>
-                                                <?php endif; ?>
-                                                <span>• <?= substr($item['published_at'],0,16); ?></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                <?php elseif ($item['type'] == 'comment'): ?>
+                                    <?= $this->render('_post_small',['post' => $item->post]); ?>
+                                <?php elseif (!empty($item->comment)): ?>
                                     <div class="contentComments__card content__card">
-                                        <img class="img-fluid" src="<?= $item['avatar_file']; ?>">
+                                        <img class="img-fluid" src="<?= $user->getAvatar(); ?>">
                                         <div class="contentComments__card__content">
-                                            <b><a rel="canonical" href="<?= Url::to(['main/profile','id'=> $item['author_id']]); ?>"><?= $item['name'].' '.$item['surname']; ?></a><span>-  <?= substr($item['published_at'],0,16); ?></span></b>
-                                            <p><?= $item['content']; ?></p>
+                                            <b><a rel="canonical" href="<?= Url::to(['main/profile','id'=>$item->user_id]); ?>"><?= $user->name.' '.$user->surname; ?></a><span>-  <?= substr($item->published_at,0,16); ?></span></b>
+                                            <p><?= $item->comment->text; ?></p>
                                         </div>
                                     </div>
                                 <?php endif; ?>

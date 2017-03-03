@@ -676,4 +676,38 @@ class SyncController extends Controller
 
         echo "Finished! \n";
     }
+
+    /**
+     * Updates activity time-lines for all users
+     */
+    public function actionUpdateUserTimeLines()
+    {        /* @var $all Post[] */
+        echo "Querying all users. Please wait...";
+
+        $q = User::find();
+        $count = $q->count();
+
+        if(!$this->confirm("Found ({$count}) users. Do you want proceed ?\n")){
+            echo "Canceled. \n";
+            exit();
+        }
+
+        echo "Updating...\n";
+
+        $pages = new Pagination(['totalCount' => $q->count(), 'defaultPageSize' => 20]);
+        for ($i = 0; $i <= $pages->pageCount; $i++){
+            $pages->setPage($i+1);
+
+            /* @var $users User[] */
+            $users = $q->limit($pages->limit)->offset($pages->offset)->all();
+
+            foreach($users as $index => $user){
+                $currentIndex = (($pages->page-1) * $pages->limit) + $index;
+                $user->refreshTimeLine();
+                echo "User {$currentIndex} of {$count} done. \n";
+            }
+        }
+
+        echo "Done!\n";
+    }
 }

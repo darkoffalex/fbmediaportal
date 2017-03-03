@@ -95,6 +95,10 @@ class PostsController extends Controller
 
                     $model->updateSearchKeywords();
 
+                    if(!empty($model->author)){
+                        $model->author->refreshTimeLine();
+                    }
+
                     //clear cache
                     Yii::$app->cache->flush();
 
@@ -212,6 +216,10 @@ class PostsController extends Controller
                         $model->author->counter_posts = count($model->author->posts);
                         $model->author->update();
                     }
+                }
+
+                if(!empty($model->author)){
+                    $model->author->refreshTimeLine();
                 }
 
                 //clear the cache

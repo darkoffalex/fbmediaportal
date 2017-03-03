@@ -8,6 +8,7 @@ use app\models\Category;
 use app\models\Comment;
 use app\models\Post;
 use app\models\User;
+use app\models\UserTimeLine;
 use Facebook\Exceptions\FacebookResponseException;
 use Facebook\Facebook;
 use Yii;
@@ -15,6 +16,7 @@ use app\components\Controller;
 use yii\base\Exception;
 use yii\data\Pagination;
 use yii\db\Expression;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 
@@ -430,6 +432,12 @@ class MainController extends Controller
                     $user->counter_comments = count($user->comments);
                     $user->update();
 
+                    $tli = new UserTimeLine();
+                    $tli->published_at = $model->created_at;
+                    $tli->comment_id = $model->id;
+                    $tli->user_id = $user->id;
+                    $tli->save();
+
                     if(!empty($user->fb_user_id) && !empty($comment->fb_sync_id)){
                         $name = $user->name.' '.$user->surname;
                         $message = "Пользователем {$name} был добавлен комментарий: «{$model->text}»";
@@ -485,6 +493,12 @@ class MainController extends Controller
                     $user->counter_comments = count($user->comments);
                     $user->update();
 
+                    $tli = new UserTimeLine();
+                    $tli->published_at = $newComment->created_at;
+                    $tli->comment_id = $newComment->id;
+                    $tli->user_id = $user->id;
+                    $tli->save();
+
                     if(!empty($user->fb_user_id) && !empty($post->fb_sync_id)){
                         $name = $user->name.' '.$user->surname;
                         $message = "Пользователем {$name} был добавлен комментарий: «{$newComment->text}»";
@@ -533,12 +547,16 @@ class MainController extends Controller
         $this->view->registerMetaTag(['name' => 'keywords', 'content' => '']);
 
         //query activity list
-        $sql = "SELECT post_id, comment_id, content, post_name, author_id, published_at, type, image_path, image_url, `user`.avatar_file, `user`.name, `user`.surname FROM (SELECT * FROM (SELECT  post.id as post_id, NULL as comment_id, post_trl.text as content, post_trl.name as post_name, author_id, published_at, 'post' as type, (SELECT file_path FROM post_image WHERE post_image.post_id = post.id ORDER BY priority ASC LIMIT 1) image_path,(SELECT file_url FROM post_image WHERE post_image.post_id = post.id ORDER BY priority ASC LIMIT 1) image_url FROM `post` JOIN post_trl ON post_trl.post_id = post.id AND post_trl.lng = :lng WHERE author_id = :user) p UNION SELECT * FROM (SELECT NULL as post_id, `comment`.id as comment_id, text as content, NULL as post_name, author_id, created_at as published_at, 'comment' as type, NULL as image_path, NULL as image_url FROM `comment` WHERE author_id = :user) c) activity_log JOIN `user` ON activity_log.author_id = `user`.id ORDER BY published_at DESC LIMIT :limit OFFSET :offset";
-        $sqlCount = "SELECT COUNT(*) FROM (SELECT * FROM (SELECT  post.id as post_id, NULL as comment_id, post_trl.text as content, author_id, published_at, 'post' as type, (SELECT file_path FROM post_image WHERE post_image.post_id = post.id ORDER BY priority ASC LIMIT 1) image_path,(SELECT file_url FROM post_image WHERE post_image.post_id = post.id ORDER BY priority ASC LIMIT 1) image_url FROM `post` JOIN post_trl ON post_trl.post_id = post.id AND post_trl.lng = :lng WHERE author_id = :user) p UNION SELECT * FROM (SELECT NULL as post_id, `comment`.id as comment_id, text as content, author_id, created_at as published_at, 'comment' as type, NULL as image_path, NULL as image_url FROM `comment` WHERE author_id = :user) c) activity_log JOIN `user` ON activity_log.author_id = `user`.id ORDER BY published_at";
+        $q = UserTimeLine::find()->where(['user_id' => $user->id]);
+        $countQ = clone $q;
+        $q->with(['post.trl','comment'])->orderBy('published_at DESC');
 
-        $count = Yii::$app->db->createCommand($sqlCount,['user' => $user->id, 'lng' => Yii::$app->language])->queryScalar();
-        $pages = new Pagination(['totalCount' => $count, 'defaultPageSize' => 20]);
-        $items = Yii::$app->db->createCommand($sql,['user' => $user->id,'limit' => $pages->limit, 'offset' => $pages->offset, 'lng' => Yii::$app->language])->queryAll();
+        $pages = new Pagination(['totalCount' => $countQ->count(), 'defaultPageSize' => 20]);
+        $items = $q->limit($pages->limit)
+            ->offset($pages->offset)
+            ->with(['post.trl','comment'])
+            ->orderBy('published_at DESC')
+            ->all();
 
         //posts for carousel
         $carouselPostsQuery = Post::findSorted()
