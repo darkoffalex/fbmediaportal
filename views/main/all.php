@@ -49,13 +49,13 @@ $controller = $this->context;
                     <h1>Категория материалов</h1>
 
                     <div class="sorting">
-                        <a rel="canonical" class="btn btn-outline <?= $type=='latest' ? 'active' : ''; ?>" href="<?= Url::to(['main/all','type' => 'latest']); ?>">
+                        <a  class="btn btn-outline <?= $type=='latest' ? 'active' : ''; ?>" href="<?= Url::to(['main/all','type' => 'latest']); ?>">
                             <span>Последнее</span>
                         </a>
-                        <a rel="canonical" class="btn btn-outline <?= $type=='popular' ? 'active' : ''; ?>" href="<?= Url::to(['main/all','type' => 'popular']); ?>">
+                        <a  class="btn btn-outline <?= $type=='popular' ? 'active' : ''; ?>" href="<?= Url::to(['main/all','type' => 'popular']); ?>">
                             <span>Популярное</span>
                         </a>
-                        <a rel="canonical" class="btn btn-outline <?= $type=='turkey' ? 'active' : ''; ?>" href="<?= Url::to(['main/all','type' => 'turkey']); ?>">
+                        <a  class="btn btn-outline <?= $type=='turkey' ? 'active' : ''; ?>" href="<?= Url::to(['main/all','type' => 'turkey']); ?>">
                             <span>Полезное о Турции</span>
                         </a>
                     </div>
@@ -64,16 +64,16 @@ $controller = $this->context;
                         <!-- card-->
                         <div class="content__card">
                             <div class="content__card__image">
-                                <a rel="canonical" href="<?= $post->getUrl(); ?>">
+                                <a  href="<?= $post->getUrl(); ?>">
                                     <img class="img-fluid" src="<?= $post->getThumbnailUrl(484,276); ?>">
                                 </a>
                             </div>
-                            <a rel="canonical" class="content__card__title hidden-sm-up" href="#"><?= $post->trl->name; ?></a>
-                            <div class="content__card__content"><a rel="canonical" class="content__card__title hidden-xs-down" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
+                            <a  class="content__card__title hidden-sm-up" href="#"><?= $post->trl->name; ?></a>
+                            <div class="content__card__content"><a  class="content__card__title hidden-xs-down" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
                                 <div class="content__card__intro">
                                     <p><?= $post->trl->small_text; ?></p>
                                     <?php if(!empty($post->author)): ?>
-                                        <a rel="canonical" href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
+                                        <a  href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
                                             <?= $post->author->name.' '.$post->author->surname; ?>
                                         </a>
                                     <?php else: ?>

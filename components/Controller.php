@@ -89,9 +89,12 @@ class Controller extends BaseController
 
         //Get all banners
         $qBannerDisplays = BannerDisplay::find()
-            ->with(['banner','place'])
-            ->where(new Expression('start_at < :cur AND end_at > :cur',['cur' => date('Y-m-d H:i:s',time())]));
-        $bannerDisplays = Help::cquery(function($db)use($qBannerDisplays){return $qBannerDisplays->all();},true);
+            ->joinWith('banner as b')
+            ->with('place')
+            ->where(new Expression('start_at < :cur AND end_at > :cur',['cur' => date('Y-m-d H:i:s',time())]))
+            ->orWhere(['b.is_eternal' => 1])
+            ->distinct();
+        $bannerDisplays = Help::cquery(function($db)use($qBannerDisplays){return $qBannerDisplays->all();},false);
 
         /* @var $bannerDisplays BannerDisplay[] */
         foreach ($bannerDisplays as $bannerDisplay){
@@ -102,5 +105,18 @@ class Controller extends BaseController
 //        Yii::$app->cache->flush();
 
         return parent::beforeAction($action);
+    }
+
+    /**
+     * Run after every action on frontend part
+     * @param Action $action
+     * @param mixed $result
+     * @return mixed
+     */
+    public function afterAction($action, $result)
+    {
+        $result = parent::afterAction($action, $result);
+        Yii::$app->session->setFlash('last-url',Help::canonical());
+        return $result;
     }
 }

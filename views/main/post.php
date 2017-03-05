@@ -3,6 +3,7 @@ use yii\helpers\Url;
 use yii\helpers\Html;
 use yii\helpers\ArrayHelper;
 use app\helpers\Constants;
+use app\helpers\Help;
 
 /* @var $this \yii\web\View */
 /* @var $user \app\models\User */
@@ -53,7 +54,7 @@ $controller = $this->context;
 
                         <div class="content__card__info">
                             <?php if(!empty($post->author)): ?>
-                                <a rel="canonical" href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
+                                <a  href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
                                     <?= $post->author->name.' '.$post->author->surname; ?>
                                 </a>
                             <?php else: ?>
@@ -63,13 +64,15 @@ $controller = $this->context;
                         </div>
 
                         <div class="content__card__crumbs">
-                            <a rel="canonical" href="<?= Url::to(['main/index']); ?>">Главная</a><span class="crumb-seprator">-</span><?php if(!empty($post->categories[0])): ?><?php $crumbs = $post->categories[0]->getBreadCrumbs(true); ?><?php foreach ($crumbs as $cid => $name): ?><a rel="canonical" href="<?= Url::to(['main/category', 'id' => $cid, 'title' => \app\helpers\Help::slug($name)]); ?>"><?= $name; ?></a><span class="crumb-seprator">-</span><?php endforeach; ?><?php endif; ?><span class="current"><?= $post->trl->name; ?></span>
+                            <a  href="<?= Url::to(['main/index']); ?>">Главная</a><span class="crumb-seprator">-</span><?php if(!empty($post->categories[0])): ?><?php $crumbs = $post->categories[0]->getBreadCrumbs(true); ?><?php foreach ($crumbs as $cid => $name): ?><a  href="<?= Url::to(['main/category', 'id' => $cid, 'title' => \app\helpers\Help::slug($name)]); ?>"><?= $name; ?></a><span class="crumb-seprator">-</span><?php endforeach; ?><?php endif; ?><span class="current"><?= $post->trl->name; ?></span>
                         </div>
 
-                        <div class="content__card__share">
-                            <!-- uSocial -->
+                        <div class="share-box clearfix">
+                            <div class="content__card__share">
+                                <span>Поделиться</span>
+                            </div>
                             <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.1" data-script="usocial" charset="utf-8"></script>
-                            <div class="uSocial-Share" data-pid="4ef9f797785c35e48331c7832aa0d5eb" data-type="share" data-options="round-rect,style1,absolute,horizontal,upArrow-left,size24,eachCounter0,counter1,counter-after" data-social="fb,vk,ok,bookmarks" data-mobile="vi,wa,telegram,sms"></div><!-- /uSocial -->
+                            <div class="uSocial-Share" data-pid="4ef9f797785c35e48331c7832aa0d5eb" data-type="share" data-options="round-rect,style1,absolute,horizontal,upArrow-left,size24,eachCounter0,counter1,counter-after,nomobile" data-social="fb,vk,ok,bookmarks" data-mobile="vi,wa,telegram,sms"></div><!-- /uSocial -->
                         </div>
 
                         <?php if($post->content_type_id == Constants::CONTENT_TYPE_VIDEO && (!empty($post->video_key_fb) || !empty($post->video_key_yt))): ?>
@@ -79,7 +82,7 @@ $controller = $this->context;
                                 </video>
                             <?php endif; ?>
                             <?php if(!empty($post->video_key_yt)): ?>
-                                <iframe width="100%" src="<?= $post->video_key_yt; ?>" frameborder="0" allowfullscreen></iframe>
+                                <iframe width="100%" height="311px" src="<?= Help::youtubeurl($post->video_key_yt); ?>" frameborder="0" allowfullscreen></iframe>
                             <?php endif; ?>
                         <?php else: ?>
                             <div>
@@ -96,10 +99,12 @@ $controller = $this->context;
                             <?= $post->trl->text; ?>
                         </div>
 
-                        <div class="content__card__share">
-                            <!-- uSocial -->
+                        <div class="share-box clearfix">
+                            <div class="content__card__share">
+                                <span>Поделиться</span>
+                            </div>
                             <script async src="https://usocial.pro/usocial/usocial.js?v=6.1.1" data-script="usocial" charset="utf-8"></script>
-                            <div class="uSocial-Share" data-pid="4ef9f797785c35e48331c7832aa0d5eb" data-type="share" data-options="round-rect,style1,absolute,horizontal,upArrow-left,size24,eachCounter0,counter1,counter-after" data-social="fb,vk,ok,bookmarks" data-mobile="vi,wa,telegram,sms"></div><!-- /uSocial -->
+                            <div class="uSocial-Share" data-pid="4ef9f797785c35e48331c7832aa0d5eb" data-type="share" data-options="round-rect,style1,absolute,horizontal,upArrow-left,size24,eachCounter0,counter1,counter-after,nomobile" data-social="fb,vk,ok,bookmarks" data-mobile="vi,wa,telegram,sms"></div><!-- /uSocial -->
                         </div>
 
                         <!-- Comment section-->
@@ -125,7 +130,7 @@ $controller = $this->context;
 
                 <!--sidebar-->
                 <div class="col-sm-4 col-lg-3 no-pad-l">
-                    <div class="content__sidebar content__sidebar--top">
+                    <div class="content__sidebar content__sidebar--top clearfix">
 
                         <div class="content__sidebar__metrics text-xs-center">
                             <?= $this->render('/common/_banners',[

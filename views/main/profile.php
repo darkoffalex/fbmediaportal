@@ -82,7 +82,7 @@ $controller = $this->context;
                                     <div class="contentComments__card content__card">
                                         <img class="img-fluid" src="<?= $user->getAvatar(); ?>">
                                         <div class="contentComments__card__content">
-                                            <b><a rel="canonical" href="<?= Url::to(['main/profile','id'=>$item->user_id]); ?>"><?= $user->name.' '.$user->surname; ?></a><span>-  <?= substr($item->published_at,0,16); ?></span></b>
+                                            <b><a  href="<?= Url::to(['main/profile','id'=>$item->user_id]); ?>"><?= $user->name.' '.$user->surname; ?></a><span>-  <?= substr($item->published_at,0,16); ?></span></b>
                                             <p><?= $item->comment->text; ?></p>
                                         </div>
                                     </div>
@@ -104,7 +104,7 @@ $controller = $this->context;
 
             <!--sidebar-->
             <div class="col-sm-4 col-lg-3 no-pad-l">
-                <div class="content__sidebar content__sidebar--top">
+                <div class="content__sidebar content__sidebar--top clearfix">
 
                     <div class="content__sidebar__metrics text-xs-center">
                         <?= $this->render('/common/_banners',[

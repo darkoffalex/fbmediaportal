@@ -59,7 +59,7 @@ $controller = $this->context;
                             <!-- card-->
                             <div class="content__card">
                                 <div class="content__card__image">
-                                    <a rel="canonical" href="<?= $post->getUrl(); ?>">
+                                    <a  href="<?= $post->getUrl(); ?>">
                                         <img class="img-fluid" src="<?= $post->getThumbnailUrl(484,276); ?>">
                                     </a>
                                 </div>
@@ -68,7 +68,7 @@ $controller = $this->context;
                                     <div class="content__card__intro">
                                         <p><?= $post->trl->small_text; ?></p>
                                         <?php if(!empty($post->author)): ?>
-                                            <a rel="canonical" href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
+                                            <a  href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
                                                 <?= $post->author->name.' '.$post->author->surname; ?>
                                             </a>
                                         <?php else: ?>
@@ -98,7 +98,7 @@ $controller = $this->context;
 
             <!--sidebar-->
             <div class="col-sm-4 col-lg-3 no-pad-l">
-                <div class="content__sidebar content__sidebar--top">
+                <div class="content__sidebar content__sidebar--top clearfix">
 
                     <div class="content__sidebar__metrics text-xs-center">
                         <?= $this->render('/common/_banners',[

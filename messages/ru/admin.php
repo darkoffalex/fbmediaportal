@@ -214,5 +214,8 @@ return [
     'To archive' => 'Переместить в архив',
     'From archive' => 'Переместить в поток',
     'Move all items on page to archive' => 'Переместить все (на странице) в архив',
-    'Useful about turkey' => 'Полезное о турции'
+    'Useful about turkey' => 'Полезное о турции',
+    'Not selected' => 'Не выбран',
+    'Is Eternal' => 'Без ограничений по времени',
+    'Clear place' => 'Очистить место'
 ];

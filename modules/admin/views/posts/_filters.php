@@ -95,11 +95,12 @@ use kartik\daterange\DateRangePicker;
                 ]
             ])->error(false); ?>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <?= $form->field($model,'group_id')->dropDownList(ArrayHelper::map(PostGroup::find()->all(),'id','name'),['prompt' => ''])->error(false); ?>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <?= $form->field($model, 'kind_id')->dropDownList([
+                Constants::KIND_NOT_SELECTED => Yii::t('admin','Not selected'),
                 Constants::KIND_INTERESTING_CONTENT => Yii::t('admin','Useful content'),
                 Constants::KIND_INTERESTING_COMMENTS => Yii::t('admin','Interesting discussion'),
                 Constants::KIND_FORUM => Yii::t('admin','Forum'),
@@ -109,6 +110,12 @@ use kartik\daterange\DateRangePicker;
             <?= $form->field($model, 'need_finish')->dropDownList([
                 "YES" => Yii::t('admin','Yes'),
                 "NO" => Yii::t('admin','No')
+            ],['prompt' => '']); ?>
+        </div>
+        <div class="col-md-2">
+            <?= $form->field($model, 'status_id')->dropDownList([
+                Constants::STATUS_ENABLED => Yii::t('admin','Enabled'),
+                Constants::STATUS_DISABLED => Yii::t('admin','Disabled'),
             ],['prompt' => '']); ?>
         </div>
         <div class="col-md-2" style="margin-top: 25px;">

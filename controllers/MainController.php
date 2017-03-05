@@ -20,6 +20,7 @@ use yii\db\Expression;
 use yii\db\Query;
 use yii\filters\PageCache;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Url;
 use yii\web\NotFoundHttpException;
 
 class MainController extends Controller
@@ -117,15 +118,6 @@ class MainController extends Controller
         $this->view->registerMetaTag(['name' => 'description', 'content' => '']);
         $this->view->registerMetaTag(['name' => 'keywords', 'content' => '']);
 
-        //open-graph meta tags
-//            $this->view->registerMetaTag(['property' => 'og:description', 'content' => ""]);
-//            $this->view->registerMetaTag(['property' => 'og:url', 'content' => ""]);
-//            $this->view->registerMetaTag(['property' => 'og:site_name', 'content' => ""]);
-//            $this->view->registerMetaTag(['property' => 'og:title', 'content' => ""]);
-//            $this->view->registerMetaTag(['property' => 'og:image', 'content' => ""]);
-//            $this->view->registerMetaTag(['property' => 'og:image:width', 'content' => '200']);
-//            $this->view->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
-
         //get all category ids which should be included in search query
         if(!empty($category)){
 
@@ -147,19 +139,23 @@ class MainController extends Controller
         $mainPostsQuery = Post::findSorted(!empty($category) ? $id : null,$currentIds,$siblingIds)
             ->with(['trl', 'postImages.trl', 'author'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
-            ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]));
+            ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
+            ->distinct();
 
         $forumPostsQuery = Post::findSorted(!empty($category) ? $id : null,$currentIds,$siblingIds)
             ->with(['trl', 'postImages.trl'])
-            ->andWhere(['status_id' => Constants::STATUS_ENABLED]);
-//            ->andWhere(['kind_id' => Constants::KIND_FORUM]);
+            ->andWhere(['status_id' => Constants::STATUS_ENABLED])
+            ->andWhere(['kind_id' => Constants::KIND_FORUM])
+            ->distinct();
 
         $popularPostsQuery = Post::findSortedPopular(!empty($category) ? $id : null,$currentIds,$siblingIds)
             ->with(['trl'])
             ->andWhere(new Expression('comment_count > :minCount',['minCount' => 200]))
-            ->andWhere(new Expression('published_at > :minDate', ['minDate' => date('Y-m-d',(time()-(86400*100)))]));
+            ->andWhere(new Expression('published_at > :minDate', ['minDate' => date('Y-m-d',(time()-(86400*7)))]))
+            ->distinct();
 
         $turkeyPostsQuery = Post::findSortedAboutTurkey(!empty($category) ? $id : null,$currentIds,$siblingIds)
+            ->distinct()
             ->with(['trl']);
 
         $mainPostsQuery->limit(15);
@@ -172,6 +168,22 @@ class MainController extends Controller
         $forumPosts = Help::cquery(function($db)use($forumPostsQuery){return $forumPostsQuery->all();},$cache);
         $popularPosts = Help::cquery(function($db)use($popularPostsQuery){return $popularPostsQuery->all();},$cache);
         $turkeyPosts = Help::cquery(function($db)use($turkeyPostsQuery){return $turkeyPostsQuery->all();},$cache);
+
+//        Help::debug($forumPosts);
+//        exit();
+
+        /* @var $mainPosts Post[] */
+
+        //open-graph meta tags
+        if(!empty($mainPosts)){
+            $this->view->registerMetaTag(['property' => 'og:description', 'content' => "Нет дескрипшена"]);
+            $this->view->registerMetaTag(['property' => 'og:url', 'content' => Help::canonical()]);
+            $this->view->registerMetaTag(['property' => 'og:site_name', 'content' => "RusTurkey.com"]);
+            $this->view->registerMetaTag(['property' => 'og:title', 'content' => $this->view->title]);
+            $this->view->registerMetaTag(['property' => 'og:image', 'content' => $mainPosts[0]->getFirstImageUrlEx(706,311,true,true,true)]);
+            $this->view->registerMetaTag(['property' => 'og:image:width', 'content' => '706']);
+            $this->view->registerMetaTag(['property' => 'og:image:height', 'content' => '311']);
+        }
 
         //rendering page
         return $this->render('category',compact('mainPosts','forumPosts','popularPosts','turkeyPosts','category'));
@@ -235,7 +247,8 @@ class MainController extends Controller
         $mainPostsQuery = Post::findSorted(!empty($category) ? $id : null,$currentIds,$siblingIds)
             ->with(['trl', 'postImages.trl', 'author'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
-            ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]));
+            ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
+            ->distinct();
 
         $mainPostsQueryCount = clone $mainPostsQuery;
         $mainPostsCount = Help::cquery(function($db)use($mainPostsQueryCount){return $mainPostsQueryCount->count();},$cache);
@@ -245,9 +258,10 @@ class MainController extends Controller
         //getting forum posts paginated
         if(!$carousel){
             $forumPostsQuery = Post::findSorted(!empty($category) ? $id : null,$currentIds,$siblingIds)
-                ->with(['trl', 'postImages.trl', 'author'])
-                ->andWhere(['status_id' => Constants::STATUS_ENABLED]);
-//            ->andWhere(['kind_id' => Constants::KIND_FORUM]);
+                ->with(['trl', 'postImages.trl'])
+                ->andWhere(['status_id' => Constants::STATUS_ENABLED])
+                ->andWhere(['kind_id' => Constants::KIND_FORUM])
+                ->distinct();
 
             $forumPostsQueryCount = clone $forumPostsQuery;
             $forumPostsCount = Help::cquery(function($db)use($forumPostsQueryCount){return $forumPostsQueryCount->count();},$cache);
@@ -298,18 +312,12 @@ class MainController extends Controller
         }
 
         //set meta data
-        $this->view->title = !empty($post) ? $post->trl->name.' - '.$this->view->title : $this->view->title;
-        $this->view->registerMetaTag(['name' => 'description', 'content' => !empty($post->trl->name) ? $post->trl->small_text : $this->commonSettings->meta_description]);
-        $this->view->registerMetaTag(['name' => 'keywords', 'content' => '']);
+        $description = !empty($post->trl->name) ? $post->trl->small_text : $this->commonSettings->meta_description;
+        $keywords = $this->commonSettings->meta_keywords;
 
-        //open-graph meta tags
-//            $this->view->registerMetaTag(['property' => 'og:description', 'content' => ""]);
-//            $this->view->registerMetaTag(['property' => 'og:url', 'content' => ""]);
-//            $this->view->registerMetaTag(['property' => 'og:site_name', 'content' => ""]);
-//            $this->view->registerMetaTag(['property' => 'og:title', 'content' => ""]);
-//            $this->view->registerMetaTag(['property' => 'og:image', 'content' => ""]);
-//            $this->view->registerMetaTag(['property' => 'og:image:width', 'content' => '200']);
-//            $this->view->registerMetaTag(['property' => 'og:image:height', 'content' => '200']);
+        $this->view->title = !empty($post) ? $post->trl->name.' - '.$this->view->title : $this->view->title;
+        $this->view->registerMetaTag(['name' => 'description', 'content' => $description]);
+        $this->view->registerMetaTag(['name' => 'keywords', 'content' => $keywords]);
 
         //current category (can be empty, then show all items)
         /* @var $category Category */
@@ -341,6 +349,7 @@ class MainController extends Controller
             ->with(['trl', 'postImages.trl', 'author'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
+            ->distinct()
             ->limit(15);
 
         $carouselPosts = Help::cquery(function($db)use($carouselPostsQuery){return $carouselPostsQuery->all();},$cache);
@@ -362,6 +371,14 @@ class MainController extends Controller
         $count = Help::cquery(function($db)use($cq){return $cq->count();},$cache);
         $pages = new Pagination(['totalCount' => $count, 'defaultPageSize' => 10]);
         $comments = Help::cquery(function($db)use($q,$pages){return $q->offset($pages->offset)->limit($pages->limit)->all();},$cache);
+
+        $this->view->registerMetaTag(['property' => 'og:description', 'content' => $description]);
+        $this->view->registerMetaTag(['property' => 'og:url', 'content' => Help::canonical()]);
+        $this->view->registerMetaTag(['property' => 'og:site_name', 'content' => "RusTurkey.com"]);
+        $this->view->registerMetaTag(['property' => 'og:title', 'content' => $this->view->title]);
+        $this->view->registerMetaTag(['property' => 'og:image', 'content' => $post->getFirstImageUrlEx(706,311,true,true,true)]);
+        $this->view->registerMetaTag(['property' => 'og:image:width', 'content' => '706']);
+        $this->view->registerMetaTag(['property' => 'og:image:height', 'content' => '311']);
 
         return $this->render('post',compact('post','comments','carouselPosts','newComment'));
     }
@@ -594,6 +611,7 @@ class MainController extends Controller
             ->with(['trl', 'postImages.trl'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
+            ->distinct()
             ->limit(15);
 
         $carouselPosts = Help::cquery(function($db)use($carouselPostsQuery){return $carouselPostsQuery->all();},$cache);
@@ -688,6 +706,7 @@ class MainController extends Controller
             ->with(['trl', 'postImages.trl'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
+            ->distinct()
             ->limit(15);
 
         $carouselPosts = Help::cquery(function($db)use($carouselPostsQuery){return $carouselPostsQuery->all();},$cache);
@@ -764,15 +783,18 @@ class MainController extends Controller
         $mainPostsQuery = Post::findSorted(!empty($category) ? $id : null,$currentIds,$siblingIds)
             ->with(['trl', 'postImages.trl', 'author'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
-            ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]));
+            ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
+            ->distinct();
 
 
         $popularPostsQuery = Post::findSortedPopular(!empty($category) ? $id : null,$currentIds,$siblingIds)
             ->with(['trl', 'postImages.trl', 'author'])
             ->andWhere(new Expression('comment_count > :minCount',['minCount' => 200]))
-            ->andWhere(new Expression('published_at > :minDate', ['minDate' => date('Y-m-d H:i:s',(time()-(86400*100)))]));
+            ->andWhere(new Expression('published_at > :minDate', ['minDate' => date('Y-m-d H:i:s',(time()-(86400*100)))]))
+            ->distinct();
 
         $turkeyPostsQuery = Post::findSortedAboutTurkey(!empty($category) ? $id : null,$currentIds,$siblingIds)
+            ->distinct()
             ->with(['trl']);
 
         switch ($type){
@@ -855,6 +877,7 @@ class MainController extends Controller
             ->with(['trl', 'postImages.trl'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
+            ->distinct()
             ->limit(15);
 
         $carouselPosts = Help::cquery(function($db)use($carouselPostsQuery){return $carouselPostsQuery->all();},$cache);
@@ -889,6 +912,7 @@ class MainController extends Controller
             ->with(['trl', 'postImages.trl'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
+            ->distinct()
             ->limit(15);
 
         $carouselPosts = Help::cquery(function($db)use($carouselPostsQuery){return $carouselPostsQuery->all();},$cache);

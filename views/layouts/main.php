@@ -5,6 +5,7 @@ use yii\helpers\Url;
 use yii\helpers\Html;
 use yii\helpers\ArrayHelper;
 use Facebook\Facebook;
+use app\helpers\Help;
 
 /* @var $this \yii\web\View */
 /* @var $content string */
@@ -36,6 +37,7 @@ $fb = new Facebook([
     <!--[if lt IE 9]>
     <script src="<?= Url::to('@web/frontend/components/html5shiv/dist/html5shiv.js') ?>"></script>
     <![endif]-->
+    <link rel="canonical" href="<?= Help::canonical(); ?>"/>
     <?php $this->head(); ?>
 </head>
 
@@ -84,7 +86,7 @@ $fb = new Facebook([
                         'user_managed_groups'
                     ]); ?>
 
-                    <a class="header__login" href="<?= $loginUrl; ?>">
+                    <a class="header__login" href="<?= $loginUrl;?>">
                         <i class="ico ico-login"></i><span>Войти</span>
                     </a>
 

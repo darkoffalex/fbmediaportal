@@ -8,7 +8,6 @@ use yii\helpers\ArrayHelper;
 /* @var $model \app\models\Post */
 /* @var $lng string */
 ?>
-
 <?php $trl = $model->getATrl($lng); ?>
 
 <?php if($model->content_type_id == Constants::CONTENT_TYPE_NEWS || $model->content_type_id == Constants::CONTENT_TYPE_ARTICLE): ?>

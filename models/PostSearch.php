@@ -6,6 +6,7 @@ use app\helpers\Constants;
 use Yii;
 use yii\data\ActiveDataProvider;
 use app\models\User;
+use yii\db\Expression;
 
 class PostSearch extends Post
 {
@@ -20,7 +21,7 @@ class PostSearch extends Post
     {
         return [
             [['name', 'content', 'published_at', 'created_at', 'need_finish', 'need_update', 'is_parsed', 'fb_sync_id'], 'string', 'max' => 255],
-            [['content_type_id', 'id', 'type_id', 'category_id', 'author_id', 'group_id', 'kind_id'], 'integer'],
+            [['content_type_id', 'id', 'type_id', 'category_id', 'author_id', 'group_id', 'kind_id', 'status_id'], 'integer'],
         ];
     }
 
@@ -91,7 +92,11 @@ class PostSearch extends Post
             }
 
             if(!empty($this->kind_id)){
-                $q->andWhere(['post.kind_id' => $this->kind_id]);
+                if($this->kind_id != Constants::KIND_NOT_SELECTED){
+                    $q->andWhere(['post.kind_id' => $this->kind_id]);
+                }else{
+                    $q->andWhere(new Expression("post.kind_id IS NULL OR post.kind_id = ''"));
+                }
             }
 
             if(!empty($this->category_id)){
@@ -104,6 +109,10 @@ class PostSearch extends Post
 
             if(!empty($this->content_type_id)){
                 $q->andWhere(['content_type_id' => $this->content_type_id]);
+            }
+
+            if(is_numeric($this->status_id)){
+                $q->andWhere(['post.status_id' => $this->status_id]);
             }
 
             if(!empty($this->type_id)){

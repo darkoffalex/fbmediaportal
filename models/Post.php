@@ -138,17 +138,18 @@ class Post extends PostDB
      * @param $h
      * @param bool $watermark
      * @param bool $placeholder
+     * @param bool $abs
      * @return null|string
      */
-    public function getFirstImageUrlEx($w, $h, $watermark = true, $placeholder = true)
+    public function getFirstImageUrlEx($w, $h, $watermark = true, $placeholder = true, $abs = false)
     {
         if(empty($this->postImages[0]->file_path) && empty($this->postImages[0]->file_url)){
-            return $placeholder ? "http://placehold.it/{$w}x{$h}" : Url::to('@web/img/no_image.jpg');
+            return $placeholder ? "http://placehold.it/{$w}x{$h}" : Url::to('@web/img/no_image.jpg',$abs);
         }elseif(!empty($this->postImages[0]->file_path)){
             if($w == 0 || $h == 0){
-                return Url::to('@web/uploads/img/'.$this->postImages[0]->file_path);
+                return Url::to('@web/uploads/img/'.$this->postImages[0]->file_path,$abs);
             }else{
-                return $this->postImages[0]->need_crop ? $this->postImages[0]->getCroppedUrl($w, $h, $watermark) : $this->postImages[0]->getThumbnailUrl($w, $h);
+                return $this->postImages[0]->need_crop ? $this->postImages[0]->getCroppedUrl($w, $h, $watermark, false, $abs) : $this->postImages[0]->getThumbnailUrl($w, $h);
             }
         }else{
             return $this->postImages[0]->file_url;

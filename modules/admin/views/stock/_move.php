@@ -80,6 +80,7 @@ $controller = $this->context;
         <?php $model->author_custom_name = !empty($model->author) ? $model->author->name.' '.$model->author->surname : $model->author_custom_name; ?>
         <?= $form->field($model,'author_custom_name')->textInput(); ?>
 
+        <?php $model->status_id = Constants::STATUS_DISABLED; ?>
         <?= $form->field($model, 'status_id')->dropDownList([
             Constants::STATUS_ENABLED => Yii::t('admin','Enabled'),
             Constants::STATUS_DISABLED => Yii::t('admin','Disabled'),

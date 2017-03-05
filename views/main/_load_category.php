@@ -21,7 +21,10 @@ $controller = $this->context;
             <div class="col-sm-8 col-lg-7 no-pad-r">
 
                 <?php if($mainPosts[0]->content_type_id == Constants::CONTENT_TYPE_VIDEO): ?>
-                    <?php Help::swap($mainPosts,0,1); ?>
+                    <?php $toIndex = (!empty($mainPosts[1]) && $mainPosts[1]->content_type_id != Constants::CONTENT_TYPE_VIDEO) ? 1 : 2 ?>
+                    <?php if(!empty($mainPosts[$toIndex]) && $mainPosts[$toIndex]->content_type_id != Constants::CONTENT_TYPE_VIDEO): ?>
+                        <?php Help::swap($mainPosts,0,$toIndex); ?>
+                    <?php endif; ?>
                 <?php endif; ?>
 
                 <?php foreach ($mainPosts as $index => $post): ?>

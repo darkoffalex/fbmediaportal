@@ -40,6 +40,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <?= $form->field($model, 'name')->textInput(); ?>
 
+                <?= $form->field($model, 'is_eternal')->checkbox(); ?>
+
                 <?= $form->field($model, 'type_id')->dropDownList([
                     Constants::BANNER_TYPE_IMAGE => Yii::t('admin','Image'),
                     Constants::BANNER_TYPE_CODE => Yii::t('admin','Code'),

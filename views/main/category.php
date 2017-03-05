@@ -80,15 +80,15 @@ $controller = $this->context;
                 </div>
 
                 <!--sidebar-->
-                <div class="col-sm-4 col-lg-3 no-pad-l">
-                    <div class="content__sidebar content__sidebar--top">
-                        <div class="content__sidebar__metrics text-xs-center">
+                <div class="col-sm-4 col-lg-3 no-pad-l clearfix">
+                    <div class="content__sidebar content__sidebar--top clearfix">
+                        <div class="content__sidebar__metrics text-xs-center clearfix">
                             <?= $this->render('/common/_banners',[
                                 'imgAttributes' => ['class' => 'img-fluid'],
                                 'banners' => ArrayHelper::getValue($controller->banners,'CURRENCY')
                             ]); ?>
                         </div>
-                        <div class="content__sidebar__metrics">
+                        <div class="content__sidebar__metrics clearfix">
                             <p class="weather-title">Погода в <b>Турции</b></p>
                             <?= $this->render('/common/_banners',[
                                 'imgAttributes' => ['class' => 'img-fluid'],
@@ -96,14 +96,14 @@ $controller = $this->context;
                             ]); ?>
                         </div>
 
-                        <div class="content__sidebar__banner">
+                        <div class="content__sidebar__banner clearfix">
                             <?= $this->render('/common/_banners',[
                                 'imgAttributes' => ['class' => 'img-fluid'],
                                 'banners' => ArrayHelper::getValue($controller->banners,'TOP_RIGHT_1')
                             ]); ?>
                         </div>
 
-                        <div class="content__sidebar__banner">
+                        <div class="content__sidebar__banner clearfix">
                             <?= $this->render('/common/_banners',[
                                 'imgAttributes' => ['class' => 'img-fluid'],
                                 'banners' => ArrayHelper::getValue($controller->banners,'TOP_RIGHT_2')
@@ -142,8 +142,12 @@ $controller = $this->context;
                     <?php $slicedPart2 = array_slice($mainPosts,5,3); ?>
 
                     <?php if(!empty($slicedPart2)): ?>
+
                         <?php if($slicedPart2[0]->content_type_id == Constants::CONTENT_TYPE_VIDEO): ?>
-                            <?php Help::swap($mainPosts,0,1); ?>
+                            <?php $toIndex = (!empty($slicedPart2[1]) && $slicedPart2[1]->content_type_id != Constants::CONTENT_TYPE_VIDEO) ? 1 : 2 ?>
+                            <?php if(!empty($slicedPart2[$toIndex]) && $slicedPart2[$toIndex]->content_type_id != Constants::CONTENT_TYPE_VIDEO): ?>
+                                <?php Help::swap($slicedPart2,0,$toIndex); ?>
+                            <?php endif; ?>
                         <?php endif; ?>
 
                         <?php foreach ($slicedPart2 as $index => $post): ?>
@@ -157,7 +161,7 @@ $controller = $this->context;
                 </div>
                 <!--sidebar-->
                 <div class="col-sm-4 col-lg-3 no-pad-l hidden-xs-down">
-                    <div class="content__sidebar">
+                    <div class="content__sidebar clearfix">
                         <div class="content__sidebar__banner">
                             <?= $this->render('/common/_banners',[
                                 'imgAttributes' => ['class' => 'img-fluid'],

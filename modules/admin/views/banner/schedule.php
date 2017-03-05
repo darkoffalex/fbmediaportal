@@ -66,6 +66,7 @@ $this->registerJsFile("@web/js/fullcalendar/lang/{$lng}.js",['position' => \yii\
 
             <div class="box-footer">
                 <a class="btn btn-primary" href="<?php echo Url::to(['/admin/banner/places']); ?>"><?= Yii::t('admin','Back'); ?></a>
+                <a class="btn btn-primary" href="<?php echo Url::to(['/admin/banner/clear-place', 'id' => $model->id]); ?>"><?= Yii::t('admin','Clear place'); ?></a>
             </div>
         </div>
     </div>

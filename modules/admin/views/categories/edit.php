@@ -128,16 +128,16 @@ $languages = \app\models\Language::find()->all();
                 <div class="tab-pane <?= $index == 0 ? 'active' : '' ?>" id="tab_<?= $index; ?>">
                     <div class="form-group field-category_trl-name">
                         <label class="control-label" for="category_trl-name_<?= $lng->prefix; ?>"><?= Yii::t('admin','Name'); ?></label>
-                        <input id="category_trl-name_<?= $lng->prefix; ?>" value="<?= $model->getATrl($lng->prefix)->name; ?>" class="form-control" name="Category[translations][<?= $lng->prefix; ?>][name]" type="text">
+                        <input id="category_trl-name_<?= $lng->prefix; ?>" value="<?= htmlentities($model->getATrl($lng->prefix)->name); ?>" class="form-control" name="Category[translations][<?= $lng->prefix; ?>][name]" type="text">
                     </div>
                     <hr>
                     <div class="form-group field-category_trl-meta_description">
                         <label class="control-label" for="category_trl-meta_description_<?= $lng->prefix; ?>"><?= Yii::t('admin','META description'); ?></label>
-                        <textarea id="category_trl-meta_description_<?= $lng->prefix; ?>" class="form-control" name="Category[translations][<?= $lng->prefix; ?>][meta_description]"><?= $model->getATrl($lng->prefix)->meta_description; ?></textarea>
+                        <textarea id="category_trl-meta_description_<?= $lng->prefix; ?>" class="form-control" name="Category[translations][<?= $lng->prefix; ?>][meta_description]"><?= htmlentities($model->getATrl($lng->prefix)->meta_description); ?></textarea>
                     </div>
                     <div class="form-group field-category_trl-meta_keywords">
                         <label class="control-label" for="category_trl-meta_keywords_<?= $lng->prefix; ?>"><?= Yii::t('admin','META keywords'); ?></label>
-                        <textarea id="category_trl-meta_keywords_<?= $lng->prefix; ?>" class="form-control" name="Category[translations][<?= $lng->prefix; ?>][meta_keywords]"><?= $model->getATrl($lng->prefix)->meta_keywords; ?></textarea>
+                        <textarea id="category_trl-meta_keywords_<?= $lng->prefix; ?>" class="form-control" name="Category[translations][<?= $lng->prefix; ?>][meta_keywords]"><?= htmlentities($model->getATrl($lng->prefix)->meta_keywords); ?></textarea>
                     </div>
                 </div><!-- /.tab-pane -->
                 <?php endforeach; ?>

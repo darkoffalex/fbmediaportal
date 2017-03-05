@@ -142,7 +142,8 @@ $gridColumns = [
 
             'move' => function ($url,$model,$key) {
                 /* @var $model \app\models\Post */
-                return Html::a('<span class="glyphicon glyphicon-filter"></span>', ['/admin/stock/move', 'id' => $model->id], ['title' => Yii::t('admin','Move to posts'), 'data-toggle'=>'modal', 'data-backdrop' => 'static', 'data-keyboard' => 'false', 'data-target'=>'.modal']);
+                //using URL as index (quick kostyl, URL reassigned in 'urlCreator' for action 'move')
+                return Html::a('<span class="glyphicon glyphicon-filter"></span>', ['/admin/stock/move', 'id' => $model->id, 'index' => $url], ['name' => 'element-move-'.$url,'title' => Yii::t('admin','Move to posts'), 'data-toggle'=>'modal', 'data-backdrop' => 'static', 'data-keyboard' => 'false', 'data-target'=>'.modal']);
             },
 
             'fb_link' => function ($url,$model,$key) {
@@ -159,6 +160,17 @@ $gridColumns = [
             },
 
         ],
+
+        'urlCreator' => function ($action, $model, $key, $index) use ($dataProvider) {
+            if($action == 'move'){
+                return (($index + 1) + (($dataProvider->pagination->pageSize) * ($dataProvider->pagination->page)));
+            }
+            $params = is_array($key) ? $key : ['id' => (string) $key];
+            $params[0] = Yii::$app->controller->id.'/'.$action;
+            return Url::toRoute($params);
+        },
+
+
         'visibleButtons' => [
             'delete' => function ($model, $key, $index) {return true;},
             'update' => function ($model, $key, $index) {return true;},

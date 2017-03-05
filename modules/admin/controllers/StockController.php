@@ -228,6 +228,12 @@ class StockController extends Controller
             throw new NotFoundHttpException(Yii::t('admin','Not found'),404);
         }
 
+        //set scrolling position in session (information about anchor)
+        $index = Yii::$app->request->get('index');
+        if(!empty($index)){
+            Yii::$app->session->setFlash('scroll-to',"#element-move-$index");
+        }
+
         //ajax validation
         if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -276,7 +282,7 @@ class StockController extends Controller
                 //clear cache
                 Yii::$app->cache->flush();
 
-                return $this->redirect(Yii::$app->request->referrer);
+                return $this->redirect(Yii::$app->request->referrer.Yii::$app->session->getFlash('scroll-to'));
             }
         }
 

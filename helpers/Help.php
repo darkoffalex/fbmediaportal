@@ -7,6 +7,7 @@ use Facebook\Facebook;
 use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 use Yii;
+use yii\helpers\Url;
 
 class Help
 {
@@ -264,5 +265,41 @@ class Help
         }
 
         return !empty($body['id']) ? $body['id'] : null;
+    }
+
+    /**
+     * Returns canonical URL to current page
+     * @param bool $abs
+     * @param bool $https
+     * @return string
+     */
+    public static function canonical($abs = true, $https = false)
+    {
+        $controllerId = Yii::$app->controller->id;
+        $actionId = Yii::$app->controller->action->id;
+        $id = Yii::$app->request->get('id',null);
+        $type = Yii::$app->request->get('type',null);
+        $title = Yii::$app->request->get('title',null);
+
+        return Url::to(["/$controllerId/$actionId", 'id' => $id, 'type' => $type, 'title' => $title],true);
+    }
+
+    /**
+     * Converts youtube URL to embed url
+     * @param $string
+     * @return mixed
+     */
+    public static function youtubeurl($string) {
+        $urlComponents = parse_url($string);
+        $queryString = $urlComponents['query'];
+        $params = [];
+        parse_str($queryString,$params);
+
+        if(!empty($params['v'])){
+            $v = $params['v'];
+            return "https://www.youtube.com/embed/$v";
+        }
+
+        return $string;
     }
 }

@@ -1,5 +1,6 @@
 $(document).ready(function () {
 
+
     /**
      * Reloading links (updates container's html via ajax)
      */

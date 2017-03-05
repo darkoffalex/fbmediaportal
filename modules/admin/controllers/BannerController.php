@@ -320,6 +320,27 @@ class BannerController extends Controller
     }
 
     /**
+     * Clears specified place from all banners
+     * @param $id
+     * @return Response
+     * @throws NotFoundHttpException
+     */
+    public function actionClearPlace($id)
+    {
+        /* @var $model BannerPlace */
+        $model = BannerPlace::findOne((int)$id);
+
+        if(empty($model)){
+            throw new NotFoundHttpException(Yii::t('admin','Banner not found'),404);
+        }
+
+        BannerDisplay::deleteAll(['place_id' => $model->id]);
+        Yii::$app->cache->flush();
+
+        return $this->redirect(Yii::$app->request->referrer);
+    }
+
+    /**
      * Adding new item to schedule
      * @param $id
      * @return array|string

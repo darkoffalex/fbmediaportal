@@ -19,6 +19,7 @@ use Yii;
  * @property string $created_at
  * @property string $updated_at
  * @property string $link
+ * @property integer $is_eternal
  *
  * @property BannerDisplay[] $bannerDisplays
  */
@@ -39,7 +40,7 @@ class BannerDB extends \yii\db\ActiveRecord
     {
         return [
             [['name'], 'required'],
-            [['type_id', 'clicks', 'created_by_id', 'updated_by_id'], 'integer'],
+            [['type_id', 'clicks', 'created_by_id', 'updated_by_id', 'is_eternal'], 'integer'],
             [['code', 'custom_html', 'link'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
             [['name', 'image_filename'], 'string', 'max' => 255],
@@ -64,6 +65,7 @@ class BannerDB extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
             'link' => 'Link',
+            'is_eternal' => 'Is Eternal',
         ];
     }
 

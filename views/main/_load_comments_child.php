@@ -12,7 +12,7 @@ $controller = $this->context;
 
 <?php foreach($comments as $comment): ?>
     <div class="contentComments__card__child">
-        <a rel="canonical" href="<?= Url::to(['main/profile','id' => $comment->author_id]); ?>"><img class="img-fluid" src="<?= $comment->author->getAvatar(); ?>"></a>
+        <a  href="<?= Url::to(['main/profile','id' => $comment->author_id]); ?>"><img class="img-fluid" src="<?= $comment->author->getAvatar(); ?>"></a>
         <p><?= $comment->text; ?></p>
     </div>
 <?php endforeach; ?>

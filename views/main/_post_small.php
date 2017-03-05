@@ -18,7 +18,7 @@ use app\helpers\Constants;
                 <iframe width="100%" src="<?= $post->video_key_yt; ?>" frameborder="0" allowfullscreen></iframe>
             <?php endif; ?>
         <?php else: ?>
-            <a rel="canonical" href="<?= $post->getUrl(); ?>">
+            <a  href="<?= $post->getUrl(); ?>">
                 <?php $titleAlt = !empty($post->postImages[0]->trl) ? $post->postImages[0]->trl->name : ''; ?>
                 <img title="<?= $titleAlt; ?>" alt="<?= $titleAlt; ?>" style="width: 240px; height: 136px;" class="img-fluid" src="<?= $post->getThumbnailUrl(484,276); ?>">
             </a>
@@ -26,14 +26,14 @@ use app\helpers\Constants;
     </div>
 
     <h2>
-        <a rel="canonical" class="content__card__title hidden-sm-up" href="<?= $post->getUrl(); ?>">
+        <a  class="content__card__title hidden-sm-up" href="<?= $post->getUrl(); ?>">
             <?= $post->trl->name; ?>
         </a>
     </h2>
 
     <div class="content__card__content" style="position: relative">
         <h2>
-            <a rel="canonical" class="content__card__title hidden-xs-down" href="<?= $post->getUrl(); ?>">
+            <a  class="content__card__title hidden-xs-down" href="<?= $post->getUrl(); ?>">
                 <?= $post->trl->name; ?>
             </a>
         </h2>
@@ -41,7 +41,7 @@ use app\helpers\Constants;
         <div class="content__card__intro">
             <p><?= $post->trl->small_text; ?></p>
             <?php if(!empty($post->author)): ?>
-                <a rel="canonical" href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
+                <a  href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
                     <?= $post->author->name.' '.$post->author->surname; ?>
                 </a>
             <?php else: ?>

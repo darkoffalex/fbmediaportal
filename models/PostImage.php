@@ -149,9 +149,10 @@ class PostImage extends PostImageDB
      * @param int $h default height
      * @param bool $useWatermark add watermark
      * @param bool $filePath
+     * @param bool $abs
      * @return null|string
      */
-    public function getCroppedUrl($w = 706, $h = 311, $useWatermark = true, $filePath = false)
+    public function getCroppedUrl($w = 706, $h = 311, $useWatermark = true, $filePath = false, $abs = false)
     {
         //if nothing to crop - return null
         if(empty($this->file_path) || !$this->hasFile()){
@@ -214,7 +215,7 @@ class PostImage extends PostImageDB
             return Yii::getAlias('@webroot/assets/cropped/'.$this->file_path);
         }
 
-        return Url::to('@web/assets/cropped/'.$this->file_path);
+        return Url::to('@web/assets/cropped/'.$this->file_path, $abs);
     }
 
     /**

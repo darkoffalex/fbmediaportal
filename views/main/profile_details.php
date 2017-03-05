@@ -120,7 +120,7 @@ $controller = $this->context;
 
             <!--sidebar-->
             <div class="col-sm-4 col-lg-3 no-pad-l">
-                <div class="content__sidebar content__sidebar--top">
+                <div class="content__sidebar content__sidebar--top clearfix">
 
                     <div class="content__sidebar__metrics text-xs-center">
                         <?= $this->render('/common/_banners',[

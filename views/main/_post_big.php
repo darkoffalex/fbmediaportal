@@ -1,6 +1,7 @@
 <?php
 use yii\helpers\Url;
 use app\helpers\Constants;
+use app\helpers\Help;
 
 /* @var $category \app\models\Category */
 /* @var $post \app\models\Post */
@@ -13,15 +14,15 @@ use app\helpers\Constants;
 
     <?php if($post->content_type_id == Constants::CONTENT_TYPE_VIDEO && (!empty($post->video_key_fb) || !empty($post->video_key_yt))): ?>
         <?php if(!empty($post->video_key_fb)): ?>
-            <video width="100%" height="400px" controls style="background-color: rgb(204,204,204);">
+            <video width="100%" height="311px" controls style="background-color: rgb(204,204,204);">
                 <source src="<?= $post->video_key_fb; ?>" type="video/mp4">
             </video>
         <?php endif; ?>
         <?php if(!empty($post->video_key_yt)): ?>
-            <iframe width="100%" src="<?= $post->video_key_yt; ?>" frameborder="0" allowfullscreen></iframe>
+            <iframe width="100%" height="301px" src="<?= Help::youtubeurl($post->video_key_yt); ?>" frameborder="0" allowfullscreen></iframe>
         <?php endif; ?>
     <?php else: ?>
-        <a rel="canonical" href="<?= $post->getUrl(); ?>">
+        <a  href="<?= $post->getUrl(); ?>">
             <?php $titleAlt = !empty($post->postImages[0]->trl) ? $post->postImages[0]->trl->name : ''; ?>
             <img title="<?= $titleAlt; ?>" alt="<?= $titleAlt; ?>" width="706" class="img-fluid" src="<?= $post->getFirstImageUrlEx(706,311); ?>">
         </a>
@@ -31,7 +32,7 @@ use app\helpers\Constants;
     <?php endif; ?>
 
     <h2>
-        <a rel="canonical" class="content__card__title" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
+        <a  class="content__card__title" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
     </h2>
 
     <div class="content__card__intro">
@@ -40,7 +41,7 @@ use app\helpers\Constants;
 
     <div class="content__card__info">
         <?php if(!empty($post->author)): ?>
-            <a rel="canonical" href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
+            <a  href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
                 <?= $post->author->name.' '.$post->author->surname; ?>
             </a>
         <?php else: ?>

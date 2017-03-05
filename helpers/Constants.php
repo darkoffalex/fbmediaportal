@@ -45,6 +45,7 @@ class Constants
     const KIND_INTERESTING_CONTENT = 1;
     const KIND_INTERESTING_COMMENTS = 2;
     const KIND_FORUM = 3;
+    const KIND_NOT_SELECTED = 4;
 
     //Types of banners
     const BANNER_TYPE_IMAGE = 1;

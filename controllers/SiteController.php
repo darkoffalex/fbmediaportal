@@ -15,6 +15,7 @@ use app\components\Controller;
 use yii\data\Pagination;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
+use yii\helpers\FileHelper;
 use yii\helpers\Url;
 use yii\web\NotAcceptableHttpException;
 use app\models\User;
@@ -58,6 +59,42 @@ class SiteController extends Controller
     }
 
     /**
+     * Clear cache
+     */
+    public function actionCc()
+    {
+        //clear standard cache
+        Yii::$app->cache->flush();
+
+        //skip settings
+        $skip = array('.', '..', '.gitignore','cropped','thumbnails');
+
+        //path to assets and runtime directories
+        $assets = scandir(Yii::getAlias('@webroot/assets'));
+        $runtime = scandir(Yii::getAlias('@app/runtime'));
+
+        //clear assets
+        foreach($assets as $entry) {
+            if(!in_array($entry, $skip)){
+                $path = Yii::getAlias('@webroot/assets/'.$entry);
+                FileHelper::removeDirectory($path);
+                echo $path." removed <br>";
+            }
+        }
+
+        //clear runtime
+        foreach($runtime as $entry) {
+            if(!in_array($entry, $skip)){
+                $path = Yii::getAlias('@app/runtime/'.$entry);
+                FileHelper::removeDirectory($path);
+                echo $path." removed <br>";
+            }
+        }
+
+        exit('Finished');
+    }
+
+    /**
      * Temporary method to show all categories in list
      */
     public function actionRubricator()
@@ -95,9 +132,12 @@ class SiteController extends Controller
      */
     public function actionFbLogin()
     {
+
         if(!session_id()) {
             session_start();
         }
+
+        $redirectUrl = Yii::$app->session->getFlash('last-url',Url::to(['/main/profile']));
 
         $fb = new Facebook([
             'app_id' => Yii::$app->params['facebook']['app_id'],
@@ -161,7 +201,7 @@ class SiteController extends Controller
                 if($user->role_id == Constants::ROLE_REDACTOR || $user->role_id == Constants::ROLE_ADMIN){
                     return $this->redirect(Url::to(['/admin/main/index']));
                 }else{
-                    return $this->redirect(Url::to(['/main/profile']));
+                    return $this->redirect($redirectUrl);
                 }
             }
 

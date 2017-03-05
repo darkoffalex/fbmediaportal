@@ -21,6 +21,7 @@ $controller = $this->context;
         <title><?= Html::encode($this->title) ?></title>
         <?php $this->head() ?>
 
+
         <style type="text/css">
             .row
             {
