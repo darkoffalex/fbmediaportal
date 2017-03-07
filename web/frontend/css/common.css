@@ -87,3 +87,8 @@
 {
     width: 100% !important;
 }
+
+.afterglow.video-js
+{
+    width: auto;
+}

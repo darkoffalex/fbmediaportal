@@ -900,7 +900,8 @@ class MainController extends Controller
         $titles = [
             'about' => 'О проекте',
             'advertising' => 'Реклама',
-            'politics' => 'Политика безопасности'
+            'politics' => 'Политика безопасности',
+            'agreement' => 'Пользовательское соглашение'
         ];
 
         $this->view->title = ArrayHelper::getValue($titles,$type,'Безымянная страница').' - '.$this->view->title;

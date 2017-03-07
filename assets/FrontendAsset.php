@@ -22,6 +22,7 @@ class FrontendAsset extends AssetBundle
 
     public $js = [
         'js/scripts.min.js',
-        'js/common.js'
+        'js/common.js',
+        'js/afterglow.min.js'
     ];
 }

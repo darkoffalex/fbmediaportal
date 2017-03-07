@@ -98,7 +98,10 @@ class Controller extends BaseController
 
         /* @var $bannerDisplays BannerDisplay[] */
         foreach ($bannerDisplays as $bannerDisplay){
-            $this->banners[$bannerDisplay->place->alias][] = $bannerDisplay->banner;
+            $arr = !empty($this->banners[$bannerDisplay->place->alias]) ? $this->banners[$bannerDisplay->place->alias] : [];
+            if(!in_array($bannerDisplay->banner, $arr)){
+                $this->banners[$bannerDisplay->place->alias][] = $bannerDisplay->banner;
+            }
         }
 
         //clear the cache

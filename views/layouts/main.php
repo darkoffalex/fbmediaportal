@@ -43,6 +43,7 @@ $fb = new Facebook([
 
 <body>
 <?php $this->beginBody(); ?>
+
 <!-- BANNER DESKTOP::START-->
 <section class="topBanner hidden-xs-down">
     <div class="container">
@@ -139,8 +140,7 @@ $fb = new Facebook([
                     <div class="col-sm-8">
                         <div class="footer__navi">
                             <a href="<?= Url::to(['/main/pages','type' => 'about']); ?>">О проекте</a>
-                            <a href="<?= Url::to(['/main/pages','type' => 'advertising']); ?>">Реклама</a>
-                            <a href="<?= Url::to(['/main/pages','type' => 'politics']); ?>">Политика безопасности</a>
+                            <a href="<?= Url::to(['/main/pages','type' => 'agreement']); ?>">Пользовательское соглашение</a>
                         </div>
 <!--                        <div class="footer__navi">-->
 <!--                            <a href="#">secret@vc.ru</a>-->

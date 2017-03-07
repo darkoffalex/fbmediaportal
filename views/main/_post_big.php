@@ -14,9 +14,8 @@ use app\helpers\Help;
 
     <?php if($post->content_type_id == Constants::CONTENT_TYPE_VIDEO && (!empty($post->video_key_fb) || !empty($post->video_key_yt))): ?>
         <?php if(!empty($post->video_key_fb)): ?>
-            <video width="100%" height="311px" controls style="background-color: rgb(204,204,204);">
-                <source src="<?= $post->video_key_fb; ?>" type="video/mp4">
-            </video>
+            <?php $poster = !empty($post->postImages[0]) ? $post->getFirstImageUrlEx(706,311) : null; ?>
+            <video class="afterglow" <?php if(!empty($poster)): ?>poster="<?= $poster; ?>"<?php endif; ?> id="fb_vid_<?= $post->video_attachment_id_fb; ?>" width="665" height="294" src="<?= $post->video_key_fb; ?>"></video>
         <?php endif; ?>
         <?php if(!empty($post->video_key_yt)): ?>
             <iframe width="100%" height="301px" src="<?= Help::youtubeurl($post->video_key_yt); ?>" frameborder="0" allowfullscreen></iframe>
