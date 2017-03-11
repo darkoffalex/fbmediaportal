@@ -106,6 +106,10 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                     </p>
 
                     <p>
+                        <?= Html::a(Yii::t('admin','Refresh commentator time-lines'),['/admin/posts/refresh-lines', 'id' => $model->id],['data-confirm' => Yii::t('admin','Please DO NOT close this page until updating be finished!')]); ?>
+                    </p>
+
+                    <p>
                         <strong><?= Yii::t('admin','Created At') ?></strong> : <?= $model->created_at; ?>
                     </p>
 

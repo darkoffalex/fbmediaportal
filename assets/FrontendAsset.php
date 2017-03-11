@@ -13,7 +13,7 @@ class FrontendAsset extends AssetBundle
 {
     public $basePath = '@webroot/frontend';
     public $baseUrl = '@web/frontend';
-    public $jsOptions = ['position' => View::POS_HEAD];
+    public $jsOptions = ['position' => View::POS_END];
 
     public $css = [
         'css/styles.min.css',

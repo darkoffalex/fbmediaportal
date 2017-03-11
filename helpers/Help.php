@@ -302,4 +302,35 @@ class Help
 
         return $string;
     }
+
+    /**
+     * Executes some code just for developer's IPS
+     * @param callable $callback
+     * @return bool|mixed
+     */
+    public static function devexe(callable $callback){
+
+        $ips = [
+            '78.56.14.109',
+            '78.31.184.83'
+        ];
+
+        if(in_array($_SERVER['REMOTE_ADDR'],$ips)){
+            return call_user_func($callback);
+        }
+
+        return false;
+    }
+
+    /**
+     * Formats datetime string
+     * @param $datetime
+     * @param string $format
+     * @return bool|string
+     */
+    public static function datefmt($datetime,$format = 'd.m.Y H:i')
+    {
+        $dt = new \DateTime($datetime);
+        return date($format,$dt->getTimestamp());
+    }
 }

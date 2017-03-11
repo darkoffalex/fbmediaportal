@@ -178,40 +178,51 @@ class User extends UserDB implements IdentityInterface
      */
     public function getAvatar()
     {
-        return !empty($this->avatar_file) ? $this->avatar_file : Url::to('@web/img/no_user.png');
+        return !empty($this->avatar_file) && !empty($this->last_online_at) ? $this->avatar_file : Url::to('@web/img/no_user.png');
+    }
+
+    /**
+     * Updates user's time-line (non-static variant)
+     */
+    public function refreshTimeLine()
+    {
+        self::refreshTimeLineStatic($this->id);
     }
 
     /**
      * Updates user's time-line (full refresh, deletes old data and creates new)
+     * @param $userId
+     * @throws \yii\db\Exception
      */
-    public function refreshTimeLine()
+    public static function refreshTimeLineStatic($userId)
     {
-        UserTimeLine::deleteAll(['user_id' => $this->id]);
+        UserTimeLine::deleteAll(['user_id' => $userId]);
 
         $commentQuery = new Query();
         $comments = $commentQuery->select('comment.id, comment.created_at as published_at')
             ->from('comment')->leftJoin('post','comment.post_id = post.id')
-            ->where('comment.author_id = :author AND post.status_id = :status',['author' => $this->id, 'status' => Constants::STATUS_ENABLED])
+            ->where('comment.author_id = :author AND post.status_id = :status',['author' => $userId, 'status' => Constants::STATUS_ENABLED])
             ->createCommand()->queryAll();
 
         $postsQuery = new Query();
         $posts = $postsQuery->select('id, published_at')
             ->from('post')
-            ->where(['status_id' => Constants::STATUS_ENABLED, 'author_id' => $this->id])
+            ->where(['status_id' => Constants::STATUS_ENABLED, 'author_id' => $userId])
             ->createCommand()->queryAll();
 
         $rows = [];
         foreach ($comments as $row){
             $rows[] = [
-                'user_id' => $this->id,
+                'user_id' => $userId,
                 'post_id' => null,
                 'comment_id' => $row['id'],
                 'published_at' => $row['published_at']
             ];
         }
+
         foreach ($posts as $row){
             $rows[] = [
-                'user_id' => $this->id,
+                'user_id' => $userId,
                 'post_id' => $row['id'],
                 'comment_id' => null,
                 'published_at' => $row['published_at']

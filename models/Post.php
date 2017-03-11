@@ -9,6 +9,7 @@ use himiklab\thumbnail\EasyThumbnailImage;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\Expression;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\web\UploadedFile;
@@ -412,5 +413,30 @@ class Post extends PostDB
         $mainPostsQuery->orderBy(new Expression(implode(', ',$orderPriorities), $orderParams));
 
         return $mainPostsQuery;
+    }
+
+    /**
+     * Refreshing post's commentator's time-lines (useful when post changing his status, becomes visible or hidden)
+     */
+    public function refreshCommentAuthorsTimeLines()
+    {
+        $q = new Query();
+
+        $relatedAuthorIds = $q->select('comment.author_id')
+            ->from('comment')
+            ->where(['post_id' => $this->id])
+            ->createCommand()
+            ->queryAll();
+
+        $ids = [];
+        foreach($relatedAuthorIds as $item){
+            if(!in_array($item['author_id'],$ids)){
+                $ids[] = $item['author_id'];
+            }
+        }
+
+        foreach($ids as $id){
+            User::refreshTimeLineStatic($id);
+        }
     }
 }

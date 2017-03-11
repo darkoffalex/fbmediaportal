@@ -63,8 +63,8 @@ $config = [
             'transport' => [
                 'class' => 'Swift_SmtpTransport',
                 'host' => 'smtp.yandex.ru',
-                'username' => 'message@calltoclient.com',
-                'password' => 'rV68gE6D4fw5s4X5zae445',
+                'username' => 'info@rusturkey.com',
+                'password' => '',
                 'port' => '465',
                 'encryption' => 'ssl',
             ]
@@ -95,6 +95,7 @@ $config = [
                 'search' => 'main/search',
 
                 '/' => 'main/index',
+                'sitemap.xml' => 'site/site-map',
                 '<controller>' => '<controller>/index',
 
                 'post/<id:\d+>/<title:\w+(-\w+)*>' => 'main/post',

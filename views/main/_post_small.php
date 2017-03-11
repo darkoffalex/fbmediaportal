@@ -1,6 +1,7 @@
 <?php
 use yii\helpers\Url;
 use app\helpers\Constants;
+use app\helpers\Help;
 
 /* @var $category \app\models\Category */
 /* @var $post \app\models\Post */
@@ -47,7 +48,7 @@ use app\helpers\Constants;
             <?php else: ?>
                 <a href="#"><?= $post->author_custom_name; ?></a>
             <?php endif; ?>
-            <span>• <?= substr($post->published_at,0,16); ?></span>
+            <span> • <?= Help::datefmt($post->published_at); ?></span>
 
             <?php if($post->comment_count > 0): ?>
                 <div class="content__card__comments" style="margin-left: 10px;">

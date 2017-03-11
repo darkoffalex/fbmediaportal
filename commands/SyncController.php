@@ -4,12 +4,14 @@ namespace app\commands;
 use app\helpers\Constants;
 use app\helpers\Help;
 use app\helpers\Sort;
+use app\models\Category;
 use app\models\Comment;
 use app\models\Post;
 use app\models\PostGroup;
 use app\models\PostImage;
 use app\models\PostImageDB;
 use app\models\User;
+use app\models\UserTimeLine;
 use Yii;
 use yii\base\Exception;
 use yii\console\Controller;
@@ -34,10 +36,11 @@ class SyncController extends Controller
     public $attachments = 'yes';
     public $mark = 'yes';
     public $order = 'random';
+    public $ids = "";
 
     public function options($actionID)
     {
-        return ['eld', 'output', 'lng', 'portion', 'parsed', 'stock', 'from', 'attachments', 'to', 'mark', 'order'];
+        return ['eld', 'output', 'lng', 'portion', 'parsed', 'stock', 'from', 'attachments', 'to', 'mark', 'order', 'ids'];
     }
 
     private $processId = null;
@@ -256,7 +259,16 @@ class SyncController extends Controller
                         }
 
                         //save new comment
-                        $comment->save();
+                        $saved = $comment->save();
+
+                        //update author's time-line if added new comment for activated post
+                        if($saved && !empty($author) && $post->status_id == Constants::STATUS_ENABLED){
+                            $utl = new UserTimeLine();
+                            $utl -> comment_id = $comment->id;
+                            $utl -> user_id = $comment->author_id;
+                            $utl -> published_at = $comment->created_at;
+                            $utl -> save();
+                        }
                     }
                 }
             }
@@ -660,7 +672,7 @@ class SyncController extends Controller
 
         $pages = new Pagination(['totalCount' => $q->count(), 'defaultPageSize' => 20]);
         for ($i = 0; $i <= $pages->pageCount; $i++){
-            $pages->setPage($i+1);
+            $pages->setPage($i);
 
             /* @var $posts Post[] */
             $posts = $q->with(['categories','comments'])
@@ -668,7 +680,7 @@ class SyncController extends Controller
                 ->offset($pages->offset)->all();
 
             foreach($posts as $index => $post){
-                $currentIndex = (($pages->page-1) * $pages->limit) + $index;
+                $currentIndex = (($pages->page) * $pages->limit) + $index;
                 $post->updateSearchKeywords();
                 echo "Post {$currentIndex} of {$count} done. \n";
             }
@@ -682,9 +694,15 @@ class SyncController extends Controller
      */
     public function actionUpdateUserTimeLines()
     {        /* @var $all Post[] */
-        echo "Querying all users. Please wait...";
+        echo "Querying all users. Please wait...\n";
 
         $q = User::find();
+
+        if(!empty($this->ids)){
+            $IDs = explode(',',$this->ids);
+            $q->andWhere(['id' => $IDs]);
+        }
+
         $count = $q->count();
 
         if(!$this->confirm("Found ({$count}) users. Do you want proceed ?\n")){
@@ -694,20 +712,74 @@ class SyncController extends Controller
 
         echo "Updating...\n";
 
-        $pages = new Pagination(['totalCount' => $q->count(), 'defaultPageSize' => 20]);
+        $pages = new Pagination(['totalCount' => $count, 'defaultPageSize' => 20]);
         for ($i = 0; $i <= $pages->pageCount; $i++){
-            $pages->setPage($i+1);
+            $pages->setPage($i);
 
             /* @var $users User[] */
             $users = $q->limit($pages->limit)->offset($pages->offset)->all();
 
             foreach($users as $index => $user){
-                $currentIndex = (($pages->page-1) * $pages->limit) + $index;
+                $currentIndex = (($pages->page) * $pages->limit) + $index + 1;
                 $user->refreshTimeLine();
                 echo "User {$currentIndex} of {$count} done. \n";
             }
         }
 
         echo "Done!\n";
+    }
+
+    /**
+     * Fix priorities in all categories (if done mistake and same value was set for several items)
+     * @param int $rootId
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function actionFixPriorities($rootId = 0)
+    {
+        echo "Querying all categories of root {$rootId}. Please wait...\n";
+
+        /* @var $categories Category[] */
+        $categories = Category::find()->where(['parent_category_id' => $rootId])->orderBy('priority ASC')->all();
+        $total = count($categories);
+
+        foreach($categories as $index => $cat){
+            $cat->priority = $index+1;
+            $cat->update();
+
+            $current = $index + 1;
+
+            if(Category::find()->where(['parent_category_id' => $cat->id])->count() > 0){
+                $this->actionFixPriorities($cat->id);
+            }
+
+            echo "Category {$current} of {$total} [{$cat->id}] updated. Priority set to - {$current} \n";
+        }
+    }
+
+    /**
+     * Fixes empty names (when has internal name, but tranlatable not set)
+     * @param int $rootId
+     * @param string $lng
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function actionFixCategoryNames($rootId = 0, $lng = 'ru'){
+        /* @var $categories Category[] */
+        $categories = Category::find()->where(['parent_category_id' => $rootId])->orderBy('priority ASC')->all();
+
+        foreach($categories as $index => $cat){
+            $trl = $cat->getATrl($lng);
+
+            if(empty($trl->name) && !empty($cat->name)){
+                $trl->name = $cat->name;
+                $trl->isNewRecord ? $trl->save() : $trl->update();
+                echo "Category [{$cat->id}] fixed. Name set to - {$trl->name} \n";
+            }
+
+            if(Category::find()->where(['parent_category_id' => $cat->id])->count() > 0){
+                $this->actionFixCategoryNames($cat->id,$lng);
+            }
+        }
     }
 }

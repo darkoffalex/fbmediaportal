@@ -47,3 +47,5 @@ $controller = $this->context;
 <?php if(!empty($forumPosts)): ?>
     <?= $this->render('/common/_forum_posts',['posts' => $forumPosts, 'label' => 'Форум']); ?>
 <?php endif; ?>
+
+<script type="text/javascript">afterglow.init();</script>

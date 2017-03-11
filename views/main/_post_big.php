@@ -40,13 +40,11 @@ use app\helpers\Help;
 
     <div class="content__card__info">
         <?php if(!empty($post->author)): ?>
-            <a  href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>">
-                <?= $post->author->name.' '.$post->author->surname; ?>
-            </a>
+            <a href="<?= Url::to(['main/profile','id'=> $post->author_id]); ?>"><?= $post->author->name.' '.$post->author->surname; ?></a>
         <?php else: ?>
             <a href="#"><?= $post->author_custom_name; ?></a>
         <?php endif; ?>
-        <span>• <?= substr($post->published_at,0,16); ?></span>
+        <span>• <?= Help::datefmt($post->published_at); ?></span>
     </div>
 
     <?php if($post->comment_count > 0): ?>

@@ -7,6 +7,7 @@ use app\helpers\Help;
 use app\models\Banner;
 use app\models\Category;
 use app\models\Post;
+use app\models\UserTimeLine;
 use Facebook\Exceptions\FacebookSDKException;
 use Facebook\Facebook;
 use Facebook\GraphNodes\GraphPicture;
@@ -14,12 +15,14 @@ use Yii;
 use app\components\Controller;
 use yii\data\Pagination;
 use yii\db\Expression;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
 use yii\helpers\Url;
 use yii\web\NotAcceptableHttpException;
 use app\models\User;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 class SiteController extends Controller
 {
@@ -123,6 +126,39 @@ class SiteController extends Controller
         }
 
         return $this->renderContent(nl2br($content));
+    }
+
+    /**
+     * Generates site-map
+     * @return mixed|string
+     */
+    public function actionSiteMap()
+    {
+        if (!$xmlSiteMap = Yii::$app->cache->get('sitemap')) {
+            $urls = array();
+
+            $posts = (new Query())
+                ->select('p.id, trl.name')
+                ->from('post as p')
+                ->leftJoin('post_trl as trl', 'trl.post_id = p.id AND trl.lng = :lng',['lng' => Yii::$app->language])
+                ->where('p.status_id = :status', ['status' => Constants::STATUS_ENABLED])
+                ->orderBy('published_at DESC')
+                ->all();
+
+            foreach ($posts as $post) {
+                $urls[] = array(Yii::$app->urlManager->createUrl(['/main/post','id' => $post['id'], 'title' => Help::slug($post['name'])]), 'weekly');
+            }
+
+            $xmlSiteMap = $this->renderPartial('sitemap', array(
+                'host' => Yii::$app->request->hostInfo,
+                'urls' => $urls,
+            ));
+
+            Yii::$app->cache->set('sitemap', $xmlSiteMap, 3600*24*7);
+        }
+
+        header('Content-Type: application/xml');
+        echo $xmlSiteMap;
     }
 
     /**

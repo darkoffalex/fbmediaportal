@@ -2,6 +2,7 @@
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\widgets\LinkPager;
+use app\helpers\Help;
 
 /* @var $this \yii\web\View */
 /* @var $user \app\models\User */
@@ -74,7 +75,13 @@ $controller = $this->context;
                                         <?php else: ?>
                                             <a href="#"><?= $post->author_custom_name; ?></a>
                                         <?php endif; ?>
-                                        <span>• <?= substr($post->published_at,0,16); ?></span>
+                                        <span>• <?= Help::datefmt($post->published_at); ?></span>
+
+                                        <?php if($post->comment_count > 0): ?>
+                                            <div class="content__card__comments" style="margin-left: 10px;">
+                                                <span><?= $post->comment_count; ?></span>
+                                            </div>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>

@@ -34,10 +34,16 @@ $fb = new Facebook([
     <meta charset="<?= Yii::$app->charset ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title><?= Html::encode($this->title) ?></title>
+
     <!--[if lt IE 9]>
     <script src="<?= Url::to('@web/frontend/components/html5shiv/dist/html5shiv.js') ?>"></script>
     <![endif]-->
+
+<!--    <meta http-equiv="cache-control" content="private">-->
+<!--    <meta http-equiv="cache-control" content="max-age=3600, must-revalidate">-->
+
     <link rel="canonical" href="<?= Help::canonical(); ?>"/>
+    <link rel="shortcut icon" href="<?= Url::to('@web/favicon.ico'); ?>" type="image/x-icon">
     <?php $this->head(); ?>
 </head>
 
@@ -87,7 +93,7 @@ $fb = new Facebook([
                         'user_managed_groups'
                     ]); ?>
 
-                    <a class="header__login" href="<?= $loginUrl;?>">
+                    <a id="auth-link" class="header__login" href="<?= $loginUrl;?>">
                         <i class="ico ico-login"></i><span>Войти</span>
                     </a>
 
@@ -142,6 +148,10 @@ $fb = new Facebook([
                             <a href="<?= Url::to(['/main/pages','type' => 'about']); ?>">О проекте</a>
                             <a href="<?= Url::to(['/main/pages','type' => 'agreement']); ?>">Пользовательское соглашение</a>
                         </div>
+                        <div class="footer__navi">
+                            <a href="<?= Url::to(['/main/pages','type' => 'widgets']) ?>">Полезные виджеты</a>
+                            <a href="mailto:<?= Yii::$app->params['adminEmail']; ?>"><?= Yii::$app->params['adminEmail']; ?></a>
+                        </div>
 <!--                        <div class="footer__navi">-->
 <!--                            <a href="#">secret@vc.ru</a>-->
 <!--                            <a href="#">Карта сайта</a>-->
@@ -149,13 +159,23 @@ $fb = new Facebook([
 <!--                            ><a href="#">ИД «Комитет»</a>-->
 <!--                        </div>-->
                     </div>
-                    <div class="col-sm-4 text-sm-right"><a class="footer__alert" href="#"><i class="ico ico-alert"></i><span>Включить уведомления</span></a>
-                        <div class="footer__socials"><a href="#"><i class="ico ico-gplus"></i></a><a href="#"><i class="ico ico-twitter"></i></a><a href="#"><i class="ico ico-vk"></i></a><a href="#"><i class="ico ico-fb"></i></a><a href="#"><i class="ico ico-rss"></i></a><a href="#"><i class="ico ico-ok"></i></a></div>
+                    <div class="col-sm-4 text-sm-right">
+<!--                        <a class="footer__alert" href="#">-->
+<!--                            <i class="ico ico-alert"></i><span>Включить уведомления</span>-->
+<!--                        </a>-->
+                        <div class="footer__socials">
+<!--                            <a href="#"><i class="ico ico-gplus"></i></a>-->
+<!--                            <a href="#"><i class="ico ico-twitter"></i></a>-->
+<!--                            <a href="#"><i class="ico ico-vk"></i></a>-->
+                            <a href="#"><i class="ico ico-fb"></i></a>
+<!--                            <a href="#"><i class="ico ico-rss"></i></a>-->
+<!--                            <a href="#"><i class="ico ico-ok"></i></a>-->
+                        </div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-sm-12 text-xs-center">
-                        <div class="footer__copy">© RusTurkey. Копирайт 2016. Все права защишены</div>
+                        <div class="footer__copy">© RusTurkey.com, <?= date('Y'); ?>. Все права защищены</div>
                     </div>
                 </div>
             </div>

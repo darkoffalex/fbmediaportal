@@ -222,6 +222,7 @@ class PostsController extends Controller
                     $model->author->refreshTimeLine();
                 }
 
+
                 //clear the cache
                 Yii::$app->cache->flush();
             }
@@ -788,6 +789,30 @@ class PostsController extends Controller
         return $this->redirect(Yii::$app->request->referrer);
     }
 
+
+    /**
+     * Refreshes commentator's time-lines
+     * @param $id
+     * @return Response
+     * @throws NotFoundHttpException
+     */
+    public function actionRefreshLines($id)
+    {
+        /* @var $post Post */
+        $post = Post::find()->where(['id' => $id])->one();
+
+        if(empty($post)){
+            throw new NotFoundHttpException(Yii::t('admin','Post not found'),404);
+        }
+
+        $post->refreshCommentAuthorsTimeLines();
+
+        //clear cache
+        Yii::$app->cache->flush();
+
+        //back to previous page
+        return $this->redirect(Yii::$app->request->referrer);
+    }
 
     ////////////////////////////// A D M I N I Z A T O R  A P I  F U N C T I O N S ////////////////////////////////////
 

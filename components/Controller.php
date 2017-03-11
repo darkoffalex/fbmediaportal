@@ -119,7 +119,9 @@ class Controller extends BaseController
     public function afterAction($action, $result)
     {
         $result = parent::afterAction($action, $result);
-        Yii::$app->session->setFlash('last-url',Help::canonical());
+        if(!Yii::$app->request->isAjax){
+            Yii::$app->session->setFlash('last-url',Help::canonical());
+        }
         return $result;
     }
 }

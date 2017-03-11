@@ -3,7 +3,7 @@ use himiklab\thumbnail\EasyThumbnailImage;
 use yii\helpers\Url;
 use yii\widgets\LinkPager;
 use yii\helpers\ArrayHelper;
-use yii\helpers\StringHelper;
+use app\helpers\Help;
 
 /* @var $this \yii\web\View */
 /* @var $user \app\models\User; */
@@ -14,6 +14,7 @@ use yii\helpers\StringHelper;
 /* @var $type string */
 /* @var $materialCount int */
 /* @var $postCount int */
+/* @var $commentCount int */
 
 $controller = $this->context;
 ?>
@@ -56,10 +57,10 @@ $controller = $this->context;
                             <div class="profile__stats">
                                 <p>Количество материалов:<b><a href="<?= Url::to(['main/profile-details', 'id' => $user->id, 'type' => 'materials']); ?>"><?= $materialCount; ?></a></b></p>
                                 <p>Количество постов:<b><a href="<?= Url::to(['main/profile-details', 'id' => $user->id, 'type' => 'posts']); ?>"><?= $postCount; ?></a></b></p>
-                                <p>Количество комментариев:<b><a href="<?= Url::to(['main/profile-details', 'id' => $user->id, 'type' => 'comments']); ?>"><?= (int)$user->counter_comments; ?></a></b></p>
+                                <p>Количество комментариев:<b><a href="<?= Url::to(['main/profile-details', 'id' => $user->id, 'type' => 'comments']); ?>"><?= $commentCount; ?></a></b></p>
                             </div>
 
-                            <?php if(!empty($user->fb_user_id)): ?>
+                            <?php if(!empty($user->fb_user_id) && !empty($user->last_online_at)): ?>
                                 <a target="_blank" class="btn btn-fb" href="<?= "https://www.facebook.com/{$user->fb_user_id}/" ?>">
                                     <i class="ico ico-fb"></i>
                                     <span>Профиль в facebook</span>
@@ -76,14 +77,16 @@ $controller = $this->context;
                         <div class="content__card">
                             <?php foreach ($items as $item): ?>
                                 <?php if(!empty($item->post)): ?>
-                                    <!-- card-->
                                     <?= $this->render('_post_small',['post' => $item->post]); ?>
                                 <?php elseif (!empty($item->comment)): ?>
                                     <div class="contentComments__card content__card">
                                         <img class="img-fluid" src="<?= $user->getAvatar(); ?>">
                                         <div class="contentComments__card__content">
-                                            <b><a  href="<?= Url::to(['main/profile','id'=>$item->user_id]); ?>"><?= $user->name.' '.$user->surname; ?></a><span>-  <?= substr($item->published_at,0,16); ?></span></b>
+                                            <b><?= Help::datefmt($item->published_at); ?></span></b>
                                             <p><?= $item->comment->text; ?></p>
+                                            <div class="comment-for">
+                                                Комментарий к: <a href="<?= $item->comment->post->getUrl(); ?>"><?= $item->comment->post->trl->name; ?></a>
+                                            </div>
                                         </div>
                                     </div>
                                 <?php endif; ?>

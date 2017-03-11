@@ -152,6 +152,7 @@ class CategoriesController extends Controller
         if(Yii::$app->request->isPost){
 
             //load data
+            $oldParentCat = $model->parent_category_id;
             $model->load(Yii::$app->request->post());;
 
             //set some statistics info
@@ -160,6 +161,11 @@ class CategoriesController extends Controller
 
             //if validated - save
             if($model->validate()){
+
+                //if changing parent - recalculate priority
+                if($oldParentCat != $model->parent_category_id){
+                    $model->priority = Sort::GetNextPriority(Category::className(),['parent_category_id' => $model->parent_category_id]);
+                }
 
                 //update main object
                 $model->update();

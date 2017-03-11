@@ -33,7 +33,7 @@ $(document).ready(function () {
      * When scrolled to the bottom
      */
     $(document).scroll(function () {
-        if(($(window).scrollTop()+$(window).height())+450 >= $(document).height()){
+        if(($(window).scrollTop()+$(window).height())+900 >= $(document).height()){
 
             $('[data-postload]').each(function () {
 
@@ -57,8 +57,6 @@ $(document).ready(function () {
                         }
                     });
                 }
-
-
             })
         }
     });

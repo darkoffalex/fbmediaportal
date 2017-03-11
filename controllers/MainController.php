@@ -597,14 +597,17 @@ class MainController extends Controller
         //query activity list
         $q = UserTimeLine::find()->where(['user_id' => $user->id]);
         $countQ = clone $q;
-        $q->with(['post.trl','comment'])->orderBy('published_at DESC');
+        $q->with([
+            'post.trl',
+            'comment.post.trl',
+            'comment.author',
+            'post.postImages.trl',
+            'post.author'
+        ])->orderBy('published_at DESC');
 
-        $pages = new Pagination(['totalCount' => $countQ->count(), 'defaultPageSize' => 20]);
-        $items = $q->limit($pages->limit)
-            ->offset($pages->offset)
-            ->with(['post.trl','comment'])
-            ->orderBy('published_at DESC')
-            ->all();
+        $count = Help::cquery(function($db)use($countQ){return $countQ->count();},$cache);
+        $pages = new Pagination(['totalCount' => $count, 'defaultPageSize' => 20]);
+        $items = Help::cquery(function($db)use($q, $pages){return $q->limit($pages->limit)->offset($pages->offset)->all();},$cache);
 
         //posts for carousel
         $carouselPostsQuery = Post::findSorted()
@@ -619,8 +622,9 @@ class MainController extends Controller
         //counters
         $materialCount = Post::find()->where(['author_id' => $user->id, 'status_id' => Constants::STATUS_ENABLED])->andWhere('content_type_id != :type',['type' => Constants::CONTENT_TYPE_POST])->count();
         $postCount = Post::find()->where(['author_id' => $user->id, 'status_id' => Constants::STATUS_ENABLED, 'content_type_id' => Constants::CONTENT_TYPE_POST])->count();
+        $commentCount = Comment::find()->alias('c')->joinWith('post as p')->where('c.author_id = :author AND p.status_id = :status',['author' => $user->id, 'status' => Constants::STATUS_ENABLED])->count();
 
-        return $this->render('profile', compact('items','pages','user','carouselPosts','materialCount','postCount'));
+        return $this->render('profile', compact('items','pages','user','carouselPosts','materialCount','postCount','commentCount'));
     }
 
     /**
@@ -672,9 +676,12 @@ class MainController extends Controller
                 break;
             case 'comments':
                 $q = Comment::find()
-                    ->where(['author_id' => $user->id])
-//                    ->andWhere(new Expression('answer_to_id IS NULL OR answer_to_id = 0'))
-                    ->orderBy('created_at DESC');
+                    ->with(['post.trl','author'])
+                    ->alias('c')
+                    ->joinWith('post as p')
+                    ->where('c.author_id = :author AND p.status_id = :status',['author' => $user->id, 'status' => Constants::STATUS_ENABLED])
+                    ->orderBy('created_at DESC')
+                    ->distinct();
                 $qc = clone $q;
                 break;
             default :
@@ -686,19 +693,19 @@ class MainController extends Controller
                 break;
         }
 
-        $count = $count = Help::cquery(function($db)use($qc){return $qc->count();},false);
+        $count = $count = Help::cquery(function($db)use($qc){return $qc->count();},$cache);
         $pages = new Pagination(['totalCount' => $count, 'defaultPageSize' => 20]);
 
         if($type == 'comments'){
             $q->with(['children','author'])
                 ->offset($pages->offset)
                 ->limit($pages->limit);
-            $comments = Help::cquery(function($db)use($q){return $q->all();},false);
+            $comments = Help::cquery(function($db)use($q){return $q->all();},$cache);
         }else{
             $q->with(['trl','postImages','author'])
                 ->offset($pages->offset)
                 ->limit($pages->limit);
-            $posts = Help::cquery(function($db)use($q){return $q->all();},false);
+            $posts = Help::cquery(function($db)use($q){return $q->all();},$cache);
         }
 
         //posts for carousel
@@ -789,6 +796,7 @@ class MainController extends Controller
 
         $popularPostsQuery = Post::findSortedPopular(!empty($category) ? $id : null,$currentIds,$siblingIds)
             ->with(['trl', 'postImages.trl', 'author'])
+            ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('comment_count > :minCount',['minCount' => 200]))
             ->andWhere(new Expression('published_at > :minDate', ['minDate' => date('Y-m-d H:i:s',(time()-(86400*100)))]))
             ->distinct();
@@ -901,7 +909,8 @@ class MainController extends Controller
             'about' => 'О проекте',
             'advertising' => 'Реклама',
             'politics' => 'Политика безопасности',
-            'agreement' => 'Пользовательское соглашение'
+            'agreement' => 'Пользовательское соглашение',
+            'widgets' => 'Полезные виджеты'
         ];
 
         $this->view->title = ArrayHelper::getValue($titles,$type,'Безымянная страница').' - '.$this->view->title;

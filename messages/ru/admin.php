@@ -217,5 +217,6 @@ return [
     'Useful about turkey' => 'Полезное о турции',
     'Not selected' => 'Не выбран',
     'Is Eternal' => 'Без ограничений по времени',
-    'Clear place' => 'Очистить место'
+    'Clear place' => 'Очистить место',
+    'Refresh commentator time-lines' => 'Обновить ленты активности комментаторов'
 ];

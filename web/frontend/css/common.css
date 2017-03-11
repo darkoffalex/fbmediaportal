@@ -6,11 +6,19 @@
 }
 
 .contentComments__card img,
-.contentComments__card__child img
+.contentComments__card__child img,
+.contentComments__post img,
+.profile img
 {
     background-image: url("../../img/no_user.png");
     background-size: contain;
 }
+.contentComments__post img
+{
+    width: 80px;
+    height: 80px;
+}
+
 
 .child-comment-text.has-error,
 .form-control.has-error{
@@ -91,4 +99,26 @@
 .afterglow.video-js
 {
     width: auto;
+}
+
+.comment-muted
+{
+    color: #bfbfbf;
+}
+
+.comment-for
+{
+    font-size: 11px;
+}
+
+.comment-for a
+{
+    color: #bfbfbf;
+    text-decoration: underline;
+    font-style: italic;
+}
+
+.content__card__info
+{
+    margin-bottom: 10px;
 }

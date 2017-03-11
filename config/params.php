@@ -1,11 +1,11 @@
 <?php
 
 return [
-    'adminEmail' => 'admin@example.com',
+    'adminEmail' => 'info@rusturkey.com',
 
     'facebook' => [
-        'app_id' => '******',
-        'app_secret' => '*****',
-        'bot_token' => '*****'
+        'app_id' => '',
+        'app_secret' => '',
+        'bot_token' => ''
     ],
 ];
