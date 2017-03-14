@@ -62,7 +62,7 @@ $controller = $this->context;
                     <?php foreach ($slicedPart1 as $index => $post): ?>
 
                         <?php if($index == 0 || $post->content_type_id == Constants::CONTENT_TYPE_VIDEO): ?>
-                            <?= $this->render('_post_big',['category' => $category, 'post' => $post]); ?>
+                            <?= $this->render('_post_big',['category' => $category, 'post' => $post, 'title' => $index == 0]); ?>
                         <?php else: ?>
                             <?= $this->render('_post_small',['category' => $category, 'post' => $post]); ?>
                         <?php endif; ?>

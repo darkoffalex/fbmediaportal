@@ -304,6 +304,21 @@ class Help
     }
 
     /**
+     * Converts youtube URL to video ID
+     * @param $string
+     * @return mixed
+     */
+    public static function youtubeid($string){
+        $urlComponents = parse_url($string);
+        $queryString = $urlComponents['query'];
+
+        $params = [];
+        parse_str($queryString,$params);
+
+        return ArrayHelper::getValue($params,'v');
+    }
+
+    /**
      * Executes some code just for developer's IPS
      * @param callable $callback
      * @return bool|mixed
@@ -328,9 +343,36 @@ class Help
      * @param string $format
      * @return bool|string
      */
-    public static function datefmt($datetime,$format = 'd.m.Y H:i')
+    public static function datefmt($datetime,$format = '%e %B %Y, %R',$strftime = true)
     {
         $dt = new \DateTime($datetime);
+
+        if($strftime){
+            return self::rudate($format,$dt->getTimestamp());
+        }
+
         return date($format,$dt->getTimestamp());
+    }
+
+    /**
+     * Format russian date
+     * @param $format
+     * @param bool|false $date
+     * @return string
+     */
+    public static function rudate($format, $date = false) {
+        setlocale(LC_ALL, 'ru_RU.UTF-8');
+
+        if ($date === false) {
+            $date = time();
+        }
+
+        if ($format === '') {
+            $format = '%e&nbsp;%bg&nbsp;%Y&nbsp;г.';
+        }
+
+        $months = explode("|", '|января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря');
+        $format = preg_replace("~\%B~", $months[date('n', $date)], $format);
+        return strftime($format, $date);
     }
 }

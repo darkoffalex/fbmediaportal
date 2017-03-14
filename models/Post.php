@@ -301,6 +301,57 @@ class Post extends PostDB
         $this->update();
     }
 
+    /**
+     * Experimental base-selection method
+     * @param null $curCatId
+     * @param null $curCatIds
+     * @param null $sibIds
+     * @param bool|true $sticky
+     * @return ActiveQuery
+     */
+    public static function findSortedEx($curCatId = null, $curCatIds = null, $sibIds = null, $sticky = true)
+    {
+        //find all posts which related with specified categories
+        $q = Post::find()
+            ->alias('p')
+            ->joinWith('postCategories as pc')
+            ->andWhere(['pc.category_id' => $curCatIds]);
+
+        //ordering parameters (ordering is too complex in this shit)
+        $ordering = [];
+        $orderingParams = [];
+
+        //if need use sticky position, and specified category - use it in ordering
+        if($sticky && !empty($curCatId)){
+            $ordering[] = "IF((pc.category_id = :cat AND sticky_position > 0), sticky_position, 2147483647) ASC";
+            $orderingParams['cat'] = $curCatId;
+        }
+
+        //if need use sticky position but category not specified - use in ordering for main page
+        if($sticky && empty($curCatId)){
+            $ordering[] = "IF(sticky_position_main, sticky_position_main, 2147483647)";
+        }
+
+        //basic ordering stuff (lowest priority type, chronological order)
+        $ordering[] = "IF(content_type_id = :lowestPriorityType, 2147483647, 0) ASC";
+        $ordering[] = "p.published_at DESC";
+        $orderingParams['lowestPriorityType'] = Constants::STATUS_ENABLED;
+
+        //apply ordering
+        $q->orderBy(new Expression(implode(', ',$ordering), $orderingParams));
+
+        //remove duplicates
+        $q->distinct();
+
+        //unite with posts located in siblings (if siblings found)
+        if(!empty($sibIds)){
+            $qn = new ActiveQuery($q->modelClass);
+            $qn->select("*")->from([$q->union(self::findSortedEx(null,$sibIds,null,false))]);
+            return $qn;
+        }
+
+        return $q;
+    }
 
     /**
      * Builds complexly sort query for selecting all posts depending on current categories
@@ -335,7 +386,6 @@ class Post extends PostDB
         }
         $orderPriorities[] = "IF(content_type_id = :lowestPriorityType, 2147483647, 0) ASC";
         $orderPriorities[] = "p.published_at DESC";
-
 
         //finalize query
         $orderParams = ['lowestPriorityType' => Constants::CONTENT_TYPE_POST];
