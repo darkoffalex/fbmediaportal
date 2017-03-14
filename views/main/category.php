@@ -59,24 +59,25 @@ $controller = $this->context;
                     <?php /* @var $slicedPart1 \app\models\Post[] */ ?>
                     <?php $slicedPart1 = array_slice($mainPosts,0,5); ?>
 
-                    <?php foreach ($slicedPart1 as $index => $post): ?>
-
-                        <?php if($index == 0 || $post->content_type_id == Constants::CONTENT_TYPE_VIDEO): ?>
-                            <?= $this->render('_post_big',['category' => $category, 'post' => $post, 'title' => $index == 0]); ?>
-                        <?php else: ?>
-                            <?= $this->render('_post_small',['category' => $category, 'post' => $post]); ?>
-                        <?php endif; ?>
-
-                        <?php if($index == 0): ?>
-                            <!-- OWL DESKTOP::START-->
-                            <section class="topCarousel hidden-sm-up">
-                                <div id="owlTopMobile" data-current-page="1" data-loading="<?= Url::to(['main/category-ajax','carousel' => 1,'id' => !empty($category) ? $category->id : null]); ?>">
-                                    <?= $this->render('/common/_carousel',['posts' => $mainPosts]); ?>
-                                </div>
-                            </section>
-                        <?php endif; ?>
-
-                    <?php endforeach; ?>
+                    <?php if(!empty($slicedPart1)): ?>
+                        <?php foreach ($slicedPart1 as $index => $post): ?>
+                            <?php if($index == 0 || $post->content_type_id == Constants::CONTENT_TYPE_VIDEO): ?>
+                                <?= $this->render('_post_big',['category' => $category, 'post' => $post, 'title' => $index == 0]); ?>
+                            <?php else: ?>
+                                <?= $this->render('_post_small',['category' => $category, 'post' => $post]); ?>
+                            <?php endif; ?>
+                            <?php if($index == 0): ?>
+                                <!-- OWL DESKTOP::START-->
+                                <section class="topCarousel hidden-sm-up">
+                                    <div id="owlTopMobile" data-current-page="1" data-loading="<?= Url::to(['main/category-ajax','carousel' => 1,'id' => !empty($category) ? $category->id : null]); ?>">
+                                        <?= $this->render('/common/_carousel',['posts' => $mainPosts]); ?>
+                                    </div>
+                                </section>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p>Нет материалов</p>
+                    <?php endif; ?>
                 </div>
 
                 <!--sidebar-->
@@ -142,14 +143,12 @@ $controller = $this->context;
                     <?php $slicedPart2 = array_slice($mainPosts,5,3); ?>
 
                     <?php if(!empty($slicedPart2)): ?>
-
                         <?php if($slicedPart2[0]->content_type_id == Constants::CONTENT_TYPE_VIDEO): ?>
                             <?php $toIndex = (!empty($slicedPart2[1]) && $slicedPart2[1]->content_type_id != Constants::CONTENT_TYPE_VIDEO) ? 1 : 2 ?>
                             <?php if(!empty($slicedPart2[$toIndex]) && $slicedPart2[$toIndex]->content_type_id != Constants::CONTENT_TYPE_VIDEO): ?>
                                 <?php Help::swap($slicedPart2,0,$toIndex); ?>
                             <?php endif; ?>
                         <?php endif; ?>
-
                         <?php foreach ($slicedPart2 as $index => $post): ?>
                             <?php if($post->content_type_id == Constants::CONTENT_TYPE_VIDEO): ?>
                                 <?= $this->render('_post_big',['category' => $category, 'post' => $post]); ?>
@@ -157,6 +156,8 @@ $controller = $this->context;
                                 <?= $this->render('_post_small',['category' => $category, 'post' => $post]); ?>
                             <?php endif; ?>
                         <?php endforeach; ?>
+                    <?php else: ?>
+                        <p>Нет материалов</p>
                     <?php endif; ?>
                 </div>
                 <!--sidebar-->

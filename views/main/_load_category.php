@@ -34,6 +34,7 @@ $controller = $this->context;
                         <?= $this->render('_post_small',['category' => null, 'post' => $post]); ?>
                     <?php endif; ?>
                 <?php endforeach; ?>
+
             </div>
 
             <!--sidebar-->
@@ -42,6 +43,18 @@ $controller = $this->context;
         </div>
     </div>
 </section>
+<?php else: ?>
+    <section class="content">
+        <div class="container">
+            <div class="row">
+                <div class="hidden-md-down col-lg-2"></div>
+                <div class="col-sm-8 col-lg-7 no-pad-r">
+                    <p>Нет материалов</p>
+                </div>
+                <div class="col-sm-4 col-lg-3 no-pad-l hidden-xs-down"><div class="content__sidebar"></div></div>
+            </div>
+        </div>
+    </section>
 <?php endif; ?>
 
 <?php if(!empty($forumPosts)): ?>

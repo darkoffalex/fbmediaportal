@@ -314,8 +314,12 @@ class Post extends PostDB
         //find all posts which related with specified categories
         $q = Post::find()
             ->alias('p')
-            ->joinWith('postCategories as pc')
-            ->andWhere(['pc.category_id' => $curCatIds]);
+            ->joinWith('postCategories as pc');
+
+        //if categories specified (if not - will be selected all)
+        if(!empty($curCatIds)){
+            $q->andWhere(['pc.category_id' => $curCatIds]);
+        }
 
         //ordering parameters (ordering is too complex in this shit)
         $ordering = [];

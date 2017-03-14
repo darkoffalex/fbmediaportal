@@ -77,75 +77,6 @@ class MainController extends Controller
 
     /********************************************** C A T E G O R Y ***************************************************/
 
-    public function actionCategoryTest($id)
-    {
-
-        /* @var $category Category */
-        $category = null;
-        //category ids which should be used for finding posts (empty for searching whole posts)
-        $currentIds = [];
-        //siblings categories (second priority for ordering)
-        $siblingIds = [];
-
-        //if ID set - try to get category
-        if(!empty($id)){
-            $catQuery = Category::find()
-                ->where(['id' => $id, 'status_id' => Constants::STATUS_ENABLED])
-                ->with([
-                    'trl',
-                    'parent.trl',
-                    'parent.childrenActive.childrenActive',
-                    'childrenActive.childrenActive'
-                ]);
-
-            $category = $catQuery->one();
-
-            if(empty($category)){
-                throw new NotFoundHttpException('Рубрика не найдена', 404);
-            }
-        }
-
-        //get all category ids which should be included in search query
-        if(!empty($category)){
-
-            /* @var $children Category[] */
-            $children = $category->getChildrenRecursive(true);
-            $currentIds = array_values(ArrayHelper::map($children,'id','id'));
-            $currentIds[] = $category->id;
-
-            /* @var $siblings Category[] */
-            $siblings = !empty($category->parent) ? $category->parent->getChildrenRecursive(true) : [];
-            $siblingIds = !empty($siblings) ? array_values(ArrayHelper::map($siblings,'id','id')) : [];
-            foreach ($siblingIds as $index => $id){
-                if(in_array($id,$currentIds)){
-                    unset($siblingIds[$index]);
-                }
-            }
-        }
-
-        Help::debug($currentIds);
-        Help::debug($siblingIds);
-
-        $currentIdsStr = !empty($currentIds) ? implode(',',$currentIds) : null;
-        Help::debug($currentIdsStr);
-
-        $forumPostsQuery = Post::findSortedEx(!empty($category) ? $id : null,$currentIds,$siblingIds,true)
-            ->with(['trl', 'postImages.trl'])
-            ->andWhere(['status_id' => Constants::STATUS_ENABLED])
-            ->andWhere(['kind_id' => Constants::KIND_FORUM])
-            ->distinct()
-            ->limit(4);
-
-        /* @var $forumPosts Post[] */
-        $forumPosts = $forumPostsQuery->all();
-
-        foreach($forumPosts as $fp){
-            Help::debug($fp->name.' ('.$fp->id.')');
-        }
-        exit();
-    }
-
-
     /**
      * Render category page
      * @param null $id
@@ -205,7 +136,7 @@ class MainController extends Controller
             }
         }
 
-        $mainPostsQuery = Post::findSorted(!empty($category) ? $id : null,$currentIds,$siblingIds)
+        $mainPostsQuery = Post::findSortedEx(!empty($category) ? $id : null,$currentIds,$siblingIds)
             ->with(['trl', 'postImages.trl', 'author'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
@@ -313,11 +244,12 @@ class MainController extends Controller
         }
 
         //getting main posts paginated
-        $mainPostsQuery = Post::findSorted(!empty($category) ? $id : null,$currentIds,$siblingIds)
+        $mainPostsQuery = Post::findSortedEx(!empty($category) ? $id : null,$currentIds,$siblingIds)
             ->with(['trl', 'postImages.trl', 'author'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
             ->distinct();
+
 
         $mainPostsQueryCount = clone $mainPostsQuery;
         $mainPostsCount = Help::cquery(function($db)use($mainPostsQueryCount){return $mainPostsQueryCount->count();},$cache);
@@ -326,7 +258,7 @@ class MainController extends Controller
 
         //getting forum posts paginated
         if(!$carousel){
-            $forumPostsQuery = Post::findSorted(!empty($category) ? $id : null,$currentIds,$siblingIds)
+            $forumPostsQuery = Post::findSortedEx(!empty($category) ? $id : null,$currentIds,$siblingIds)
                 ->with(['trl', 'postImages.trl'])
                 ->andWhere(['status_id' => Constants::STATUS_ENABLED])
                 ->andWhere(['kind_id' => Constants::KIND_FORUM])
@@ -336,6 +268,13 @@ class MainController extends Controller
             $forumPostsCount = Help::cquery(function($db)use($forumPostsQueryCount){return $forumPostsQueryCount->count();},$cache);
             $pagesForum = new Pagination(['totalCount' => $forumPostsCount, 'defaultPageSize' => 4]);
             $forumPosts = Help::cquery(function($db)use($forumPostsQuery,$pagesForum){return $forumPostsQuery->offset($pagesForum->offset)->limit($pagesForum->limit)->all();},$cache);
+
+            //load nothing if can't find any data
+            if($page > $pagesForum->pageCount && $page > $pagesMain->pageCount){
+                return false;
+            }elseif($page > $pagesForum->pageCount){
+                $forumPosts = [];
+            }
         }
 
         if($carousel){
@@ -414,7 +353,7 @@ class MainController extends Controller
         }
 
         //get all related with current category posts (to populate carousel)
-        $carouselPostsQuery = Post::findSorted(!empty($category) ? $id : null,$currentIds,$siblingIds)
+        $carouselPostsQuery = Post::findSortedEx(!empty($category) ? $id : null,$currentIds,$siblingIds)
             ->with(['trl', 'postImages.trl', 'author'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
@@ -679,7 +618,7 @@ class MainController extends Controller
         $items = Help::cquery(function($db)use($q, $pages){return $q->limit($pages->limit)->offset($pages->offset)->all();},$cache);
 
         //posts for carousel
-        $carouselPostsQuery = Post::findSorted()
+        $carouselPostsQuery = Post::findSortedEx()
             ->with(['trl', 'postImages.trl'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
@@ -778,7 +717,7 @@ class MainController extends Controller
         }
 
         //posts for carousel
-        $carouselPostsQuery = Post::findSorted()
+        $carouselPostsQuery = Post::findSortedEx()
             ->with(['trl', 'postImages.trl'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
@@ -856,7 +795,7 @@ class MainController extends Controller
             }
         }
 
-        $mainPostsQuery = Post::findSorted(!empty($category) ? $id : null,$currentIds,$siblingIds)
+        $mainPostsQuery = Post::findSortedEx(!empty($category) ? $id : null,$currentIds,$siblingIds)
             ->with(['trl', 'postImages.trl', 'author'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
@@ -950,7 +889,7 @@ class MainController extends Controller
         $this->view->registerMetaTag(['name' => 'keywords', 'content' => '']);
 
         //posts for carousel
-        $carouselPostsQuery = Post::findSorted()
+        $carouselPostsQuery = Post::findSortedEx()
             ->with(['trl', 'postImages.trl'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
@@ -987,7 +926,7 @@ class MainController extends Controller
         $this->view->registerMetaTag(['name' => 'keywords', 'content' => '']);
 
         //posts for carousel
-        $carouselPostsQuery = Post::findSorted()
+        $carouselPostsQuery = Post::findSortedEx()
             ->with(['trl', 'postImages.trl'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
