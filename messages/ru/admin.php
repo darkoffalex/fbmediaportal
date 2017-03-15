@@ -218,5 +218,6 @@ return [
     'Not selected' => 'Не выбран',
     'Is Eternal' => 'Без ограничений по времени',
     'Clear place' => 'Очистить место',
-    'Refresh commentator time-lines' => 'Обновить ленты активности комментаторов'
+    'Refresh commentator time-lines' => 'Обновить ленты активности комментаторов',
+    'Nested' => 'Вложен.'
 ];

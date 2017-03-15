@@ -7,11 +7,12 @@ use Yii;
 use yii\data\ActiveDataProvider;
 use app\models\User;
 use yii\db\Expression;
+use yii\helpers\ArrayHelper;
 
 class PostSearch extends Post
 {
 
-    public $content, $category_id;
+    public $content, $category_id, $nested;
 
     /**
      * Validation rules for search
@@ -21,7 +22,7 @@ class PostSearch extends Post
     {
         return [
             [['name', 'content', 'published_at', 'created_at', 'need_finish', 'need_update', 'is_parsed', 'fb_sync_id'], 'string', 'max' => 255],
-            [['content_type_id', 'id', 'type_id', 'category_id', 'author_id', 'group_id', 'kind_id', 'status_id'], 'integer'],
+            [['content_type_id', 'id', 'type_id', 'category_id', 'author_id', 'group_id', 'kind_id', 'status_id', 'nested'], 'integer'],
         ];
     }
 
@@ -34,6 +35,7 @@ class PostSearch extends Post
 
         $newLabels = [
             'content' => Yii::t('admin','Content'),
+            'nested' => Yii::t('admin','Nested')
         ];
 
         return array_merge($baseLabels,$newLabels);
@@ -100,7 +102,20 @@ class PostSearch extends Post
             }
 
             if(!empty($this->category_id)){
-                $q->joinWith('categories as cat')->andWhere(['cat.id' => $this->category_id]);
+
+                if(!$this->nested){
+                    $q->joinWith('categories as cat')->andWhere(['cat.id' => $this->category_id]);
+                }else{
+                    /* @var $category Category */
+                    $category = Category::find()->where(['id' => $this->category_id])->one();
+                    //obtain children ID's
+                    $children = $category->getChildrenRecursive(true);
+                    $currentIds = array_values(ArrayHelper::map($children,'id','id'));
+                    //include current id
+                    $currentIds[] = $category->id;
+                    //query
+                    $q->joinWith('categories as cat')->andWhere(['cat.id' => $currentIds]);
+                }
             }
 
             if(!empty($this->name)){

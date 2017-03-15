@@ -122,3 +122,9 @@
 {
     margin-bottom: 10px;
 }
+
+.topCarousel
+{
+    max-height: 130px;
+    overflow: hidden;
+}

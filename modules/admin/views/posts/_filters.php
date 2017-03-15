@@ -1,6 +1,6 @@
 <?php
 use yii\helpers\Html;
-use yii\widgets\ActiveForm;
+use yii\bootstrap\ActiveForm;
 use kartik\select2\Select2;
 use yii\helpers\Url;
 use yii\helpers\ArrayHelper;
@@ -30,7 +30,7 @@ use kartik\daterange\DateRangePicker;
         <div class="col-md-1">
             <?= $form->field($model,'id')->textInput()->error(false); ?>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <?= $form->field($model,'category_id')->dropDownList(ArrayHelper::map(Category::getRecursiveItemsEx(),'id',function($model,$defaultValue){
                 /* @var $model Category */
                 $result = "";
@@ -38,6 +38,9 @@ use kartik\daterange\DateRangePicker;
                 $result.= $model->name;
                 return $result;
             }),['prompt' => ''])->label(Yii::t('admin','Category'))->error(false); ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model,'nested')->checkbox([],false);  ?>
         </div>
         <div class="col-md-2">
             <?= $form->field($model,'author_id')->widget(Select2::classname(), [

@@ -138,7 +138,7 @@ class SiteController extends Controller
             $urls = array();
 
             $posts = (new Query())
-                ->select('p.id, trl.name')
+                ->select('p.id, p.updated_at, trl.name')
                 ->from('post as p')
                 ->leftJoin('post_trl as trl', 'trl.post_id = p.id AND trl.lng = :lng',['lng' => Yii::$app->language])
                 ->where('p.status_id = :status', ['status' => Constants::STATUS_ENABLED])
@@ -146,7 +146,13 @@ class SiteController extends Controller
                 ->all();
 
             foreach ($posts as $post) {
-                $urls[] = array(Yii::$app->urlManager->createUrl(['/main/post','id' => $post['id'], 'title' => Help::slug($post['name'])]), 'weekly');
+                $item = [
+                    'updated_at' => $post['updated_at'],
+                    'id' => $post['id'],
+                    'url' => Yii::$app->urlManager->createUrl(['/main/post','id' => $post['id'], 'title' => Help::slug($post['name'])]),
+                    'freq' => 'daily'
+                ];
+                $urls[] = $item;
             }
 
             $xmlSiteMap = $this->renderPartial('sitemap', array(

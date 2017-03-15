@@ -6,8 +6,9 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
 <urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">
     <?php foreach($urls as $index => $url): ?>
         <url>
-            <loc><?= $host.$url[0];?></loc>
-            <changefreq><?= $url[1];?></changefreq>
+            <loc><?= $host.$url['url'];?></loc>
+            <changefreq><?= $url['freq'];?></changefreq>
+            <lastmod><?= $url['updated_at']; ?></lastmod>
             <priority>0.5</priority>
         </url>
     <?php endforeach; ?>
