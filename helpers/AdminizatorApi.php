@@ -56,7 +56,7 @@ class AdminizatorApi
     private function __clone(){}
 
     /**
-     * AdminizatorApi constructor.
+     * Adminizator Api constructor.
      */
     private function __construct()
     {

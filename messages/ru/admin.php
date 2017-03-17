@@ -219,5 +219,10 @@ return [
     'Is Eternal' => 'Без ограничений по времени',
     'Clear place' => 'Очистить место',
     'Refresh commentator time-lines' => 'Обновить ленты активности комментаторов',
-    'Nested' => 'Вложен.'
+    'Nested' => 'Вложен.',
+    'Sticky' => 'Закреплен',
+    'On main page' => 'На главной странице',
+    'Non sticky on main' => 'Не закреплен на главной',
+    'On categories' => 'В категориях',
+    'On main or categories' => 'На главной или в категориях'
 ];

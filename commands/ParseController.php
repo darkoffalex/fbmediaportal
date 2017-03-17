@@ -1,6 +1,7 @@
 <?php
 namespace app\commands;
 
+use app\helpers\AdminizatorApi;
 use app\helpers\Sort;
 use app\models\Category;
 use app\models\Language;
@@ -91,6 +92,8 @@ class ParseController extends Controller
      */
     public function actionIndex()
     {
+        exit("Method disabled \n");
+
         mb_internal_encoding("UTF-8");
 
         if(empty($this->url)){
@@ -595,6 +598,7 @@ class ParseController extends Controller
 
         echo "DONE! Added {$added} of {$total} posts.\nCategory has {$categoryAppended}\n";
     }
+
 
     /**
      * Cleans fucked names

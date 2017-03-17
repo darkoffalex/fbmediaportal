@@ -142,6 +142,12 @@ class MainController extends Controller
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
             ->distinct();
 
+        $lastPostsQuery = Post::find()
+            ->with(['trl', 'postImages.trl'])
+            ->where(['status_id' => Constants::STATUS_ENABLED])
+            ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
+            ->orderBy('published_at DESC');
+
         $forumPostsQuery = Post::findSortedEx(!empty($category) ? $id : null,$currentIds,$siblingIds)
             ->with(['trl', 'postImages.trl'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
@@ -150,8 +156,9 @@ class MainController extends Controller
 
         $popularPostsQuery = Post::findSortedPopular(!empty($category) ? $id : null,$currentIds,$siblingIds)
             ->with(['trl'])
+            ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('comment_count > :minCount',['minCount' => 200]))
-            ->andWhere(new Expression('published_at > :minDate', ['minDate' => date('Y-m-d',(time()-(86400*7)))]))
+            ->andWhere(new Expression('published_at > :minDate', ['minDate' => date('Y-m-d',(time()-(86400*14)))]))
             ->distinct();
 
         $turkeyPostsQuery = Post::findSortedAboutTurkey(!empty($category) ? $id : null,$currentIds,$siblingIds)
@@ -160,6 +167,8 @@ class MainController extends Controller
 
         $mainPostsQuery->limit(15);
         $forumPostsQuery->limit(4);
+
+        $lastPostsQuery->limit(7);
         $popularPostsQuery->limit(7);
         $turkeyPostsQuery->limit(7);
 
@@ -168,6 +177,7 @@ class MainController extends Controller
         $forumPosts = Help::cquery(function($db)use($forumPostsQuery){return $forumPostsQuery->all();},$cache);
         $popularPosts = Help::cquery(function($db)use($popularPostsQuery){return $popularPostsQuery->all();},$cache);
         $turkeyPosts = Help::cquery(function($db)use($turkeyPostsQuery){return $turkeyPostsQuery->all();},$cache);
+        $lastPosts = Help::cquery(function($db)use($lastPostsQuery){return $lastPostsQuery->all();},$cache);
 
 //        Help::debug($forumPosts);
 //        exit();
@@ -186,7 +196,7 @@ class MainController extends Controller
         }
 
         //rendering page
-        return $this->render('category',compact('mainPosts','forumPosts','popularPosts','turkeyPosts','category'));
+        return $this->render('category',compact('mainPosts','forumPosts','popularPosts','turkeyPosts','lastPosts','category'));
     }
 
     /**
@@ -795,18 +805,18 @@ class MainController extends Controller
             }
         }
 
-        $mainPostsQuery = Post::findSortedEx(!empty($category) ? $id : null,$currentIds,$siblingIds)
-            ->with(['trl', 'postImages.trl', 'author'])
-            ->andWhere(['status_id' => Constants::STATUS_ENABLED])
+        $mainPostsQuery = Post::find()
+            ->with(['trl', 'postImages.trl'])
+            ->where(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
-            ->distinct();
+            ->orderBy('published_at DESC');
 
 
         $popularPostsQuery = Post::findSortedPopular(!empty($category) ? $id : null,$currentIds,$siblingIds)
             ->with(['trl', 'postImages.trl', 'author'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('comment_count > :minCount',['minCount' => 200]))
-            ->andWhere(new Expression('published_at > :minDate', ['minDate' => date('Y-m-d H:i:s',(time()-(86400*100)))]))
+            ->andWhere(new Expression('published_at > :minDate', ['minDate' => date('Y-m-d H:i:s',(time()-(86400*14)))]))
             ->distinct();
 
         $turkeyPostsQuery = Post::findSortedAboutTurkey(!empty($category) ? $id : null,$currentIds,$siblingIds)

@@ -78,7 +78,7 @@ $controller = $this->context;
                                         <span>• <?= Help::datefmt($post->published_at); ?></span>
 
                                         <?php if($post->comment_count > 0): ?>
-                                            <div class="content__card__comments" style="margin-left: 10px;">
+                                            <div class="content__card__comments">
                                                 <span><?= $post->comment_count; ?></span>
                                             </div>
                                         <?php endif; ?>

@@ -152,6 +152,11 @@ class PostsController extends Controller
             //if validated - save and go to list
             if($model->validate()){
 
+                //if selected sticky-position - unbind all posts from this sticky position
+                if(!empty($model->sticky_position_main)){
+                    Post::updateAll(['sticky_position_main' => null],['sticky_position_main' => $model->sticky_position_main]);
+                }
+
                 //update
                 $model->update();
 
@@ -184,8 +189,15 @@ class PostsController extends Controller
                 foreach($model->categoriesStickyPositions as $cpID => $stickyPosition){
                     $postId = explode('_',$cpID)[0];
                     $categoryId = explode('_',$cpID)[1];
+
                     $pc = PostCategory::findOne(['category_id' => $categoryId,'post_id' => $postId]);
                     if(!empty($pc)){
+
+                        //unbind all other posts relations from this position
+                        if(!empty($categoryId)){
+                            PostCategory::updateAll(['sticky_position' => null],['category_id' => $categoryId, 'sticky_position' => $stickyPosition]);
+                        }
+
                         $pc->sticky_position = $stickyPosition;
                         $pc->update();
                     }

@@ -13,6 +13,7 @@ use app\helpers\Help;
 /* @var $popularPosts \app\models\Post[] */
 /* @var $turkeyPosts \app\models\Post[] */
 /* @var $category \app\models\Category */
+/* @var $lastPosts \app\models\Post[] */
 
 /* @var $currentIds int[] */
 /* @var $siblingIds int[] */
@@ -123,7 +124,7 @@ $controller = $this->context;
                 <div class="hidden-md-down col-lg-2"></div>
                 <div class="col-md-12 col-lg-10">
                     <div class="row">
-                        <?= $this->render('/common/_posts_list',['posts' => $mainPosts, 'label' => 'Последнее', 'type' => 'latest']); ?>
+                        <?= $this->render('/common/_posts_list',['posts' => $lastPosts, 'label' => 'Последнее', 'type' => 'latest']); ?>
                         <?= $this->render('/common/_posts_list',['posts' => $popularPosts, 'label' => 'Популярное', 'type' => 'popular', 'ico' => 'ico-cat-hot']); ?>
                         <?= $this->render('/common/_posts_list',['posts' => $turkeyPosts, 'label' => 'Полезное о Турции', 'type' => 'turkey', 'ico' => 'ico-cat-turkey']); ?>
                     </div>

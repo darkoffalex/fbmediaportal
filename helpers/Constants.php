@@ -62,4 +62,10 @@ class Constants
     const FB_POST_STATUS = "status";
     const FB_POST_LINK = "link";
     const FB_POST_EVENT = "event";
+
+    //Sticky status
+    const STICKY_MAIN = 1;
+    const STICKY_CATEGORIES = 2;
+    const STICKY_ANY = 3;
+    const STICKY_NONE = 4;
 }

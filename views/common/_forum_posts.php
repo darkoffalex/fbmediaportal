@@ -26,12 +26,12 @@ $user = Yii::$app->user->identity;
                         <div class="col-sm-12 text-xs-center">
                             <div class="bottomCards__heading"> <?= $label; ?></div>
                         </div>
-                        <?php foreach ($posts as $post): ?>
-                            <div class="col-sm-4 col-lg-3">
-                                <a class="bottomCards__card" href="<?= $post->getUrl(); ?>">
-                                    <img class="img-fluid" style="width: 220px; height: 140px;" src="<?= $post->getThumbnailUrl(220,140); ?>">
+                        <?php foreach ($posts as $index => $post): ?>
+                            <div class="col-sm-4 col-lg-3 <?php if($index == 2): ?> hidden-xs-down <?php endif; ?> <?php if($index == 3): ?> hidden-md-down <?php endif; ?>">
+                                <div class="bottomCards__card">
+                                    <a href="<?= $post->getUrl(); ?>"><img class="img-fluid" src="<?= $post->getThumbnailUrl(440,280); ?>"></a>
                                     <a class="bottomCards__card__title" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
-                                </a>
+                                </div>
                             </div>
                         <?php endforeach; ?>
                     </div>

@@ -55,12 +55,13 @@ $languages = \app\models\Language::find()->all();
                     Constants::STATUS_DISABLED => Yii::t('admin','Disabled'),
                 ]); ?>
 
-                <?php $all = ArrayHelper::map(Category::getRecursiveItemsEx(),'id',function($model,$defaultValue){
+                <?php $all = ArrayHelper::map(Category::buildRecursiveArrayForDropDown(0,false,false),'id',function($model,$defaultValue){
                     /* @var $model Category */
                     $result = "";
                     for($i=1;$i<$model->getDepth();$i++){$result.= "-";}
                     $result.= $model->name;
                     return $result;
+//                return $model->name;
                 }); ?>
                 
                 <?php if(!$model->isNewRecord): ?>

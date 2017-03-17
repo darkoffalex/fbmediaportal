@@ -20,8 +20,9 @@ use app\helpers\Help;
             <?php endif; ?>
         <?php else: ?>
             <a  href="<?= $post->getUrl(); ?>">
+<!--                style="width: 240px; height: 136px;"-->
                 <?php $titleAlt = !empty($post->postImages[0]->trl) ? $post->postImages[0]->trl->name : ''; ?>
-                <img title="<?= $titleAlt; ?>" alt="<?= $titleAlt; ?>" style="width: 240px; height: 136px;" class="img-fluid" src="<?= $post->getThumbnailUrl(484,276); ?>">
+                <img title="<?= $titleAlt; ?>" alt="<?= $titleAlt; ?>" class="img-fluid" src="<?= $post->getThumbnailUrl(484,276); ?>">
             </a>
         <?endif; ?>
     </div>
@@ -51,7 +52,7 @@ use app\helpers\Help;
             <span> • <?= Help::datefmt($post->published_at); ?></span>
 
             <?php if($post->comment_count > 0): ?>
-                <div class="content__card__comments" style="margin-left: 10px;">
+                <div class="content__card__comments">
                     <span><?= $post->comment_count; ?></span>
                 </div>
             <?php endif; ?>

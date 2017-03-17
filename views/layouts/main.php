@@ -167,7 +167,7 @@ $fb = new Facebook([
 <!--                            <a href="#"><i class="ico ico-gplus"></i></a>-->
 <!--                            <a href="#"><i class="ico ico-twitter"></i></a>-->
 <!--                            <a href="#"><i class="ico ico-vk"></i></a>-->
-                            <a href="#"><i class="ico ico-fb"></i></a>
+                            <a target="_blank" href="https://www.facebook.com/RusTurkey-1217534681658311/?fref=ts"><i class="ico ico-fb"></i></a>
 <!--                            <a href="#"><i class="ico ico-rss"></i></a>-->
 <!--                            <a href="#"><i class="ico ico-ok"></i></a>-->
                         </div>

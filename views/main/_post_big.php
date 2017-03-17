@@ -36,7 +36,7 @@ $title = !empty($title) ? $title : false;
     <?php endif; ?>
 
     <h2>
-        <a  class="content__card__title" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
+        <a class="content__card__title" href="<?= $post->getUrl(); ?>"><?= $post->trl->name; ?></a>
     </h2>
 
     <div class="content__card__intro">

@@ -312,9 +312,10 @@ class Category extends CategoryDB
     /**
      * Recursive drop-down menu built array
      * @param bool $onlyActive
-     * @return array
+     * @param bool $nestedDropDown
+     * @return array|Category[]
      */
-    public function getChildrenForDropDownRecursive($onlyActive = false)
+    public function getChildrenForDropDownRecursive($onlyActive = false, $nestedDropDown = true)
     {
         $children = $onlyActive ? $this->childrenActive : $this->children;
         $items = [];
@@ -322,26 +323,36 @@ class Category extends CategoryDB
         if(!empty($children)){
             foreach($children as $child){
                 if(empty($child->children)){
-                    $items[] = [
-                        'label' => $child->name,
-                        'url' => '#',
-                        'options' => [
-                            'data-category-name' => $child->name,
-                            'data-category-add' => $child->id,
-                            'data-category-remove' => $child->parent_category_id,
-                            'data-no-click' => 'true'
-                        ]
-                    ];
+
+                    if($nestedDropDown){
+                        $items[] = [
+                            'label' => $child->name,
+                            'url' => '#',
+                            'options' => [
+                                'data-category-name' => $child->name,
+                                'data-category-add' => $child->id,
+                                'data-category-remove' => $child->parent_category_id,
+                                'data-no-click' => 'true'
+                            ]
+                        ];
+                    }else{
+                        $items[] = $child;
+                    }
                 }else{
-                    $items[] = [
-                        'label' => $child->name,
-                        'options' => [
-                            'data-category-name' => $child->name,
-                            'data-category-add' => $child->id,
-                            'data-category-remove' => $child->parent_category_id,
-                        ],
-                        'items' => $child->getChildrenForDropDownRecursive($onlyActive)
-                    ];
+                    if($nestedDropDown){
+                        $items[] = [
+                            'label' => $child->name,
+                            'options' => [
+                                'data-category-name' => $child->name,
+                                'data-category-add' => $child->id,
+                                'data-category-remove' => $child->parent_category_id,
+                            ],
+                            'items' => $child->getChildrenForDropDownRecursive($onlyActive,$nestedDropDown)
+                        ];
+                    }else{
+                        $items[] = $child;
+                        $items = ArrayHelper::merge($items,$child->getChildrenForDropDownRecursive($onlyActive,$nestedDropDown));
+                    }
                 }
             }
         }
@@ -353,41 +364,57 @@ class Category extends CategoryDB
      * Build a recursive array for drop-down controls in forms
      * @param int $rootId
      * @param bool|false $justEnabled
-     * @return Category[]
+     * @param bool $nestedDropDown
+     * @return array|Category[]
      */
-    public static function buildRecursiveArrayForDropDown($rootId = 0, $justEnabled = false)
+    public static function buildRecursiveArrayForDropDown($rootId = 0, $justEnabled = false, $nestedDropDown = true)
     {
         /* @var $result self[] */
         $result = [];
 
         /* @var $items self[] */
         $q = self::find()->orderBy('priority ASC')->where(['parent_category_id' => $rootId]);
-        $q->with(['children.children']);
+        $q->with([
+            'children.children',
+            'parent.parent',
+            'children.parent',
+            'children.children.parent',
+            'children.parent.parent'
+        ]);
         if($justEnabled) $q->where(['status_id' => Constants::STATUS_ENABLED]);
         $items = $q->all();
 
         foreach($items as $item){
             if(empty($item->children)){
-                $result[] = [
-                    'label' => $item->name,
-                    'url' => '#',
-                    'options' => [
-                        'data-category-name' => $item->name,
-                        'data-category-add' => $item->id,
-                        'data-category-remove' => $item->parent_category_id,
-                        'data-no-click' => 'true'
-                    ]
-                ];
+                if($nestedDropDown){
+                    $result[] = [
+                        'label' => $item->name,
+                        'url' => '#',
+                        'options' => [
+                            'data-category-name' => $item->name,
+                            'data-category-add' => $item->id,
+                            'data-category-remove' => $item->parent_category_id,
+                            'data-no-click' => 'true'
+                        ]
+                    ];
+                }else{
+                    $result[] = $item;
+                }
             }else{
-                $result[] = [
-                    'label' => $item->name,
-                    'options' => [
-                        'data-category-name' => $item->name,
-                        'data-category-add' => $item->id,
-                        'data-category-remove' => $item->parent_category_id,
-                    ],
-                    'items' => $item->getChildrenForDropDownRecursive($justEnabled)
-                ];
+                if($nestedDropDown){
+                    $result[] = [
+                        'label' => $item->name,
+                        'options' => [
+                            'data-category-name' => $item->name,
+                            'data-category-add' => $item->id,
+                            'data-category-remove' => $item->parent_category_id,
+                        ],
+                        'items' => $item->getChildrenForDropDownRecursive($justEnabled,$nestedDropDown)
+                    ];
+                }else{
+                    $result[] = $item;
+                    $result = ArrayHelper::merge($result,$item->getChildrenForDropDownRecursive($justEnabled,$nestedDropDown));
+                }
             }
         }
 

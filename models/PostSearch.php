@@ -12,7 +12,7 @@ use yii\helpers\ArrayHelper;
 class PostSearch extends Post
 {
 
-    public $content, $category_id, $nested;
+    public $content, $category_id, $nested, $sticky;
 
     /**
      * Validation rules for search
@@ -22,7 +22,7 @@ class PostSearch extends Post
     {
         return [
             [['name', 'content', 'published_at', 'created_at', 'need_finish', 'need_update', 'is_parsed', 'fb_sync_id'], 'string', 'max' => 255],
-            [['content_type_id', 'id', 'type_id', 'category_id', 'author_id', 'group_id', 'kind_id', 'status_id', 'nested'], 'integer'],
+            [['content_type_id', 'id', 'type_id', 'category_id', 'author_id', 'group_id', 'kind_id', 'status_id', 'nested', 'sticky'], 'integer'],
         ];
     }
 
@@ -35,7 +35,8 @@ class PostSearch extends Post
 
         $newLabels = [
             'content' => Yii::t('admin','Content'),
-            'nested' => Yii::t('admin','Nested')
+            'nested' => Yii::t('admin','Nested'),
+            'sticky' => Yii::t('admin','Sticky')
         ];
 
         return array_merge($baseLabels,$newLabels);
@@ -91,6 +92,14 @@ class PostSearch extends Post
 
             if(!empty($this->fb_sync_id)){
                 $q->andWhere(['fb_sync_id' => $this->fb_sync_id]);
+            }
+
+            if(!empty($this->sticky)){
+                if($this->sticky == Constants::STICKY_MAIN){
+                    $q->andWhere(new Expression('sticky_position_main IS NOT NULL AND sticky_position_main > 0'));
+                }elseif($this->sticky == Constants::STICKY_NONE){
+                    $q->andWhere(new Expression('sticky_position_main IS NULL OR sticky_position_main = 0'));
+                }
             }
 
             if(!empty($this->kind_id)){

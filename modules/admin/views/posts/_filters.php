@@ -31,12 +31,13 @@ use kartik\daterange\DateRangePicker;
             <?= $form->field($model,'id')->textInput()->error(false); ?>
         </div>
         <div class="col-md-2">
-            <?= $form->field($model,'category_id')->dropDownList(ArrayHelper::map(Category::getRecursiveItemsEx(),'id',function($model,$defaultValue){
+            <?= $form->field($model,'category_id')->dropDownList(ArrayHelper::map(Category::buildRecursiveArrayForDropDown(0,false,false),'id',function($model,$defaultValue){
                 /* @var $model Category */
                 $result = "";
                 for($i=1;$i<$model->getDepth();$i++){$result.= "-";}
                 $result.= $model->name;
                 return $result;
+//                return $model->name;
             }),['prompt' => ''])->label(Yii::t('admin','Category'))->error(false); ?>
         </div>
         <div class="col-md-1">
@@ -121,9 +122,21 @@ use kartik\daterange\DateRangePicker;
                 Constants::STATUS_DISABLED => Yii::t('admin','Disabled'),
             ],['prompt' => '']); ?>
         </div>
-        <div class="col-md-2" style="margin-top: 25px;">
+        <div class="col-md-2">
+            <?= $form->field($model,'sticky')->dropDownList([
+                Constants::STICKY_MAIN => Yii::t('admin','On main page'),
+                Constants::STICKY_NONE => Yii::t('admin','Non sticky on main'),
+//                Constants::STICKY_CATEGORIES => Yii::t('admin','On categories'),
+//                Constants::STICKY_ANY => Yii::t('admin','On main or categories')
+            ],['prompt' => '']); ?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2">
             <?= Html::submitButton(Yii::t('admin','Filter'), ['class' => 'btn btn-primary box-btn']) ?>
         </div>
     </div>
+
     <?php ActiveForm::end(); ?>
 </div>

@@ -67,7 +67,7 @@
     font-size: 17px;
 }
 
-#gcw_siteFq5Qgpr2R {width: auto !important;}
+#gcw_siteFKZNEPOtf {width: auto !important;}
 .content__sidebar__metrics{overflow:hidden}
 
 .uSocial-Share
@@ -91,7 +91,7 @@
     width: 100%;
 }
 
-#gsInformerID-3b11qqjw22EYrq
+#gsInformerID-cwQPln6G4wW1tY
 {
     width: 100% !important;
 }
@@ -128,3 +128,26 @@
     max-height: 130px;
     overflow: hidden;
 }
+
+.header__navi__drop
+{
+    z-index: 10;
+}
+
+
+.content__card__comments
+{
+    margin-left: 12px;
+}
+
+.content__card__intro
+{
+    font-size: 14px !important;
+}
+
+/*@media screen and (min-width: 640px) {*/
+    /*.content__card__comments*/
+    /*{*/
+        /*margin-left: 10px;*/
+    /*}*/
+/*}*/
