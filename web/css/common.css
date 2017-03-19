@@ -92,3 +92,14 @@
 {
     text-align: center;
 }
+
+.content,
+.content-header
+{
+    max-width: 1280px;
+}
+
+.content-header
+{
+    margin: 0 auto;
+}

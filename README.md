@@ -1,57 +1,74 @@
-FB MEDIA PORTAL
+RusTurkey.com / FB Media-Portal engine
 ===============
 
-Media portal management system, the content of which is imported from FB 
-groups through Adminizator system. Based on [Yii 2](http://www.yiiframework.com/) framework 
+Система управления новостным порталом, контент которого как может быть создан в ручную, так и импортирован из Facebook. Система работает в связке с [Adminizator](https://adminizator.com/) и разрабатывалась в первую очередь как сторонний модуль для Adminizator'a. Весь контент импортируемый из Facebook загружается и обновляется через Adminizator API. Основано на PHP феймфорке [Yii 2](http://www.yiiframework.com/) framework
 
-REQUIREMENTS
+ТРЕБОВАНИЯ
 ------------
 
-The minimum requirement by this project template that your Web server supports PHP 5.4.0.
+Ваш веб-сервер должен поддерживать как минимум PHP 5.4.0 и MySql
 
 
-INSTALLATION
+УСТАНОВКА И РАЗВЕРТЫВАНИЕ
 ------------
+### Установите Composer
 
-### Install composer
+Для того чтобы развернуть проект вам понадобится менеджер по управлению пакетами [Composer](http://getcomposer.org/). Он позволяет легко загружать и использовать необходимые для вашего приложения библиотеки и пакеты. Если у вас нет [Composer](http://getcomposer.org/), вы можете установить его руководствуясь инструкциями на [getcomposer.org](http://getcomposer.org/doc/00-intro.md#installation-nix). Если вы пользуетесь готовой сборкой для запуска локального веб-сервера (например такой как [XAMPP](https://www.apachefriends.org/), или [OpenServer](https://ospanel.io/))  убедитесь что composer не поставляется вместе со сборкой и уже не установлен.
 
-If you do not have [Composer](http://getcomposer.org/), you may install it by following the instructions at [getcomposer.org](http://getcomposer.org/doc/00-intro.md#installation-nix). If you using [OpenServer](https://ospanel.io/) you shouldn't install composer separately, because it is already integrated.
+### Обновите проект
 
-### Update project
-
-You can then clone or download this project into your preferred directory on your web server. By default - project will be without necessary framework files, so it can't be run by your server. You need update it through [Composer](http://getcomposer.org/), to download all necessary system files. Open your console and go to your project directory using following command.
-
+После загрузки проекта в нужную директорию вы не сможете заставить ваш веб-сервер его запустить, поскольку отсутствуют необходимые библиотеки и файлы фреймворка которые можно "догрузить" при помощи composer. Что именно должно быть загружено прописано в файле composer.json, поэтому вам остается только инициировать процесс обновления пакетов используя composer. Откройте вашу командную строку, перейдтие в папку расположения вашего проекта. Для этого воспользуйтесь командой cd, пример которой указан ниже.
+ 
 ~~~
 cd "your/project/directory"
 ~~~
 
-Then you can use composer to update your project and download all necessary system files. Run following command
+Обратите внимание на то, что использовать алиас php в командной строке не удастся, если путь к интерпретатору php не настроен в вашей системе, поэтому вместо короткого алиаса нужно будет всегда указывать полный путь к файлу php.exe. Если вы пользуетесь [OpenServer](https://ospanel.io/), вы можете использовать встроенную командную строку, в которой этот алиас будет уже прописан. Перед тем как присутпить к обновлению стоит обновить сам composer. Для этого воспользуейтесь командой
+
+~~~
+php composer self-update
+~~~
+
+После чего следует установить дополнительный пакет [Composer Asset Plugin](https://github.com/fxpio/composer-asset-plugin) при помощи следующей команды
+
+~~~
+php composer global require "fxp/composer-asset-plugin:^1.2.0"
+~~~
+
+Затем можно запускать обновление проекта
 
 ~~~
 php composer update
 ~~~
 
-Wait until project be updated. Then you can run project with your server.
+При обновлении может возникнуть потребность ввести oAuth токен github'а. Вы можете сгенерировать такой токен в разделе [personal access tokens](https://github.com/settings/tokens) в настройках своего github аккаунта. Не обращайте внимание на то что при вставке или вводе токена в командной строке он не отображается, просто вставьте его и нажмите enter
 
 
-CONFIGURATION
--------------
+### База данных
 
-### Database
-
-Edit the file `config/db.php` with real data, for example:
+После того как проект будет полностью обновлен, необходимо настроить подключение базы данных. Настрйока подключения к базе производится в файле `config/db.php`. Он содержит обычный ассоциативный массив. Создайте пустую базу и пропишите подкючение к ней в этом массиве.
 
 ```php
 return [
     'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=localhost;dbname=yii2basic',
-    'username' => 'root',
-    'password' => '1234',
+    'dsn' => 'mysql:host=ваш_хост;dbname=имя_вашей_базы',
+    'username' => 'имя_пользователя',
+    'password' => 'пароль_пользователя',
     'charset' => 'utf8',
 ];
 ```
 
-**NOTES:**
-- Yii won't create the database for you, this has to be done manually before you can access it.
-- Check and edit the other files in the `config/` directory to customize your application as required.
-- Refer to the README in the `tests` directory for information specific to basic application tests.
+### Миграции
+
+После того как подключения к базе данных будут настроены, следует запустить миграции. Эта процедура создаст необходимые таблицы. Для запуска миграций перейдите в командную строку (убедитесь что находитесь в директории проекта) и впишите следующую комманду
+```php
+php yii migrate
+```
+
+Приложение будет готово к запуску после того как все миграции будут обновлены.
+
+СТРУКТУРА
+------------
+Система по сути разделена на две части, одна из них отвечает за frontend (отображение содержимого) другая за backend (администрирование содержимого). Часть отвечающая за backend выполнена в виде модуля admin. Путь к модулю  - modules\admin. В модуле сохранена структура MVC, там вы найдете папки controllers и views. В корневой директории вы так же найдете папки controllers и views. Модели из папки models используются в обеих частях (в модуле admin и на frontend). Согласно прадигме MVC (по которой работает фреймворк Yii2) вся логика находится в controller'ах, отображение же находится в файлых view. Файлы models используются дл работы с базой данных (часть логики может быть инкапсулирована и в них)
+
+_Продолжение следует..._

@@ -20,15 +20,6 @@ $controller = $this->context;
         <?= Html::csrfMetaTags() ?>
         <title><?= Html::encode($this->title) ?></title>
         <?php $this->head() ?>
-
-
-        <style type="text/css">
-            .row
-            {
-                max-width: 1280px;
-            }
-        </style>
-
     </head>
     <!-- sidebar-collapse-->
     <body class="hold-transition <?= \dmstr\helpers\AdminLteHelper::skinClass(); ?> sidebar-mini sidebar-collapse">
