@@ -17,14 +17,23 @@ $(document).ready(function () {
         var container = $($(this).data('click-load'));
         var link = $(this);
 
-        $.ajax({
-            url: link.attr('href'),
-            type: 'GET',
-            async: false,
-            success: function(reloaded_data){
-                container.html(reloaded_data);
-            }
-        });
+        if(!container.hasClass('loaded')){
+            $.ajax({
+                url: link.attr('href'),
+                type: 'GET',
+                async: false,
+                success: function(reloaded_data){
+                    container.html(reloaded_data);
+                    container.addClass('loaded');
+                    link.addClass('loaded');
+                }
+            });
+        }else{
+            container.html('');
+            container.removeClass('loaded');
+            link.removeClass('loaded');
+        }
+
 
         return false;
     });

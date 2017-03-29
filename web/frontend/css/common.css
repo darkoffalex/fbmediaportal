@@ -5,6 +5,13 @@
     padding-left: 20px;
 }
 
+.reloading-comments.loaded
+{
+    background: url('../images/have-ul-dark@2x_flip.png') center left no-repeat;
+    background-size: 12px;
+    padding-left: 20px;
+}
+
 .contentComments__card img,
 .contentComments__card__child img,
 .contentComments__post img,
@@ -85,10 +92,15 @@
     margin-right: 5px !important;
 }
 
+.code-banner-holder
+{
+    width: 100%;
+}
 
 .content__sidebar__metrics
 {
     width: 100%;
+    /*margin: 0 auto;*/
 }
 
 #gsInformerID-cwQPln6G4wW1tY

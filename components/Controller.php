@@ -104,6 +104,10 @@ class Controller extends BaseController
             }
         }
 
+        //Set cache-controlling headers
+//        Yii::$app->response->headers->set('Expires', gmdate('D, d M Y H:i:s \G\M\T', time() + (60 * 60)));
+//        Yii::$app->response->headers->set('Pragma', 'cache');
+
         //clear the cache
 //        Yii::$app->cache->flush();
 

@@ -31,7 +31,7 @@ class AdminModule extends \yii\base\Module
     }
 
     /**
-     * Выполняется перед каждым action'ом
+     * Override before action method
      * @param \yii\base\Action $action
      * @return bool
      */

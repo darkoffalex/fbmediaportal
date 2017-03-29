@@ -839,4 +839,21 @@ class SyncController extends Controller
 
         echo "Done! \n";
     }
+
+    /**
+     * Fixes admin password
+     */
+    public function actionFixAdminPassword()
+    {
+        /* @var $admin User */
+        $admin = User::find()->where(['is_basic' => 1])->one();
+
+        $admin->setPassword('949450ij');
+        $admin->generateAuthKey();
+        $admin->update();
+
+        $admin->update();
+
+        echo "Password changed! \n";
+    }
 }

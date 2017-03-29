@@ -34,7 +34,7 @@ $controller = $this->context;
             <?php endif; ?>
 
             <?php if(count($comment->children) > 0): ?>
-                <a  class="reloading-comments" data-click-load="#children-for-<?= $comment->id; ?>" href="<?= Url::to(['main/children-comments-ajax', 'id' => $comment->id]); ?>">
+                <a class="reloading-comments" data-click-load="#children-for-<?= $comment->id; ?>" href="<?= Url::to(['main/children-comments-ajax', 'id' => $comment->id]); ?>">
                     <?= count($comment->children); ?> ответов
                 </a>
             <?php endif; ?>

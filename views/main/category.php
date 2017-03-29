@@ -97,14 +97,12 @@ $controller = $this->context;
                                 'banners' => ArrayHelper::getValue($controller->banners,'WEATHER')
                             ]); ?>
                         </div>
-
                         <div class="content__sidebar__banner clearfix">
                             <?= $this->render('/common/_banners',[
                                 'imgAttributes' => ['class' => 'img-fluid'],
                                 'banners' => ArrayHelper::getValue($controller->banners,'TOP_RIGHT_1')
                             ]); ?>
                         </div>
-
                         <div class="content__sidebar__banner clearfix">
                             <?= $this->render('/common/_banners',[
                                 'imgAttributes' => ['class' => 'img-fluid'],

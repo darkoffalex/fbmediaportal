@@ -6,7 +6,9 @@ $config = [
     'id' => 'FB Media Portal',
     'name' => 'FB Media Portal',
     'basePath' => dirname(__DIR__),
+
     'bootstrap' => ['log','thumbnail'],
+
     'language' => 'ru',
 
     'modules' => [
@@ -79,6 +81,7 @@ $config = [
                 ],
             ],
         ],
+
         'db' => require(__DIR__ . '/db.php'),
 
         'urlManager' => [

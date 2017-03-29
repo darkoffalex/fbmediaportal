@@ -33,6 +33,8 @@ $fb = new Facebook([
     <!-- MADE WITH LOVE BY <> SERGEY KHMELEVSKOY </>-->
     <meta charset="<?= Yii::$app->charset ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<!--    <meta http-equiv="expires" content="--><?//= date(DATE_RFC850,(time()+86400)) ?><!--">-->
+
     <title><?= Html::encode($this->title) ?></title>
 
     <!--[if lt IE 9]>

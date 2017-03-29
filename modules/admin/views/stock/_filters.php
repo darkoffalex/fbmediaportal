@@ -18,7 +18,7 @@ use kartik\daterange\DateRangePicker;
 
 <div class="filters" style="border-bottom: 1px solid #F9F9F9; margin-bottom: 15px;">
     <?php $form = ActiveForm::begin([
-        'action' => ['index'],
+//        'action' => ['index'],
         'method' => 'get',
         'enableClientValidation'=>false,
     ]); ?>

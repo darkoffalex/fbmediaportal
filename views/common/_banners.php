@@ -26,7 +26,9 @@ $imgAttributes = !empty($imgAttributes) ? $imgAttributes : [];
             <?php $url = Url::to(['site/banner-redirect','id' => $banner->id, 'title' => Help::slug($banner->name)]); ?>
             <?= Html::a(Html::img('@web/uploads/img/'.$banner->image_filename,ArrayHelper::merge(['alt' => $banner->name],$imgAttributes)),$url,$attributes); ?>
         <?php elseif($banner->type_id == \app\helpers\Constants::BANNER_TYPE_CODE): ?>
-            <?= $banner->code; ?>
+            <div class="code-banner-holder clearfix">
+                <?= $banner->code; ?>
+            </div>
         <?php endif; ?>
     <?php endforeach; ?>
 <?php endif; ?>

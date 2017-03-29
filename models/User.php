@@ -178,7 +178,7 @@ class User extends UserDB implements IdentityInterface
      */
     public function getAvatar()
     {
-        return !empty($this->avatar_file) && !empty($this->last_online_at) ? $this->avatar_file : Url::to('@web/img/no_user.png');
+        return !empty($this->avatar_file) && !empty($this->last_online_at) ? $this->avatar_file : Url::to('@web/frontend/images/avatars/'.rand(1,24).'.png');
     }
 
     /**

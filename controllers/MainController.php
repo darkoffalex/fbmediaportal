@@ -114,9 +114,9 @@ class MainController extends Controller
         }
 
         //set meta data
-        $this->view->title = !empty($category) ? $category->trl->name .' - '.(!empty($category->parent) ? $category->parent->trl->name.' - '.$this->view->title : $this->view->title) : $this->view->title;
-        $this->view->registerMetaTag(['name' => 'description', 'content' => '']);
-        $this->view->registerMetaTag(['name' => 'keywords', 'content' => '']);
+        $this->view->title = !empty($category) ? $category->trl->name .' - '.(!empty($category->parent) ? $category->parent->trl->name.' - '.$this->view->title : $this->view->title) : "RusTurkey.com – крупнейший русскоязычный портал о Турции";
+        $this->view->registerMetaTag(['name' => 'description', 'content' => $this->commonSettings->meta_description]);
+        $this->view->registerMetaTag(['name' => 'keywords', 'content' => $this->commonSettings->meta_keywords]);
 
         //get all category ids which should be included in search query
         if(!empty($category)){
@@ -186,7 +186,7 @@ class MainController extends Controller
 
         //open-graph meta tags
         if(!empty($mainPosts)){
-            $this->view->registerMetaTag(['property' => 'og:description', 'content' => "Нет дескрипшена"]);
+            $this->view->registerMetaTag(['property' => 'og:description', 'content' => $this->commonSettings->meta_description]);
             $this->view->registerMetaTag(['property' => 'og:url', 'content' => Help::canonical()]);
             $this->view->registerMetaTag(['property' => 'og:site_name', 'content' => "RusTurkey.com"]);
             $this->view->registerMetaTag(['property' => 'og:title', 'content' => $this->view->title]);
@@ -609,8 +609,8 @@ class MainController extends Controller
 
         //set meta data
         $this->view->title = $user->name.' '.$user->surname.' - Профиль участника - '.$this->view->title;
-        $this->view->registerMetaTag(['name' => 'description', 'content' => '']);
-        $this->view->registerMetaTag(['name' => 'keywords', 'content' => '']);
+        $this->view->registerMetaTag(['name' => 'description', 'content' => $this->commonSettings->meta_description]);
+        $this->view->registerMetaTag(['name' => 'keywords', 'content' => $this->commonSettings->meta_keywords]);
 
         //query activity list
         $q = UserTimeLine::find()->where(['user_id' => $user->id]);
@@ -895,8 +895,8 @@ class MainController extends Controller
 
         //set meta data
         $this->view->title = $query.' - '.$this->view->title;
-        $this->view->registerMetaTag(['name' => 'description', 'content' => '']);
-        $this->view->registerMetaTag(['name' => 'keywords', 'content' => '']);
+        $this->view->registerMetaTag(['name' => 'description', 'content' => $this->commonSettings->meta_description]);
+        $this->view->registerMetaTag(['name' => 'keywords', 'content' => $this->commonSettings->meta_keywords]);
 
         //posts for carousel
         $carouselPostsQuery = Post::findSortedEx()
@@ -932,8 +932,8 @@ class MainController extends Controller
         ];
 
         $this->view->title = ArrayHelper::getValue($titles,$type,'Безымянная страница').' - '.$this->view->title;
-        $this->view->registerMetaTag(['name' => 'description', 'content' => '']);
-        $this->view->registerMetaTag(['name' => 'keywords', 'content' => '']);
+        $this->view->registerMetaTag(['name' => 'description', 'content' => $this->commonSettings->meta_description]);
+        $this->view->registerMetaTag(['name' => 'keywords', 'content' => $this->commonSettings->meta_keywords]);
 
         //posts for carousel
         $carouselPostsQuery = Post::findSortedEx()

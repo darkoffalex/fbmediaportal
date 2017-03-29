@@ -156,13 +156,13 @@ $gridColumns = [
                 $icon = $type == 'main' ? 'fa-sign-in' : 'fa-sign-out';
                 $title = $type == 'main' ? 'To archive' : 'From archive';
                 $batchMove[] = $model->id;
-                return Html::a('<i class="fa '.$icon.'"></i>', ['/admin/stock/status', 'id' => $model->id, 'status' => ($type == 'main'  ? Constants::STATUS_DELETED : Constants::STATUS_IN_STOCK)], ['title' => Yii::t('admin',$title)]);
+                return Html::a('<i class="fa '.$icon.'"></i>', ['/admin/stock/status', 'id' => $model->id, 'index' => $url, 'status' => ($type == 'main'  ? Constants::STATUS_DELETED : Constants::STATUS_IN_STOCK)], ['title' => Yii::t('admin',$title)]);
             },
 
         ],
 
         'urlCreator' => function ($action, $model, $key, $index) use ($dataProvider) {
-            if($action == 'move'){
+            if($action == 'move' || $action == 'archive'){
                 return (($index + 1) + (($dataProvider->pagination->pageSize) * ($dataProvider->pagination->page)));
             }
             $params = is_array($key) ? $key : ['id' => (string) $key];

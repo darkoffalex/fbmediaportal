@@ -43,10 +43,11 @@ class StockController extends Controller
      * Change status
      * @param $id
      * @param $status
+     * @param null $index
      * @return Response
      * @throws NotFoundHttpException
      */
-    public function actionStatus($id, $status)
+    public function actionStatus($id, $status, $index = null)
     {
         $availableStatuses = [
             Constants::STATUS_DELETED,
@@ -63,7 +64,7 @@ class StockController extends Controller
         $post->status_id = $status;
         $post->update();
 
-        return $this->redirect(Yii::$app->request->referrer);
+        return $this->redirect(Yii::$app->request->referrer.(!empty($index) ? "#element-move-$index" : ''));
     }
 
     /**
