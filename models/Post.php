@@ -6,6 +6,7 @@ use app\helpers\Constants;
 use app\helpers\Help;
 use app\models\Comment;
 use himiklab\thumbnail\EasyThumbnailImage;
+use himiklab\thumbnail\FileNotFoundException;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\Expression;
@@ -115,7 +116,11 @@ class Post extends PostDB
      */
     public function getThumbnailUrl($w = 90, $h = 70, $placeholder = true)
     {
-        return !empty($this->postImages[0]) ? $this->postImages[0]->getThumbnailUrl($w,$h) : ($placeholder ? "http://placehold.it/{$w}x{$h}" : EasyThumbnailImage::thumbnailFileUrl(Yii::getAlias('@webroot/img/no_image.jpg'),$w,$h));
+        try{
+            return !empty($this->postImages[0]) ? $this->postImages[0]->getThumbnailUrl($w,$h) : ($placeholder ? "http://placehold.it/{$w}x{$h}" : EasyThumbnailImage::thumbnailFileUrl(Yii::getAlias('@webroot/img/no_image.jpg'),$w,$h));
+        }catch (FileNotFoundException $ex){
+            return $placeholder ? "http://placehold.it/{$w}x{$h}" : "";
+        }
     }
 
     /**
@@ -302,6 +307,59 @@ class Post extends PostDB
     }
 
     /**
+     * Experimental base-selection method (one more)
+     * @param null $curCat
+     * @param null $sibIds
+     * @param bool $sticky
+     * @param bool $complexSort
+     * @return ActiveQuery
+     */
+    public static function findSortedExEx($curCat = null, $sibIds = null, $sticky = true, $complexSort = true)
+    {
+        //find all posts which related with specified categories
+        $q = Post::find()->alias('p');
+
+        if(!empty($curCat)){
+            if(!is_array($curCat)){
+                $q->where(['like','p.trail', ':'.$curCat]);
+            }else{
+                foreach ($curCat as $id){
+                    $q->orWhere(['like','p.trail', ':'.$id]);
+                }
+            }
+        }
+
+        //ordering parameters (ordering is too complex in this shit)
+        $ordering = [];
+        $orderingParams = [];
+
+        //if need complexly sort
+        if($complexSort){
+            //if need use sticky position but category not specified - use in ordering for main page
+            if($sticky && empty($curCat)){
+                $ordering[] = "IF(sticky_position_main, sticky_position_main, 2147483647)";
+            }
+
+            //basic ordering stuff (lowest priority type, chronological order)
+            $ordering[] = "IF(content_type_id = :lowestPriorityType, 2147483647, 0) ASC";
+            $ordering[] = "p.published_at DESC";
+            $orderingParams['lowestPriorityType'] = Constants::CONTENT_TYPE_POST;
+
+            //apply ordering
+            $q->orderBy(new Expression(implode(', ',$ordering), $orderingParams));
+        }
+
+        //unite with posts located in siblings (if siblings found)
+        if(!empty($sibIds)){
+            $qn = new ActiveQuery($q->modelClass);
+            $qn->select("*")->from([$q->union(self::findSortedExEx($sibIds,null,false))]);
+            return $qn;
+        }
+
+        return $q;
+    }
+
+    /**
      * Experimental base-selection method
      * @param null $curCatId
      * @param null $curCatIds
@@ -339,7 +397,7 @@ class Post extends PostDB
         //basic ordering stuff (lowest priority type, chronological order)
         $ordering[] = "IF(content_type_id = :lowestPriorityType, 2147483647, 0) ASC";
         $ordering[] = "p.published_at DESC";
-        $orderingParams['lowestPriorityType'] = Constants::STATUS_ENABLED;
+        $orderingParams['lowestPriorityType'] = Constants::CONTENT_TYPE_POST;
 
         //apply ordering
         $q->orderBy(new Expression(implode(', ',$ordering), $orderingParams));
@@ -398,6 +456,8 @@ class Post extends PostDB
 
         return $mainPostsQuery;
     }
+
+
 
     /**
      * Builds complexly sort query for selecting all popular posts depending on current categories
@@ -492,5 +552,25 @@ class Post extends PostDB
         foreach($ids as $id){
             User::refreshTimeLineStatic($id);
         }
+    }
+
+    /**
+     * Builds trails for current categories (serialized breadcrumb arrays)
+     */
+    public function updateTrails()
+    {
+        $categories = $this->categories;
+
+        $trails = [];
+
+        if(!empty($categories)){
+            foreach ($categories as $cat){
+                $ids = array_keys($cat->getBreadCrumbs(false));
+                $trails[] = ':'.implode(':',$ids);
+            }
+        }
+
+        $this->trail = implode(',',$trails);
+        $this->update();
     }
 }

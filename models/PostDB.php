@@ -42,6 +42,7 @@ use Yii;
  * @property string $search_keywords
  * @property integer $need_update
  * @property integer $is_parsed
+ * @property string $trail
  *
  * @property Comment[] $comments
  * @property User $author
@@ -75,7 +76,7 @@ class PostDB extends \yii\db\ActiveRecord
             [['content_type_id', 'status_id', 'type_id', 'author_id', 'sticky_position_main', 'stats_after_vote', 'votes_only_authorized', 'created_by_id', 'updated_by_id', 'group_id', 'kind_id', 'need_finish', 'comment_count', 'about_turkey', 'need_update', 'is_parsed'], 'integer'],
             [['name'], 'required'],
             [['published_at', 'created_at', 'updated_at', 'last_comment_at'], 'safe'],
-            [['name', 'author_custom_name', 'offer_category_tag', 'offer_author_tag', 'video_preview_fb', 'video_preview_yt', 'video_attachment_id_fb'], 'string', 'max' => 255],
+            [['name', 'author_custom_name', 'offer_category_tag', 'offer_author_tag', 'video_preview_fb', 'video_preview_yt', 'video_attachment_id_fb', 'trail'], 'string', 'max' => 255],
             [['author_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['author_id' => 'id']],
             [['group_id'], 'exist', 'skipOnError' => true, 'targetClass' => PostGroup::className(), 'targetAttribute' => ['group_id' => 'id']],
         ];
@@ -122,6 +123,7 @@ class PostDB extends \yii\db\ActiveRecord
             'search_keywords' => 'Search Keywords',
             'need_update' => 'Need Update',
             'is_parsed' => 'Is Parsed',
+            'trail' => 'Trail',
         ];
     }
 

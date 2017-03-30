@@ -856,4 +856,36 @@ class SyncController extends Controller
 
         echo "Password changed! \n";
     }
+
+    /**
+     * Updates string-represented trails
+     */
+    public function actionUpdateTrailsOfActive()
+    {
+        /* @var $all Post[] */
+        echo "Querying all posts. Please wait...";
+
+        $q = Post::find()->where(new Expression('(SELECT COUNT(*) FROM post_category WHERE post_category.post_id = post.id) > 0'));
+        $count = $q->count();
+
+        echo "Found ({$count}) posts. Updating trails... \n";
+
+        $pages = new Pagination(['totalCount' => $q->count(), 'defaultPageSize' => 20]);
+        for ($i = 0; $i <= $pages->pageCount; $i++){
+            $pages->setPage($i);
+
+            /* @var $posts Post[] */
+            $posts = $q->with(['categories'])
+                ->limit($pages->limit)
+                ->offset($pages->offset)->all();
+
+            foreach($posts as $index => $post){
+                $currentIndex = (($pages->page) * $pages->limit) + $index + 1;
+                $post->updateTrails();
+                echo "Post {$currentIndex} of {$count} done. \n";
+            }
+        }
+
+        echo "Finished! \n";
+    }
 }

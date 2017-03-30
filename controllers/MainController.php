@@ -78,6 +78,110 @@ class MainController extends Controller
     /********************************************** C A T E G O R Y ***************************************************/
 
     /**
+     * Experimental method
+     * @param null|int $id
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionCategoryNew($id = null)
+    {
+        //do we need use cache
+        $cache = false;
+
+        //current category (can be empty, then show all items)
+        /* @var $category Category */
+        $category = null;
+        //siblings categories (second priority for ordering)
+        $siblingIds = [];
+
+        //set meta data
+        $this->view->title = !empty($category) ? $category->trl->name .' - '.(!empty($category->parent) ? $category->parent->trl->name.' - '.$this->view->title : $this->view->title) : "RusTurkey.com – крупнейший русскоязычный портал о Турции";
+        $this->view->registerMetaTag(['name' => 'description', 'content' => $this->commonSettings->meta_description]);
+        $this->view->registerMetaTag(['name' => 'keywords', 'content' => $this->commonSettings->meta_keywords]);
+
+        //if ID set - try to get category and siblings
+        if(!empty($id)){
+
+            //find main category
+            $catQuery = Category::find()
+                ->where(['id' => $id, 'status_id' => Constants::STATUS_ENABLED])
+                ->with(['trl']);
+            $category = Help::cquery(function($db)use($catQuery){return $catQuery->one();},$cache);
+
+            //if specified category not found
+            if(empty($category)){
+                throw new NotFoundHttpException('Рубрика не найдена', 404);
+            }
+
+            //find siblings
+            $sibQuery = Category::find()
+                ->where(['parent_category_id' => $category->parent_category_id])
+                ->andWhere(new Expression('id != :current_id', ['current_id' => (int)$id]));
+
+            /* @var $siblings Category[] */
+            $siblings = Help::cquery(function($db)use($sibQuery){return $sibQuery->all();},$cache);
+            $siblingIds = !empty($siblings) ? array_values(ArrayHelper::map($siblings,'id','id')) : [];
+        }
+
+        $mainPostsQuery = Post::findSortedExEx($id,$siblingIds)
+            ->with(['trl', 'postImages.trl', 'author'])
+            ->andWhere(['status_id' => Constants::STATUS_ENABLED])
+            ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]));
+
+        $lastPostsQuery = Post::find()
+            ->with(['trl', 'postImages.trl'])
+            ->where(['status_id' => Constants::STATUS_ENABLED])
+            ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
+            ->orderBy('published_at DESC');
+
+        $forumPostsQuery = Post::findSortedExEx($id,$siblingIds)
+            ->with(['trl', 'postImages.trl'])
+            ->andWhere(['status_id' => Constants::STATUS_ENABLED])
+            ->andWhere(['kind_id' => Constants::KIND_FORUM]);
+
+        $popularPostsQuery = Post::findSortedExEx($id,$siblingIds,false,true)
+            ->with(['trl'])
+            ->andWhere(['status_id' => Constants::STATUS_ENABLED])
+            ->andWhere(new Expression('comment_count > :minCount',['minCount' => 200]))
+            ->andWhere(new Expression('published_at > :minDate', ['minDate' => date('Y-m-d',(time()-(86400*14)))]))
+            ->orderBy('comment_count DESC');
+
+        $turkeyPostsQuery = Post::findSortedAboutTurkey(!empty($category) ? $id : null,[$id],$siblingIds)
+            ->distinct()
+            ->with(['trl']);
+
+        $mainPostsQuery->limit(15);
+        $forumPostsQuery->limit(4);
+
+        $lastPostsQuery->limit(7);
+        $popularPostsQuery->limit(7);
+        $turkeyPostsQuery->limit(7);
+
+        //get main and forum posts posts for first page (next pages will be loaded via ajax)
+        $mainPosts = Help::cquery(function($db)use($mainPostsQuery){return $mainPostsQuery->all();},$cache);
+        $forumPosts = Help::cquery(function($db)use($forumPostsQuery){return $forumPostsQuery->all();},$cache);
+        $popularPosts = Help::cquery(function($db)use($popularPostsQuery){return $popularPostsQuery->all();},$cache);
+        $turkeyPosts = Help::cquery(function($db)use($turkeyPostsQuery){return $turkeyPostsQuery->all();},$cache);
+        $lastPosts = Help::cquery(function($db)use($lastPostsQuery){return $lastPostsQuery->all();},$cache);
+
+        /* @var $mainPosts Post[] */
+
+        //open-graph meta tags
+        if(!empty($mainPosts)){
+            $this->view->registerMetaTag(['property' => 'og:description', 'content' => $this->commonSettings->meta_description]);
+            $this->view->registerMetaTag(['property' => 'og:url', 'content' => Help::canonical()]);
+            $this->view->registerMetaTag(['property' => 'og:site_name', 'content' => "RusTurkey.com"]);
+            $this->view->registerMetaTag(['property' => 'og:title', 'content' => $this->view->title]);
+            $this->view->registerMetaTag(['property' => 'og:image', 'content' => $mainPosts[0]->getFirstImageUrlEx(706,311,true,true,true)]);
+            $this->view->registerMetaTag(['property' => 'og:image:width', 'content' => '706']);
+            $this->view->registerMetaTag(['property' => 'og:image:height', 'content' => '311']);
+        }
+
+        //rendering page
+        return $this->render('category',compact('mainPosts','forumPosts','popularPosts','turkeyPosts','lastPosts','category'));
+    }
+
+    /**
      * Render category page
      * @param null $id
      * @return string
@@ -86,7 +190,7 @@ class MainController extends Controller
     public function actionCategory($id = null)
     {
         //use cache for this action
-        $cache = true;
+        $cache = false;
         //current category (can be empty, then show all items)
         /* @var $category Category */
         $category = null;

@@ -276,6 +276,8 @@ class StockController extends Controller
 
                 $model->updateSearchKeywords();
 
+                $model->updateTrails();
+
                 if(!empty($model->author)){
                     $model->author->refreshTimeLine();
                 }

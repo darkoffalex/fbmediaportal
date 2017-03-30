@@ -134,7 +134,7 @@ class PostImage extends PostImageDB
      */
     public function getThumbnailUrl($w, $h)
     {
-        if(empty($this->file_path) && empty($this->file_url)){
+        if((empty($this->file_path) && empty($this->file_url)) || !file_exists(Yii::getAlias('@webroot/uploads/img/'.$this->file_path))){
             return EasyThumbnailImage::thumbnailFileUrl(Yii::getAlias('@webroot/img/no_image.jpg'),$w,$h);
         }elseif(!empty($this->file_path)){
             return EasyThumbnailImage::thumbnailFileUrl(Yii::getAlias('@webroot/uploads/img/'.$this->file_path),$w,$h);
