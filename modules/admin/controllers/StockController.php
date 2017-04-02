@@ -276,7 +276,10 @@ class StockController extends Controller
 
                 $model->updateSearchKeywords();
 
-                $model->updateTrails();
+                //update trails and sibling flags
+                $model->updateTrails(false);
+                $model->updateInSiblingForCat();
+
 
                 if(!empty($model->author)){
                     $model->author->refreshTimeLine();

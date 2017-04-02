@@ -91,8 +91,6 @@ class MainController extends Controller
         //current category (can be empty, then show all items)
         /* @var $category Category */
         $category = null;
-        //siblings categories (second priority for ordering)
-        $siblingIds = [];
 
         //set meta data
         $this->view->title = !empty($category) ? $category->trl->name .' - '.(!empty($category->parent) ? $category->parent->trl->name.' - '.$this->view->title : $this->view->title) : "RusTurkey.com – крупнейший русскоязычный портал о Турции";
@@ -112,18 +110,9 @@ class MainController extends Controller
             if(empty($category)){
                 throw new NotFoundHttpException('Рубрика не найдена', 404);
             }
-
-            //find siblings
-            $sibQuery = Category::find()
-                ->where(['parent_category_id' => $category->parent_category_id])
-                ->andWhere(new Expression('id != :current_id', ['current_id' => (int)$id]));
-
-            /* @var $siblings Category[] */
-            $siblings = Help::cquery(function($db)use($sibQuery){return $sibQuery->all();},$cache);
-            $siblingIds = !empty($siblings) ? array_values(ArrayHelper::map($siblings,'id','id')) : [];
         }
 
-        $mainPostsQuery = Post::findSortedExEx($id,$siblingIds)
+        $mainPostsQuery = Post::findComplex($id)
             ->with(['trl', 'postImages.trl', 'author'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]));
@@ -134,19 +123,19 @@ class MainController extends Controller
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
             ->orderBy('published_at DESC');
 
-        $forumPostsQuery = Post::findSortedExEx($id,$siblingIds)
+        $forumPostsQuery = Post::findComplex($id)
             ->with(['trl', 'postImages.trl'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(['kind_id' => Constants::KIND_FORUM]);
 
-        $popularPostsQuery = Post::findSortedExEx($id,$siblingIds,false,true)
+        $popularPostsQuery = Post::findComplex($id)
             ->with(['trl'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('comment_count > :minCount',['minCount' => 200]))
             ->andWhere(new Expression('published_at > :minDate', ['minDate' => date('Y-m-d',(time()-(86400*14)))]))
             ->orderBy('comment_count DESC');
 
-        $turkeyPostsQuery = Post::findSortedAboutTurkey(!empty($category) ? $id : null,[$id],$siblingIds)
+        $turkeyPostsQuery = Post::findSortedAboutTurkey(!empty($category) ? $id : null,[$id],[])
             ->distinct()
             ->with(['trl']);
 

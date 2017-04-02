@@ -206,8 +206,9 @@ class PostsController extends Controller
                 //update search indexes
                 $model->updateSearchKeywords();
 
-                //update trails
-                $model->updateTrails();
+                //update trails and sibling flags
+                $model->updateTrails(false);
+                $model->updateInSiblingForCat();
 
                 //load all related stuff again
                 $model->refresh();

@@ -881,7 +881,8 @@ class SyncController extends Controller
 
             foreach($posts as $index => $post){
                 $currentIndex = (($pages->page) * $pages->limit) + $index + 1;
-                $post->updateTrails();
+                $post->updateTrails(false);
+                $post->updateInSiblingForCat();
                 echo "Post {$currentIndex} of {$count} done. \n";
             }
         }

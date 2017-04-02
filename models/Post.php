@@ -306,53 +306,53 @@ class Post extends PostDB
         $this->update();
     }
 
+
     /**
-     * Experimental base-selection method (one more)
-     * @param null $curCat
-     * @param null $sibIds
+     * Experimental finding and sorting method
+     * @param null $categoryId
      * @param bool $sticky
-     * @param bool $complexSort
+     * @param bool $fromSiblings
+     * @param bool $siblingsOnly
      * @return ActiveQuery
      */
-    public static function findSortedExEx($curCat = null, $sibIds = null, $sticky = true, $complexSort = true)
+    public static function findComplex($categoryId = null, $sticky = true, $fromSiblings = true, $siblingsOnly = false)
     {
-        //find all posts which related with specified categories
+        //main query
         $q = Post::find()->alias('p');
 
-        if(!empty($curCat)){
-            if(!is_array($curCat)){
-                $q->where(['like','p.trail', ':'.$curCat]);
-            }else{
-                foreach ($curCat as $id){
-                    $q->orWhere(['like','p.trail', ':'.$id]);
-                }
+        //all related with current category (category id can be found in trail string)
+        if(!$siblingsOnly){
+            if(!empty($categoryId)){
+                $q->where(['like','p.trail', ':'.$categoryId]);
+            }
+        //all related with category sibling cats (category id can be found in sibling array)
+        }else{
+            if(!empty($categoryId)){
+                $q->where(['like','p.in_sibling_for_cats', ':'.$categoryId]);
             }
         }
 
-        //ordering parameters (ordering is too complex in this shit)
+        //ordering settings
         $ordering = [];
         $orderingParams = [];
 
-        //if need complexly sort
-        if($complexSort){
-            //if need use sticky position but category not specified - use in ordering for main page
-            if($sticky && empty($curCat)){
-                $ordering[] = "IF(sticky_position_main, sticky_position_main, 2147483647)";
-            }
-
-            //basic ordering stuff (lowest priority type, chronological order)
-            $ordering[] = "IF(content_type_id = :lowestPriorityType, 2147483647, 0) ASC";
-            $ordering[] = "p.published_at DESC";
-            $orderingParams['lowestPriorityType'] = Constants::CONTENT_TYPE_POST;
-
-            //apply ordering
-            $q->orderBy(new Expression(implode(', ',$ordering), $orderingParams));
+        //if need use sticky position but category not specified - use in ordering for main page
+        if($sticky && empty($categoryId)){
+            $ordering[] = "IF(sticky_position_main, sticky_position_main, 2147483647)";
         }
 
-        //unite with posts located in siblings (if siblings found)
-        if(!empty($sibIds)){
+        //basic ordering stuff (lowest priority type, chronological order)
+        $ordering[] = "IF(content_type_id = :lowestPriorityType, 2147483647, 0) ASC";
+        $ordering[] = "p.published_at DESC";
+        $orderingParams['lowestPriorityType'] = Constants::CONTENT_TYPE_POST;
+
+        //apply ordering
+        $q->orderBy(new Expression(implode(', ',$ordering), $orderingParams));
+
+        //if need append siblings
+        if($fromSiblings){
             $qn = new ActiveQuery($q->modelClass);
-            $qn->select("*")->from([$q->union(self::findSortedExEx($sibIds,null,false))]);
+            $qn->select("*")->from([$q->union(self::findComplex($categoryId,false,false,true))]);
             return $qn;
         }
 
@@ -556,9 +556,11 @@ class Post extends PostDB
 
     /**
      * Builds trails for current categories (serialized breadcrumb arrays)
+     * @param bool $update
      */
-    public function updateTrails()
+    public function updateTrails($update = true)
     {
+        $oldTranslateFlag = $this->translateLabels;
         $categories = $this->categories;
 
         $trails = [];
@@ -568,9 +570,46 @@ class Post extends PostDB
                 $ids = array_keys($cat->getBreadCrumbs(false));
                 $trails[] = ':'.implode(':',$ids);
             }
-        }
 
-        $this->trail = implode(',',$trails);
-        $this->update();
+            $this->trail = implode(',',$trails);
+
+            if($update){
+                $this->translateLabels = false;
+                $this->update();
+                $this->translateLabels = $oldTranslateFlag;
+            }
+        }
+    }
+
+    /**
+     * For which categories current post will be as in sibling cat
+     * @param bool $update
+     */
+    public function updateInSiblingForCat($update = true)
+    {
+        $oldTranslateFlag = $this->translateLabels;
+        $categories = $this->categories;
+
+        $siblingGroups = [];
+
+        if(!empty($categories)){
+            foreach ($categories as $cat){
+                $siblings = Category::find()
+                    ->where(['parent_category_id' => $cat->parent_category_id])
+                    ->andWhere(new Expression('id != :current_id', ['current_id' => $cat->id]))
+                    ->all();
+
+                $ids = array_values(ArrayHelper::map($siblings,'id','id'));
+                $siblingGroups[] = ':'.implode(':',$ids);
+            }
+
+            $this->in_sibling_for_cats = implode(',',$siblingGroups);
+
+            if($update){
+                $this->translateLabels = false;
+                $this->update();
+                $this->translateLabels = $oldTranslateFlag;
+            }
+        }
     }
 }
