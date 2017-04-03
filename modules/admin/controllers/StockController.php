@@ -286,7 +286,7 @@ class StockController extends Controller
                 }
 
                 //clear cache
-                Yii::$app->cache->flush();
+                //Yii::$app->cache->flush();
 
                 return $this->redirect(Yii::$app->request->referrer.Yii::$app->session->getFlash('scroll-to'));
             }

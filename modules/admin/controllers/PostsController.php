@@ -100,7 +100,7 @@ class PostsController extends Controller
                     }
 
                     //clear cache
-                    Yii::$app->cache->flush();
+                    //Yii::$app->cache->flush();
 
                     return $this->redirect(Url::to(['/admin/posts/update', 'id' => $model->id]));
                 }
@@ -240,7 +240,7 @@ class PostsController extends Controller
 
 
                 //clear the cache
-                Yii::$app->cache->flush();
+                //Yii::$app->cache->flush();
             }
         }
 
@@ -274,7 +274,7 @@ class PostsController extends Controller
         $post->delete();
 
         //clear cache
-        Yii::$app->cache->flush();
+        //Yii::$app->cache->flush();
 
         //back to previous page
         return $this->redirect(Yii::$app->request->referrer);
@@ -323,7 +323,7 @@ class PostsController extends Controller
         $post->updateSearchKeywords();
 
         //clear cache
-        Yii::$app->cache->flush();
+        //Yii::$app->cache->flush();
 
         return $this->actionListImages($postId);
     }
@@ -348,7 +348,7 @@ class PostsController extends Controller
         Sort::Move($image,$dir,PostImage::className(),['post_id' => $postId]);
 
         //clear cache
-        Yii::$app->cache->flush();
+        //Yii::$app->cache->flush();
 
         return $this->actionListImages($postId);
     }
@@ -387,7 +387,7 @@ class PostsController extends Controller
                 $model->clearCropped();
 
                 //clear cache
-                Yii::$app->cache->flush();
+                //Yii::$app->cache->flush();
 
                 //It's ok, can reload table
                 return 'OK';
@@ -483,7 +483,7 @@ class PostsController extends Controller
                     $post->updateSearchKeywords();
 
                     //clear cache
-                    Yii::$app->cache->flush();
+                    //Yii::$app->cache->flush();
 
                     //It's ok, can reload table
                     return 'OK';
@@ -574,7 +574,7 @@ class PostsController extends Controller
                     $post->updateSearchKeywords();
 
                     //clear cache
-                    Yii::$app->cache->flush();
+                    //Yii::$app->cache->flush();
 
                     //It's ok, can reload table
                     return 'OK';
@@ -652,7 +652,7 @@ class PostsController extends Controller
                 $post->updateSearchKeywords();
 
                 //clear the cache
-                Yii::$app->cache->flush();
+                //Yii::$app->cache->flush();
 
                 //OK message (to reload container)
                 return 'OK';
@@ -705,7 +705,7 @@ class PostsController extends Controller
         $answer->delete();
 
         //clear cache
-        Yii::$app->cache->flush();
+        //Yii::$app->cache->flush();
 
         return $this->actionListAnswers($postId);
     }
@@ -747,7 +747,7 @@ class PostsController extends Controller
                 $model->save();
 
                 //clear cache
-                Yii::$app->cache->flush();
+                //Yii::$app->cache->flush();
 
                 return 'OK';
             }
@@ -799,7 +799,7 @@ class PostsController extends Controller
         }
 
         //clear cache
-        Yii::$app->cache->flush();
+        //Yii::$app->cache->flush();
 
         //back to previous page
         return $this->redirect(Yii::$app->request->referrer);
@@ -824,7 +824,7 @@ class PostsController extends Controller
         $post->refreshCommentAuthorsTimeLines();
 
         //clear cache
-        Yii::$app->cache->flush();
+        //Yii::$app->cache->flush();
 
         //back to previous page
         return $this->redirect(Yii::$app->request->referrer);

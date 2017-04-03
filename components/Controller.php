@@ -91,10 +91,10 @@ class Controller extends BaseController
         $qBannerDisplays = BannerDisplay::find()
             ->joinWith('banner as b')
             ->with('place')
-            ->where(new Expression('start_at < :cur AND end_at > :cur',['cur' => date('Y-m-d H:i:s',time())]))
+            ->where(new Expression('start_at < :cur AND end_at > :cur',['cur' => date('Y-m-d H:i',time())]))
             ->orWhere(['b.is_eternal' => 1])
             ->distinct();
-        $bannerDisplays = Help::cquery(function($db)use($qBannerDisplays){return $qBannerDisplays->all();},false);
+        $bannerDisplays = Help::cquery(function($db)use($qBannerDisplays){return $qBannerDisplays->all();},true);
 
         /* @var $bannerDisplays BannerDisplay[] */
         foreach ($bannerDisplays as $bannerDisplay){

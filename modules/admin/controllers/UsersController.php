@@ -69,7 +69,7 @@ class UsersController extends Controller
                 $model->save();
 
                 //clear cache
-                Yii::$app->cache->flush();
+                //Yii::$app->cache->flush();
 
                 //go to list
                 return $this->redirect(Url::to(['/admin/users/index']));
@@ -130,7 +130,7 @@ class UsersController extends Controller
                 $model->update();
 
                 //clear cache
-                Yii::$app->cache->flush();
+                //Yii::$app->cache->flush();
             }
         }
 
@@ -160,7 +160,7 @@ class UsersController extends Controller
         $model->delete();
 
         //clear cache
-        Yii::$app->cache->flush();
+        //Yii::$app->cache->flush();
 
         //back to list
         return $this->redirect(Yii::$app->request->referrer);
@@ -191,7 +191,7 @@ class UsersController extends Controller
         $model->update();
 
         //clear cache
-        Yii::$app->cache->flush();
+        //Yii::$app->cache->flush();
 
         //back to list
         return $this->redirect(Yii::$app->request->referrer);
