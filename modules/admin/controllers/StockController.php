@@ -132,6 +132,39 @@ class StockController extends Controller
     }
 
     /**
+     * Delete post
+     * @param $id
+     * @return Response
+     * @throws NotFoundHttpException
+     * @throws \Exception
+     */
+    public function actionDelete($id)
+    {
+        /* @var $post Post */
+        $post = Post::findOne((int)$id);
+
+        if(empty($post)){
+            throw new NotFoundHttpException(Yii::t('admin','Post not found'),404);
+        }
+
+        //delete all related image's files
+        if(!empty($post->postImages)){
+            foreach($post->postImages as $image){
+                $image->deleteFile();
+            }
+        }
+
+        //delete post itself
+        $post->delete();
+
+        //clear cache
+        //Yii::$app->cache->flush();
+
+        //back to previous page
+        return $this->redirect(Yii::$app->request->referrer);
+    }
+
+    /**
      * Change status of group (ajax)
      * @param $id
      * @param int $status

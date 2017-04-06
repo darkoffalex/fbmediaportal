@@ -63,14 +63,27 @@ class SiteController extends Controller
 
     /**
      * Clear cache
+     * @return Response
      */
     public function actionCc()
     {
+        //if need back to previous page
+        $back = Yii::$app->request->get('back');
+
+        //if need full delete
+        $full = Yii::$app->request->get('full');
+
         //clear standard cache
         Yii::$app->cache->flush();
 
         //skip settings
         $skip = array('.', '..', '.gitignore','cropped','thumbnails');
+
+        //if need full delete - do not skip cropped and resized pics folders
+        if($full){
+            unset($skip[3]);
+            unset($skip[4]);
+        }
 
         //path to assets and runtime directories
         $assets = scandir(Yii::getAlias('@webroot/assets'));
@@ -81,7 +94,7 @@ class SiteController extends Controller
             if(!in_array($entry, $skip)){
                 $path = Yii::getAlias('@webroot/assets/'.$entry);
                 FileHelper::removeDirectory($path);
-                echo $path." removed <br>";
+                if(!$back) echo $path." removed <br>";
             }
         }
 
@@ -90,11 +103,16 @@ class SiteController extends Controller
             if(!in_array($entry, $skip)){
                 $path = Yii::getAlias('@app/runtime/'.$entry);
                 FileHelper::removeDirectory($path);
-                echo $path." removed <br>";
+                if(!$back) echo $path." removed <br>";
             }
         }
 
-        exit('Finished');
+        if(!$back){
+            exit('Finished');
+        }else{
+            return $this->redirect(Yii::$app->request->referrer);
+        }
+
     }
 
     /**

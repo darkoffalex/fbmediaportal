@@ -9,6 +9,7 @@ use app\models\Comment;
 use app\models\Post;
 use app\models\User;
 use app\models\UserTimeLine;
+use Codeception\Util\Debug;
 use Facebook\Exceptions\FacebookResponseException;
 use Facebook\Facebook;
 use Yii;
@@ -62,7 +63,7 @@ class MainController extends Controller
                     'category',
                     'categoryAjax'
                 ],
-                'duration' => 0,
+                'duration' => 1800,
                 'variations' => [
                     Yii::$app->request->get('id'),
                     Yii::$app->request->get('page',1),
@@ -79,37 +80,49 @@ class MainController extends Controller
                 'only' => [
                     'post',
                 ],
+                'duration' => 86400,
                 'variations' => [
                     Yii::$app->request->get('id'),
                 ],
             ],
             //caching for comments
-            [
-                'class' => PageCache::className(),
-                'only' => [
-                    'commentsAjax',
-                    'childrenCommentsAjax'
-                ],
-                'variations' => [
-                    Yii::$app->request->get('id'),
-                    Yii::$app->request->get('page',1),
-                ],
-            ],
+//            [
+//                'class' => PageCache::className(),
+//                'only' => [
+//                    'commentsAjax',
+//                    'childrenCommentsAjax'
+//                ],
+//                'variations' => [
+//                    Yii::$app->request->get('id'),
+//                    Yii::$app->request->get('page',1),
+//                ],
+//            ],
             //caching for page 'all'
             [
                 'class' => PageCache::className(),
                 'only' => [
                     'all',
                 ],
+                'duration' => 1800,
                 'variations' => [
                     Yii::$app->request->get('type'),
                     Yii::$app->request->get('page',1),
                     Yii::$app->request->get('id'),
                 ],
+            ],
+            //caching for page 'pages'
+            [
+                'class' => PageCache::className(),
+                'only' => [
+                    'pages',
+                ],
+                'duration' => 86400,
+                'variations' => [
+                    Yii::$app->request->get('type'),
+                ],
             ]
         ];
     }
-
 
     /********************************************** C A T E G O R Y ***************************************************/
 
@@ -194,7 +207,7 @@ class MainController extends Controller
             ->with(['trl'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('comment_count > :minCount',['minCount' => 200]))
-            ->andWhere(new Expression('published_at > :minDate', ['minDate' => date('Y-m-d',(time()-(86400*14)))]))
+//            ->andWhere(new Expression('published_at > :minDate', ['minDate' => date('Y-m-d',(time()-(86400*14)))]))
             ->distinct();
 
         $turkeyPostsQuery = Post::findSortedAboutTurkey(!empty($category) ? $id : null,$currentIds,$siblingIds)
@@ -334,12 +347,23 @@ class MainController extends Controller
     /************************************************** P O S T *******************************************************/
 
     /**
+     * Preview method
+     * @param $id
+     * @return string
+     */
+    public function actionPostPreview($id)
+    {
+        return $this->actionPost($id,true);
+    }
+
+    /**
      * Rendering single post
      * @param $id
+     * @param int $preview
      * @return string
      * @throws NotFoundHttpException
      */
-    public function actionPost($id)
+    public function actionPost($id, $preview = 0)
     {
         //use cache for this action
         $cache = false;
@@ -356,7 +380,11 @@ class MainController extends Controller
             'postImages',
             'categories.parent.childrenActive.childrenActive',
             'categories.childrenActive.childrenActive',
-        ])->where(['id' => $id, 'status_id' => Constants::STATUS_ENABLED]);
+        ])->where(['id' => $id]);
+
+        if(!$preview){
+            $postQuery->andWhere(['status_id' => Constants::STATUS_ENABLED]);
+        }
 
         /* @var $post Post */
         $post = Help::cquery(function($db)use($postQuery){return $postQuery->one();},$cache);
@@ -411,21 +439,7 @@ class MainController extends Controller
         //if need - create new comment
         $newComment = $this->addCommentIfNeeded($post,$user);
 
-        //get comments for current post (first 10)
-        $q = Comment::find()
-            ->where('answer_to_id IS NULL OR answer_to_id = 0')
-            ->andWhere(['post_id' => $post->id])
-            ->with([
-                'author',
-                'children',
-            ])
-            ->orderBy('created_at ASC');
-
-        $cq = clone $q;
-        $count = Help::cquery(function($db)use($cq){return $cq->count();},$cache);
-        $pages = new Pagination(['totalCount' => $count, 'defaultPageSize' => 10]);
-        $comments = Help::cquery(function($db)use($q,$pages){return $q->offset($pages->offset)->limit($pages->limit)->all();},$cache);
-
+        //open graph tags
         $this->view->registerMetaTag(['property' => 'og:description', 'content' => $description]);
         $this->view->registerMetaTag(['property' => 'og:url', 'content' => Help::canonical()]);
         $this->view->registerMetaTag(['property' => 'og:site_name', 'content' => "RusTurkey.com"]);
@@ -434,7 +448,7 @@ class MainController extends Controller
         $this->view->registerMetaTag(['property' => 'og:image:width', 'content' => '706']);
         $this->view->registerMetaTag(['property' => 'og:image:height', 'content' => '311']);
 
-        return $this->render('post',compact('post','comments','carouselPosts','newComment'));
+        return $this->render('post',compact('post','carouselPosts','newComment'));
     }
 
     /**

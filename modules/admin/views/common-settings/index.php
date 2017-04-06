@@ -76,6 +76,7 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
 
             <div class="box-footer">
                 <a class="btn btn-primary" href="<?php echo Url::to(['/admin/banner/index']); ?>"><?= Yii::t('admin','Back'); ?></a>
+                <a class="btn btn-primary" href="<?php echo Url::to(['/site/cc','back' => 1]); ?>"><?= Yii::t('admin','Full cache clear'); ?></a>
                 <button type="submit" class="btn btn-primary"><?= Yii::t('admin','Save') ?></button>
             </div>
 

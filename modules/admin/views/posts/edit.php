@@ -122,6 +122,10 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                     <p>
                         <strong><?= Yii::t('admin','View on portal') ?></strong> : <?= Html::a($model->getUrl(false,true),$model->getUrl(false,true),['target' => '_blank']); ?>
                     </p>
+                    <p>
+                        <?php $previewUrl = Url::to(['/main/post-preview', 'id' => $model->id],true); ?>
+                        <strong><?= Yii::t('admin','Preview on portal') ?></strong> : <?= Html::a($previewUrl,$previewUrl,['target' => '_blank']); ?>
+                    </p>
                 </div>
             </div>
         </div>

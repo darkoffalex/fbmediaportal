@@ -407,8 +407,14 @@ class Post extends PostDB
 
         //unite with posts located in siblings (if siblings found)
         if(!empty($sibIds)){
+            //siblings
             $qn = new ActiveQuery($q->modelClass);
             $qn->select("*")->from([$q->union(self::findSortedEx(null,$sibIds,null,false))]);
+
+            //all posts (from everywhere)
+//            $qnn = new ActiveQuery($qn->modelClass);
+//            $qnn->select("*")->from([$qn->union(self::findSortedEx(null,null,null,false))]);
+
             return $qn;
         }
 
@@ -485,6 +491,7 @@ class Post extends PostDB
             if(!empty($sibIds)) : $orderPriorities[] = "IF(pc.category_id IN ({$siblingIdsStr}), 0, 2147483647) ASC"; endif;
         }
         $orderPriorities[] = "p.comment_count DESC";
+        $orderPriorities[] = "p.published_at DESC";
 
         //finalize query
         $mainPostsQuery->orderBy(new Expression(implode(', ',$orderPriorities)));

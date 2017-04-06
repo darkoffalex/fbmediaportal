@@ -1,3 +1,4 @@
 User-agent: *
-Disallow: /
+Disallow:
 Disallow: /pages/agreement
+Sitemap: http://rusturkey.com/sitemap.xml

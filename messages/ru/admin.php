@@ -224,5 +224,7 @@ return [
     'On main page' => 'На главной странице',
     'Non sticky on main' => 'Не закреплен на главной',
     'On categories' => 'В категориях',
-    'On main or categories' => 'На главной или в категориях'
+    'On main or categories' => 'На главной или в категориях',
+    'Full cache clear' => 'Очистить кэш',
+    'Preview on portal' => 'Предпросмотр на портале'
 ];
