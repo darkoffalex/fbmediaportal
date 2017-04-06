@@ -343,7 +343,7 @@ class Post extends PostDB
 
         //basic ordering stuff (lowest priority type, chronological order)
         $ordering[] = "IF(content_type_id = :lowestPriorityType, 2147483647, 0) ASC";
-        $ordering[] = "p.published_at DESC";
+        $ordering[] = "p.delayed_at DESC";
         $orderingParams['lowestPriorityType'] = Constants::CONTENT_TYPE_POST;
 
         //apply ordering
@@ -396,7 +396,7 @@ class Post extends PostDB
 
         //basic ordering stuff (lowest priority type, chronological order)
         $ordering[] = "IF(content_type_id = :lowestPriorityType, 2147483647, 0) ASC";
-        $ordering[] = "p.published_at DESC";
+        $ordering[] = "p.delayed_at DESC";
         $orderingParams['lowestPriorityType'] = Constants::CONTENT_TYPE_POST;
 
         //apply ordering
@@ -453,7 +453,7 @@ class Post extends PostDB
             $orderPriorities[] = "IF(sticky_position_main, sticky_position_main, 2147483647)";
         }
         $orderPriorities[] = "IF(content_type_id = :lowestPriorityType, 2147483647, 0) ASC";
-        $orderPriorities[] = "p.published_at DESC";
+        $orderPriorities[] = "p.delayed_at DESC";
 
         //finalize query
         $orderParams = ['lowestPriorityType' => Constants::CONTENT_TYPE_POST];
@@ -491,7 +491,7 @@ class Post extends PostDB
             if(!empty($sibIds)) : $orderPriorities[] = "IF(pc.category_id IN ({$siblingIdsStr}), 0, 2147483647) ASC"; endif;
         }
         $orderPriorities[] = "p.comment_count DESC";
-        $orderPriorities[] = "p.published_at DESC";
+        $orderPriorities[] = "p.delayed_at DESC";
 
         //finalize query
         $mainPostsQuery->orderBy(new Expression(implode(', ',$orderPriorities)));
@@ -525,7 +525,7 @@ class Post extends PostDB
             $orderPriorities[] = "IF(pc.category_id IN ({$currentIdsStr}), 0, 2147483647) ASC";
             if(!empty($sibIds)) : $orderPriorities[] = "IF(pc.category_id IN ({$siblingIdsStr}), 0, 2147483647) ASC"; endif;
         }
-        $orderPriorities[] = "p.published_at DESC";
+        $orderPriorities[] = "p.delayed_at DESC";
 
 
         //finalize query

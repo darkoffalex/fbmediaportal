@@ -188,24 +188,28 @@ class MainController extends Controller
         $mainPostsQuery = Post::findSortedEx(!empty($category) ? $id : null,$currentIds,$siblingIds)
             ->with(['trl', 'postImages.trl', 'author'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
+            ->andWhere(new Expression('delayed_at <= NOW()'))
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
             ->distinct();
 
         $lastPostsQuery = Post::find()
             ->with(['trl', 'postImages.trl'])
             ->where(['status_id' => Constants::STATUS_ENABLED])
+            ->andWhere(new Expression('delayed_at <= NOW()'))
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
-            ->orderBy('published_at DESC');
+            ->orderBy('delayed_at DESC');
 
         $forumPostsQuery = Post::findSortedEx(!empty($category) ? $id : null,$currentIds,$siblingIds)
             ->with(['trl', 'postImages.trl'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
+            ->andWhere(new Expression('delayed_at <= NOW()'))
             ->andWhere(['kind_id' => Constants::KIND_FORUM])
             ->distinct();
 
         $popularPostsQuery = Post::findSortedPopular(!empty($category) ? $id : null,$currentIds,$siblingIds)
             ->with(['trl'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
+            ->andWhere(new Expression('delayed_at <= NOW()'))
             ->andWhere(new Expression('comment_count > :minCount',['minCount' => 200]))
 //            ->andWhere(new Expression('published_at > :minDate', ['minDate' => date('Y-m-d',(time()-(86400*14)))]))
             ->distinct();
@@ -272,6 +276,7 @@ class MainController extends Controller
         if(!empty($id)){
             $catQuery = Category::find()
                 ->where(['id' => $id, 'status_id' => Constants::STATUS_ENABLED])
+                ->andWhere(new Expression('delayed_at <= NOW()'))
                 ->with([
                     'trl',
                     'parent.childrenActive.childrenActive',
@@ -306,6 +311,7 @@ class MainController extends Controller
         $mainPostsQuery = Post::findSortedEx(!empty($category) ? $id : null,$currentIds,$siblingIds)
             ->with(['trl', 'postImages.trl', 'author'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
+            ->andWhere(new Expression('delayed_at <= NOW()'))
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
             ->distinct();
 
@@ -320,6 +326,7 @@ class MainController extends Controller
             $forumPostsQuery = Post::findSortedEx(!empty($category) ? $id : null,$currentIds,$siblingIds)
                 ->with(['trl', 'postImages.trl'])
                 ->andWhere(['status_id' => Constants::STATUS_ENABLED])
+                ->andWhere(new Expression('delayed_at <= NOW()'))
                 ->andWhere(['kind_id' => Constants::KIND_FORUM])
                 ->distinct();
 
@@ -383,7 +390,9 @@ class MainController extends Controller
         ])->where(['id' => $id]);
 
         if(!$preview){
-            $postQuery->andWhere(['status_id' => Constants::STATUS_ENABLED]);
+            $postQuery
+                ->andWhere(['status_id' => Constants::STATUS_ENABLED])
+                ->andWhere(new Expression('delayed_at <= NOW()'));
         }
 
         /* @var $post Post */
@@ -430,6 +439,7 @@ class MainController extends Controller
         $carouselPostsQuery = Post::findSortedEx(!empty($category) ? $id : null,$currentIds,$siblingIds)
             ->with(['trl', 'postImages.trl', 'author'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
+            ->andWhere(new Expression('delayed_at <= NOW()'))
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
             ->distinct()
             ->limit(15);
@@ -681,6 +691,7 @@ class MainController extends Controller
         $carouselPostsQuery = Post::findSortedEx()
             ->with(['trl', 'postImages.trl'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
+            ->andWhere(new Expression('delayed_at <= NOW()'))
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
             ->distinct()
             ->limit(15);
@@ -688,8 +699,8 @@ class MainController extends Controller
         $carouselPosts = Help::cquery(function($db)use($carouselPostsQuery){return $carouselPostsQuery->all();},$cache);
 
         //counters
-        $materialCount = Post::find()->where(['author_id' => $user->id, 'status_id' => Constants::STATUS_ENABLED])->andWhere('content_type_id != :type',['type' => Constants::CONTENT_TYPE_POST])->count();
-        $postCount = Post::find()->where(['author_id' => $user->id, 'status_id' => Constants::STATUS_ENABLED, 'content_type_id' => Constants::CONTENT_TYPE_POST])->count();
+        $materialCount = Post::find()->where(['author_id' => $user->id, 'status_id' => Constants::STATUS_ENABLED])->andWhere(new Expression('delayed_at <= NOW()'))->andWhere('content_type_id != :type',['type' => Constants::CONTENT_TYPE_POST])->count();
+        $postCount = Post::find()->where(['author_id' => $user->id, 'status_id' => Constants::STATUS_ENABLED, 'content_type_id' => Constants::CONTENT_TYPE_POST])->andWhere(new Expression('delayed_at <= NOW()'))->count();
         $commentCount = Comment::find()->alias('c')->joinWith('post as p')->where('c.author_id = :author AND p.status_id = :status',['author' => $user->id, 'status' => Constants::STATUS_ENABLED])->count();
 
         return $this->render('profile', compact('items','pages','user','carouselPosts','materialCount','postCount','commentCount'));
@@ -732,14 +743,16 @@ class MainController extends Controller
                     'author_id' => $user->id,
                     'status_id' => Constants::STATUS_ENABLED,
                     'content_type_id' => Constants::CONTENT_TYPE_POST])
-                    ->orderBy('published_at DESC');
+                    ->andWhere(new Expression('delayed_at <= NOW()'))
+                    ->orderBy('delayed_at DESC');
                 $qc = clone $q;
                 break;
             case 'materials':
                 $q = Post::find()
                     ->where(['author_id' => $user->id, 'status_id' => Constants::STATUS_ENABLED])
+                    ->andWhere(new Expression('delayed_at <= NOW()'))
                     ->andWhere('content_type_id != :type',['type' => Constants::CONTENT_TYPE_POST])
-                    ->orderBy('published_at DESC');
+                    ->orderBy('delayed_at DESC');
                 $qc = clone $q;
                 break;
             case 'comments':
@@ -755,8 +768,9 @@ class MainController extends Controller
             default :
                 $q = Post::find()
                     ->where(['author_id' => $user->id, 'status_id' => Constants::STATUS_ENABLED])
+                    ->andWhere(new Expression('delayed_at <= NOW()'))
                     ->andWhere('content_type_id != :type',['type' => Constants::CONTENT_TYPE_POST])
-                    ->orderBy('published_at DESC');
+                    ->orderBy('delayed_at DESC');
                 $qc = clone $q;
                 break;
         }
@@ -780,6 +794,7 @@ class MainController extends Controller
         $carouselPostsQuery = Post::findSortedEx()
             ->with(['trl', 'postImages.trl'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
+            ->andWhere(new Expression('delayed_at <= NOW()'))
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
             ->distinct()
             ->limit(15);
@@ -814,6 +829,7 @@ class MainController extends Controller
         if(!empty($id)){
             $catQuery = Category::find()
                 ->where(['id' => $id, 'status_id' => Constants::STATUS_ENABLED])
+                ->andWhere(new Expression('delayed_at <= NOW()'))
                 ->with([
                     'trl',
                     'parent.childrenActive.childrenActive',
@@ -858,13 +874,15 @@ class MainController extends Controller
         $mainPostsQuery = Post::find()
             ->with(['trl', 'postImages.trl'])
             ->where(['status_id' => Constants::STATUS_ENABLED])
+            ->andWhere(new Expression('delayed_at <= NOW()'))
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
-            ->orderBy('published_at DESC');
+            ->orderBy('delayed_at DESC');
 
 
         $popularPostsQuery = Post::findSortedPopular(!empty($category) ? $id : null,$currentIds,$siblingIds)
             ->with(['trl', 'postImages.trl', 'author'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
+            ->andWhere(new Expression('delayed_at <= NOW()'))
             ->andWhere(new Expression('comment_count > :minCount',['minCount' => 200]))
             ->andWhere(new Expression('published_at > :minDate', ['minDate' => date('Y-m-d H:i:s',(time()-(86400*14)))]))
             ->distinct();
@@ -927,7 +945,7 @@ class MainController extends Controller
             $q->andWhere(['id' => 0]);
         }
 
-        $q->orderBy('p.published_at DESC');
+        $q->orderBy('p.delayed_at DESC');
 
         $cq = clone $q;
 
@@ -952,6 +970,7 @@ class MainController extends Controller
         $carouselPostsQuery = Post::findSortedEx()
             ->with(['trl', 'postImages.trl'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
+            ->andWhere(new Expression('delayed_at <= NOW()'))
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
             ->distinct()
             ->limit(15);
@@ -989,6 +1008,7 @@ class MainController extends Controller
         $carouselPostsQuery = Post::findSortedEx()
             ->with(['trl', 'postImages.trl'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
+            ->andWhere(new Expression('delayed_at <= NOW()'))
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
             ->distinct()
             ->limit(15);
