@@ -72,6 +72,8 @@ class PostsController extends Controller
             $model->created_at = date('Y-m-d H:i:s',time());
             $model->updated_at = date('Y-m-d H:i:s',time());
             $model->updated_at = date('Y-m-d H:i:s',time());
+            $model->delayed_at = $model->created_at;
+            $model->published_at = $model->created_at;
             $model->created_by_id = Yii::$app->user->id;
             $model->updated_by_id = Yii::$app->user->id;
 
@@ -147,6 +149,7 @@ class PostsController extends Controller
 
             //set some statistics info
             $model->updated_at = date('Y-m-d H:i:s',time());
+            $model->delayed_at = !empty($model->delayed_at) ? $model->delayed_at : $model->published_at;
             $model->updated_by_id = Yii::$app->user->id;
 
             //if validated - save and go to list
@@ -207,8 +210,8 @@ class PostsController extends Controller
                 $model->updateSearchKeywords();
 
                 //update trails and sibling flags
-                $model->updateTrails(false);
-                $model->updateInSiblingForCat();
+//                $model->updateTrails(false);
+//                $model->updateInSiblingForCat();
 
                 //load all related stuff again
                 $model->refresh();

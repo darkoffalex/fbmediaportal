@@ -296,6 +296,7 @@ class StockController extends Controller
                 }
 
                 $model->updated_at = date('Y-m-d H:i:s',time());
+                $model->delayed_at = $model->published_at;
                 $model->updated_by_id = Yii::$app->user->id;
                 $model->update();
 
@@ -310,8 +311,8 @@ class StockController extends Controller
                 $model->updateSearchKeywords();
 
                 //update trails and sibling flags
-                $model->updateTrails(false);
-                $model->updateInSiblingForCat();
+//                $model->updateTrails(false);
+//                $model->updateInSiblingForCat();
 
 
                 if(!empty($model->author)){

@@ -44,6 +44,7 @@ use Yii;
  * @property integer $is_parsed
  * @property string $trail
  * @property string $in_sibling_for_cats
+ * @property string $delayed_at
  *
  * @property Comment[] $comments
  * @property User $author
@@ -76,7 +77,7 @@ class PostDB extends \yii\db\ActiveRecord
             [['fb_sync_id', 'fb_sync_token', 'video_key_yt', 'video_key_fb', 'voted_ips', 'offer_group_fb_id', 'search_keywords'], 'string'],
             [['content_type_id', 'status_id', 'type_id', 'author_id', 'sticky_position_main', 'stats_after_vote', 'votes_only_authorized', 'created_by_id', 'updated_by_id', 'group_id', 'kind_id', 'need_finish', 'comment_count', 'about_turkey', 'need_update', 'is_parsed'], 'integer'],
             [['name'], 'required'],
-            [['published_at', 'created_at', 'updated_at', 'last_comment_at'], 'safe'],
+            [['published_at', 'created_at', 'updated_at', 'last_comment_at', 'delayed_at'], 'safe'],
             [['name', 'author_custom_name', 'offer_category_tag', 'offer_author_tag', 'video_preview_fb', 'video_preview_yt', 'video_attachment_id_fb', 'trail', 'in_sibling_for_cats'], 'string', 'max' => 255],
             [['author_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['author_id' => 'id']],
             [['group_id'], 'exist', 'skipOnError' => true, 'targetClass' => PostGroup::className(), 'targetAttribute' => ['group_id' => 'id']],
@@ -126,6 +127,7 @@ class PostDB extends \yii\db\ActiveRecord
             'is_parsed' => 'Is Parsed',
             'trail' => 'Trail',
             'in_sibling_for_cats' => 'In Sibling For Cats',
+            'delayed_at' => 'Delayed At',
         ];
     }
 

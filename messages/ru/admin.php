@@ -226,5 +226,6 @@ return [
     'On categories' => 'В категориях',
     'On main or categories' => 'На главной или в категориях',
     'Full cache clear' => 'Очистить кэш',
-    'Preview on portal' => 'Предпросмотр на портале'
+    'Preview on portal' => 'Предпросмотр на портале',
+    'Delayed At' => 'Отобразится после даты'
 ];

@@ -13,6 +13,7 @@ use kartik\dropdown\DropdownX;
 use yii\helpers\ArrayHelper;
 use app\models\PostGroup;
 use app\helpers\Help;
+use kartik\datetime\DateTimePicker;
 
 $this->title = Yii::t('admin',$model->isNewRecord ? 'Create post' : 'Update post');
 $this->params['breadcrumbs'][] = ['label' => Yii::t('admin','Posts'), 'url' => Url::to(['/admin/posts/index'])];
@@ -149,6 +150,15 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                     ]); ?>
 
                     <?= $form->field($model, 'need_finish')->checkbox(); ?>
+
+                    <?php $model->delayed_at = empty($model->delayed_at) ? $model->published_at : $model->delayed_at; ?>
+                    <?= $form->field($model, 'delayed_at')->widget(DateTimePicker::className(),[
+                        'type' => DateTimePicker::TYPE_INPUT,
+                        'pluginOptions' => [
+                            'autoclose'=>true,
+                            'format' => 'yyyy-mm-dd hh:ii:ss'
+                        ]
+                    ]); ?>
 
                     <div class="form-group dropdown inactive-links">
                         <label class="control-label"><?= Yii::t('admin','Categories'); ?></label>
