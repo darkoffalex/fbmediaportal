@@ -17,7 +17,7 @@
                     ['label' => Yii::t('admin','Basic'), 'options' => ['class' => 'header']],
                     [
                         'label' => Yii::t('admin','Users'),
-                        'icon' => 'fa fa-users',
+                        'icon' => 'users',
                         'active' => $c == 'users',
                         'visible' => $user->role_id == \app\helpers\Constants::ROLE_ADMIN,
                         'url' => ['/admin/users/index'],
@@ -25,7 +25,7 @@
 
                     [
                         'label' => Yii::t('admin','Stock'),
-                        'icon' => 'fa fa-cloud-download',
+                        'icon' => 'cloud-download',
                         'active' => $c == 'stock',
                         'visible' => true,
                         'url' => ['/admin/stock/index'],
@@ -33,7 +33,7 @@
 
                     [
                         'label' => Yii::t('admin','Categories'),
-                        'icon' => 'fa fa-folder',
+                        'icon' => 'folder',
                         'active' => $c == 'categories',
                         'visible' => true,
                         'url' => ['/admin/categories/index'],
@@ -41,7 +41,7 @@
 
                     [
                         'label' => Yii::t('admin','Posts'),
-                        'icon' => 'fa fa-file',
+                        'icon' => 'file',
                         'active' => $c == 'posts',
                         'visible' => true,
                         'url' => ['/admin/posts/index'],
@@ -49,21 +49,21 @@
 
                     [
                         'label' => Yii::t('admin','Banners'),
-                        'icon' => 'fa fa-square-o',
+                        'icon' => 'square-o',
                         'url' => [''],
                         'active' => $c == 'banner',
                         'visible' => true,
                         'items' => [
                             [
                                 'label' => Yii::t('admin','List'),
-                                'icon' => 'fa fa-circle-o',
+                                'icon' => 'circle-o',
                                 'url' => ['/admin/banner/index'],
                                 'active' => $c == 'banner' && in_array($a,['index','create','update','delete']),
                                 'visible' => true
                             ],
                             [
                                 'label' => Yii::t('admin','Places'),
-                                'icon' => 'fa fa-circle-o',
+                                'icon' => 'circle-o',
                                 'url' => ['/admin/banner/places'],
                                 'active' => $c == 'banner' && in_array($a,['places','place-scheduler']),
                                 'visible' => true
@@ -76,21 +76,21 @@
 
                     [
                         'label' => Yii::t('admin','Translations'),
-                        'icon' => 'fa fa-globe',
+                        'icon' => 'globe',
                         'url' => [''],
                         'active' => in_array($c,['languages','labels']),
                         'visible' => true,
                         'items' => [
                             [
                                 'label' => Yii::t('admin','Languages'),
-                                'icon' => 'fa fa-circle-o',
+                                'icon' => 'circle-o',
                                 'url' => ['/admin/languages/index'],
                                 'active' => $c == 'languages',
                                 'visible' => true
                             ],
                             [
                                 'label' => Yii::t('admin','Labels'),
-                                'icon' => 'fa fa-circle-o',
+                                'icon' => 'circle-o',
                                 'url' => ['/admin/labels/index'],
                                 'active' => $c == 'labels',
                                 'visible' => true
@@ -101,13 +101,13 @@
                     [
                         'active' => $c == 'common-settings',
                         'label' => Yii::t('admin','Common settings'),
-                        'icon' => 'fa fa-gear',
+                        'icon' => 'gear',
                         'url' => ['/admin/common-settings/index']
                     ],
 
                     [
                         'label' => Yii::t('admin','Exit'),
-                        'icon' => 'fa fa-sign-out',
+                        'icon' => 'sign-out',
                         'url' => ['/admin/main/logout']
                     ]
                 ],

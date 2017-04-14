@@ -17,13 +17,17 @@ use app\components\Controller;
 use yii\base\Exception;
 use yii\caching\DbDependency;
 use yii\caching\Dependency;
+use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\filters\PageCache;
 use yii\helpers\ArrayHelper;
+use yii\helpers\StringHelper;
 use yii\helpers\Url;
 use yii\web\NotFoundHttpException;
+use Zelenin\Feed;
+use Zelenin\yii\extensions\Rss\RssView;
 
 class MainController extends Controller
 {
@@ -185,7 +189,14 @@ class MainController extends Controller
             }
         }
 
-        $mainPostsQuery = Post::findSortedEx(!empty($category) ? $id : null,$currentIds,$siblingIds)
+        $carouselPostQuery = Post::findSortedEx(!empty($category) ? $id : null,$currentIds,$siblingIds)
+            ->with(['trl', 'postImages.trl', 'author'])
+            ->andWhere(['status_id' => Constants::STATUS_ENABLED])
+            ->andWhere(new Expression('delayed_at <= NOW()'))
+            ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
+            ->distinct();
+
+        $mainPostsQuery = Post::findSortedEx(!empty($category) ? $id : null,$currentIds,null)
             ->with(['trl', 'postImages.trl', 'author'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('delayed_at <= NOW()'))
@@ -199,7 +210,7 @@ class MainController extends Controller
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
             ->orderBy('delayed_at DESC');
 
-        $forumPostsQuery = Post::findSortedEx(!empty($category) ? $id : null,$currentIds,$siblingIds)
+        $forumPostsQuery = Post::findSortedEx(!empty($category) ? $id : null,$currentIds,null)
             ->with(['trl', 'postImages.trl'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('delayed_at <= NOW()'))
@@ -218,7 +229,8 @@ class MainController extends Controller
             ->distinct()
             ->with(['trl']);
 
-        $mainPostsQuery->limit(15);
+        $mainPostsQuery->limit(10);
+        $carouselPostQuery->limit(20);
         $forumPostsQuery->limit(4);
 
         $lastPostsQuery->limit(7);
@@ -227,6 +239,7 @@ class MainController extends Controller
 
         //get main and forum posts posts for first page (next pages will be loaded via ajax)
         $mainPosts = Help::cquery(function($db)use($mainPostsQuery){return $mainPostsQuery->all();},$cache);
+        $carouselPosts = Help::cquery(function($db)use($carouselPostQuery){return $carouselPostQuery->all();},$cache);
         $forumPosts = Help::cquery(function($db)use($forumPostsQuery){return $forumPostsQuery->all();},$cache);
         $popularPosts = Help::cquery(function($db)use($popularPostsQuery){return $popularPostsQuery->all();},$cache);
         $turkeyPosts = Help::cquery(function($db)use($turkeyPostsQuery){return $turkeyPostsQuery->all();},$cache);
@@ -249,7 +262,7 @@ class MainController extends Controller
         }
 
         //rendering page
-        return $this->render('category',compact('mainPosts','forumPosts','popularPosts','turkeyPosts','lastPosts','category'));
+        return $this->render('category',compact('mainPosts','forumPosts','popularPosts','turkeyPosts','lastPosts','carouselPosts','category'));
     }
 
     /**
@@ -276,7 +289,6 @@ class MainController extends Controller
         if(!empty($id)){
             $catQuery = Category::find()
                 ->where(['id' => $id, 'status_id' => Constants::STATUS_ENABLED])
-                ->andWhere(new Expression('delayed_at <= NOW()'))
                 ->with([
                     'trl',
                     'parent.childrenActive.childrenActive',
@@ -308,7 +320,7 @@ class MainController extends Controller
         }
 
         //getting main posts paginated
-        $mainPostsQuery = Post::findSortedEx(!empty($category) ? $id : null,$currentIds,$siblingIds)
+        $mainPostsQuery = Post::findSortedEx(!empty($category) ? $id : null,$currentIds,$carousel ? $siblingIds : null)
             ->with(['trl', 'postImages.trl', 'author'])
             ->andWhere(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('delayed_at <= NOW()'))
@@ -319,11 +331,11 @@ class MainController extends Controller
         $mainPostsQueryCount = clone $mainPostsQuery;
         $mainPostsCount = Help::cquery(function($db)use($mainPostsQueryCount){return $mainPostsQueryCount->count();},$cache);
         $pagesMain = new Pagination(['totalCount' => $mainPostsCount, 'defaultPageSize' => ($carousel ? 3 : 3)]);
-        $mainPosts = Help::cquery(function($db)use($mainPostsQuery,$pagesMain,$carousel){return $mainPostsQuery->offset($pagesMain->offset + ($carousel ? 15 : 5))->limit($pagesMain->limit)->all();},$cache);
+        $mainPosts = Help::cquery(function($db)use($mainPostsQuery,$pagesMain,$carousel){return $mainPostsQuery->offset($pagesMain->offset + ($carousel ? 20 : 5))->limit($pagesMain->limit)->all();},$cache);
 
         //getting forum posts paginated
         if(!$carousel){
-            $forumPostsQuery = Post::findSortedEx(!empty($category) ? $id : null,$currentIds,$siblingIds)
+            $forumPostsQuery = Post::findSortedEx(!empty($category) ? $id : null,$currentIds,null)
                 ->with(['trl', 'postImages.trl'])
                 ->andWhere(['status_id' => Constants::STATUS_ENABLED])
                 ->andWhere(new Expression('delayed_at <= NOW()'))
@@ -474,9 +486,12 @@ class MainController extends Controller
             ->andWhere(['post_id' => $id])
             ->with([
                 'author',
-                'children',
+                'children'
             ])
             ->orderBy('created_at ASC');
+
+        /* @var $post Post */
+        $post = Post::find()->where(['id' => (int)$id])->one();
 
         $cq = clone $q;
         $count = Help::cquery(function($db)use($cq){return $cq->count();},false);
@@ -488,7 +503,7 @@ class MainController extends Controller
 
         $comments = Help::cquery(function($db)use($q,$pages){return $q->offset($pages->offset)->limit($pages->limit)->all();},false);
 
-        return $this->renderPartial('_load_comments', compact('comments'));
+        return $this->renderPartial('_load_comments', compact('comments','post'));
     }
 
     /**
@@ -752,7 +767,7 @@ class MainController extends Controller
                     ->where(['author_id' => $user->id, 'status_id' => Constants::STATUS_ENABLED])
                     ->andWhere(new Expression('delayed_at <= NOW()'))
                     ->andWhere('content_type_id != :type',['type' => Constants::CONTENT_TYPE_POST])
-                    ->orderBy('delayed_at DESC');
+                    ->orderBy('published_at DESC');
                 $qc = clone $q;
                 break;
             case 'comments':
@@ -770,7 +785,7 @@ class MainController extends Controller
                     ->where(['author_id' => $user->id, 'status_id' => Constants::STATUS_ENABLED])
                     ->andWhere(new Expression('delayed_at <= NOW()'))
                     ->andWhere('content_type_id != :type',['type' => Constants::CONTENT_TYPE_POST])
-                    ->orderBy('delayed_at DESC');
+                    ->orderBy('published_at DESC');
                 $qc = clone $q;
                 break;
         }
@@ -876,7 +891,7 @@ class MainController extends Controller
             ->where(['status_id' => Constants::STATUS_ENABLED])
             ->andWhere(new Expression('delayed_at <= NOW()'))
             ->andWhere(new Expression('(kind_id IS NULL OR kind_id != :except)',['except' => Constants::KIND_FORUM]))
-            ->orderBy('delayed_at DESC');
+            ->orderBy('published_at DESC');
 
 
         $popularPostsQuery = Post::findSortedPopular(!empty($category) ? $id : null,$currentIds,$siblingIds)
@@ -945,7 +960,7 @@ class MainController extends Controller
             $q->andWhere(['id' => 0]);
         }
 
-        $q->orderBy('p.delayed_at DESC');
+        $q->orderBy('p.published_at DESC');
 
         $cq = clone $q;
 
@@ -1023,5 +1038,71 @@ class MainController extends Controller
         }
 
         return $rendered;
+    }
+
+    /**
+     * Rss
+     */
+    public function actionRss()
+    {
+        $dataProvider = new ActiveDataProvider([
+            'query' => Post::findSortedEx(null,null,null,false)
+                ->with(['trl', 'postImages.trl', 'author'])
+                ->andWhere(new Expression('delayed_at <= NOW()'))
+                ->distinct(),
+            'pagination' => [
+                'pageSize' => 100
+            ],
+        ]);
+
+        $response = Yii::$app->getResponse();
+        $headers = $response->getHeaders();
+
+        $headers->set('Content-Type', 'application/rss+xml; charset=utf-8');
+
+        echo RssView::widget([
+            'dataProvider' => $dataProvider,
+            'channel' => [
+                'title' => function ($widget, Feed $feed) {
+                    $feed->addChannelTitle(Yii::$app->name);
+                },
+                'link' => Url::toRoute('/', true),
+                'description' => 'Все материалы',
+                'language' => function ($widget, Feed $feed) {
+                    return Yii::$app->language;
+                },
+//                'image'=> function ($widget, Feed $feed) {
+//                    $feed->addChannelImage('http://example.com/channel.jpg', 'http://example.com', 88, 31, 'Image description');
+//                },
+            ],
+            'items' => [
+                'title' => function ($model, $widget, Feed $feed) {
+                    /* @var $model Post */
+                    return $model->trl->name;
+                },
+                'description' => function ($model, $widget, Feed $feed) {
+                    /* @var $model Post */
+                    return $model->trl->small_text;
+                },
+                'link' => function ($model, $widget, Feed $feed) {
+                    /* @var $model Post */
+                    return $model->getUrl();
+                },
+                'author' => function ($model, $widget, Feed $feed) {
+                    /* @var $model Post */
+                    return $model->author->name.' '.$model->author->surname;
+                },
+//                'guid' => function ($model, $widget, Feed $feed) {
+//                    /* @var $model Post */
+//                    $date = \DateTime::createFromFormat('Y-m-d H:i:s', $model->updated_at);
+//                    return Url::toRoute(['post/view', 'id' => $model->id], true) . ' ' . $date->format(DATE_RSS);
+//                },
+                'pubDate' => function ($model, $widget, Feed $feed) {
+                    /* @var $model Post */
+                    $date = \DateTime::createFromFormat('Y-m-d H:i:s', $model->delayed_at);
+                    return $date->format(DATE_RSS);
+                }
+            ]
+        ]);
     }
 }

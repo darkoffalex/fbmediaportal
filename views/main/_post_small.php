@@ -49,7 +49,7 @@ use app\helpers\Help;
             <?php else: ?>
                 <a href="#"><?= $post->author_custom_name; ?></a>
             <?php endif; ?>
-            <span> • <?= Help::datefmt($post->published_at); ?></span>
+            <span> • <?= Help::datefmt($post->delayed_at); ?></span>
 
             <?php if($post->comment_count > 0): ?>
                 <div class="content__card__comments">

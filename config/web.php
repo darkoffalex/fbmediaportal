@@ -3,8 +3,8 @@
 $params = require(__DIR__ . '/params.php');
 
 $config = [
-    'id' => 'FB Media Portal',
-    'name' => 'FB Media Portal',
+    'id' => 'RusTurkey.com',
+    'name' => 'RusTurkey.com',
     'basePath' => dirname(__DIR__),
 
     'bootstrap' => ['log','thumbnail'],
@@ -99,6 +99,7 @@ $config = [
 
                 '/' => 'main/index',
                 'sitemap.xml' => 'site/site-map',
+                'rss' => 'main/rss',
                 '<controller>' => '<controller>/index',
 
                 'post/<id:\d+>/<title:\w+(-\w+)*>' => 'main/post',

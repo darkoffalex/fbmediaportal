@@ -8,6 +8,7 @@ use app\helpers\Help;
 /* @var $comments \app\models\Comment[] */
 /* @var $viewOnly bool */
 /* @var $timeLine bool */
+/* @var $post \app\models\Post */
 
 $user = Yii::$app->user->identity;
 ?>
@@ -18,9 +19,12 @@ $user = Yii::$app->user->identity;
         <div class="contentComments__card__content">
             <b>
                 <?php if(!$timeLine): ?>
-                    <a href="<?= Url::to(['main/profile','id' => $comment->author_id]); ?>"><?= $comment->author->name.' '.$comment->author->surname; ?></a> -
+                    <a href="<?= Url::to(['main/profile','id' => $comment->author_id]); ?>"><?= $comment->author->name.' '.$comment->author->surname; ?></a>
                 <?php endif; ?>
-                <span><?= Help::datefmt($comment->created_at); ?></span>
+
+                <?php if($post->published_at == $post->delayed_at): ?>
+                    - <span><?= Help::datefmt($comment->created_at); ?></span>
+                <?php endif; ?>
             </b>
 
             <p><?= $comment->text; ?></p>

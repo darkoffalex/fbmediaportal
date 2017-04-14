@@ -37,7 +37,8 @@
         "himiklab/yii2-easy-thumbnail-image-helper": "^1.0",
         "linslin/yii2-curl": "^1.0",
         "kartik-v/yii2-widget-datetimepicker" : "dev-master#d2612e5d1a6ad21c020784189a7fdd609aaae544",
-        "facebook/graph-sdk": "^5.4"
+        "facebook/graph-sdk": "^5.4",
+        "zelenin/yii2-rss": "^0.1.1"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",

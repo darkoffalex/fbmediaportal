@@ -111,6 +111,10 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                     </p>
 
                     <p>
+                        <?= Html::a(Yii::t('admin','Refresh attachments'),['/admin/posts/refresh-attachments', 'id' => $model->id],['data-confirm' => Yii::t('admin','Please DO NOT close this page until updating be finished!')]); ?>
+                    </p>
+
+                    <p>
                         <strong><?= Yii::t('admin','Created At') ?></strong> : <?= $model->created_at; ?>
                     </p>
 
@@ -121,7 +125,7 @@ Yii::$app->view->registerJs($editorInit,\yii\web\View::POS_END);
                         <strong><?= Yii::t('admin','View on facebook') ?></strong> : <?= Html::a($model->getFbUrl(),$model->getFbUrl(),['target' => '_blank']); ?>
                     </p>
                     <p>
-                        <strong><?= Yii::t('admin','View on portal') ?></strong> : <?= Html::a($model->getUrl(false,true),$model->getUrl(false,true),['target' => '_blank']); ?>
+                        <strong><?= Yii::t('admin','View on portal') ?></strong> : <?= Html::a($model->getUrl(true,true),$model->getUrl(true,true),['target' => '_blank']); ?>
                     </p>
                     <p>
                         <?php $previewUrl = Url::to(['/main/post-preview', 'id' => $model->id],true); ?>

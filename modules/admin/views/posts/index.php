@@ -186,6 +186,27 @@ $gridColumns = [
     ],
 
     [
+        'attribute' => 'delayed_at',
+        'filter' => \kartik\daterange\DateRangePicker::widget([
+            'model' => $searchModel,
+            'convertFormat' => true,
+            'attribute' => 'delayed_at',
+            'pluginOptions' => [
+                'locale' => [
+                    'format'=>'Y-m-d',
+                    'separator'=>' - ',
+                ],
+            ],
+        ]),
+        'enableSorting' => true,
+        'format' => 'raw',
+        'value' => function ($model, $key, $index, $column){
+            /* @var $model \app\models\Post*/
+            return !empty($model->published_at) ? $model->published_at : Yii::t('admin','No data');
+        },
+    ],
+
+    [
         'class' => 'yii\grid\ActionColumn',
         'contentOptions'=>['style'=>'width: 100px; text-align: center;'],
         'header' => Yii::t('admin','Actions'),

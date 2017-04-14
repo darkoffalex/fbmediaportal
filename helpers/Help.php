@@ -290,17 +290,7 @@ class Help
      * @return mixed
      */
     public static function youtubeurl($string) {
-        $urlComponents = parse_url($string);
-        $queryString = $urlComponents['query'];
-        $params = [];
-        parse_str($queryString,$params);
-
-        if(!empty($params['v'])){
-            $v = $params['v'];
-            return "https://www.youtube.com/embed/$v";
-        }
-
-        return $string;
+        return "https://www.youtube.com/embed/".Help::youtubeid($string);
     }
 
     /**
@@ -310,12 +300,15 @@ class Help
      */
     public static function youtubeid($string){
         $urlComponents = parse_url($string);
-        $queryString = $urlComponents['query'];
+        $queryString = ArrayHelper::getValue($urlComponents,'query');
 
-        $params = [];
-        parse_str($queryString,$params);
-
-        return ArrayHelper::getValue($params,'v');
+        if(!empty($queryString)){
+            $params = [];
+            parse_str($queryString,$params);
+            return ArrayHelper::getValue($params,'v');
+        }else{
+            return str_replace('/','',ArrayHelper::getValue($urlComponents,'path'));
+        }
     }
 
     /**

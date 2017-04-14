@@ -227,5 +227,6 @@ return [
     'On main or categories' => 'На главной или в категориях',
     'Full cache clear' => 'Очистить кэш',
     'Preview on portal' => 'Предпросмотр на портале',
-    'Delayed At' => 'Отобразится после даты'
+    'Delayed At' => 'Показан с',
+    'Refresh attachments' => 'Обновить вложения'
 ];

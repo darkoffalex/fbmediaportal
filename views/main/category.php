@@ -9,6 +9,7 @@ use app\helpers\Help;
 /* @var $controller \app\controllers\MainController */
 
 /* @var $mainPosts \app\models\Post[] */
+/* @var $carouselPosts \app\models\Post[] */
 /* @var $forumPosts \app\models\Post[] */
 /* @var $popularPosts \app\models\Post[] */
 /* @var $turkeyPosts \app\models\Post[] */
@@ -36,7 +37,7 @@ $controller = $this->context;
     <!-- OWL DESKTOP::START-->
     <section class="topCarousel hidden-xs-down">
         <div id="owlTop" data-current-page="1" data-loading="<?= Url::to(['main/category-ajax','carousel' => 1,'id' => !empty($category) ? $category->id : null]); ?>">
-            <?= $this->render('/common/_carousel',['posts' => $mainPosts]); ?>
+            <?= $this->render('/common/_carousel',['posts' => $carouselPosts]); ?>
         </div>
     </section>
 
@@ -71,7 +72,7 @@ $controller = $this->context;
                                 <!-- OWL DESKTOP::START-->
                                 <section class="topCarousel hidden-sm-up">
                                     <div id="owlTopMobile" data-current-page="1" data-loading="<?= Url::to(['main/category-ajax','carousel' => 1,'id' => !empty($category) ? $category->id : null]); ?>">
-                                        <?= $this->render('/common/_carousel',['posts' => $mainPosts]); ?>
+                                        <?= $this->render('/common/_carousel',['posts' => $carouselPosts]); ?>
                                     </div>
                                 </section>
                             <?php endif; ?>

@@ -134,6 +134,17 @@ use kartik\daterange\DateRangePicker;
 
     <div class="row">
         <div class="col-md-2">
+            <?= $form->field($model, 'delayed_at')->widget(DateRangePicker::className(),[
+                'convertFormat' => true,
+                'pluginOptions' => [
+                    'locale' => [
+                        'format'=>'Y-m-d',
+                        'separator'=>' - ',
+                    ],
+                ]
+            ])->error(false); ?>
+        </div>
+        <div class="col-md-2" style="margin-top: 25px;">
             <?= Html::submitButton(Yii::t('admin','Filter'), ['class' => 'btn btn-primary box-btn']) ?>
         </div>
     </div>

@@ -2,6 +2,8 @@
 
 namespace app\modules\admin\controllers;
 
+use app\commands\SyncController;
+use app\helpers\AdminizatorApi;
 use app\helpers\Sort;
 use app\helpers\Help;
 use app\models\Category;
@@ -792,14 +794,15 @@ class PostsController extends Controller
             throw new NotFoundHttpException(Yii::t('admin','Post not found'),404);
         }
 
-        $log = $this->updateComments($post);
+        /* @var $apiController SyncController */
+        $oldNamespace = Yii::$app->controllerNamespace;
+        Yii::$app->controllerNamespace = 'app\commands';
+        $apiController = Yii::$app->createControllerByID("sync");
+        $apiController->output = false;
+        $apiController->updateComments($post);
+        $apiController->actionUpdateCounters();
         $post->refresh();
-
-        $author = $post->author;
-        if(!empty(($author))){
-            $author->counter_comments = Comment::find()->where(['author_id' => $author->id])->count();
-            $author->update();
-        }
+        Yii::$app->controllerNamespace = $oldNamespace;
 
         //clear cache
         //Yii::$app->cache->flush();
@@ -808,6 +811,35 @@ class PostsController extends Controller
         return $this->redirect(Yii::$app->request->referrer);
     }
 
+    /**
+     * Refresh attachments from adminizator
+     * @param $id
+     * @return Response
+     * @throws NotFoundHttpException
+     */
+    public function actionRefreshAttachments($id)
+    {
+        /* @var $post Post */
+        $post = Post::find()->where(['id' => $id])->one();
+
+        if(empty($post)){
+            throw new NotFoundHttpException(Yii::t('admin','Post not found'),404);
+        }
+
+        $details = AdminizatorApi::getInstance()->getDetails($post->fb_sync_id);
+
+        /* @var $apiController SyncController */
+        $oldNamespace = Yii::$app->controllerNamespace;
+        Yii::$app->controllerNamespace = 'app\commands';
+        $apiController = Yii::$app->createControllerByID("sync");
+        $apiController->output = false;
+        $apiController->updateAttachments($post,ArrayHelper::getValue($details,'attachments'));
+        $post->refresh();
+        Yii::$app->controllerNamespace = $oldNamespace;
+
+        //back to previous page
+        return $this->redirect(Yii::$app->request->referrer);
+    }
 
     /**
      * Refreshes commentator's time-lines
@@ -831,183 +863,5 @@ class PostsController extends Controller
 
         //back to previous page
         return $this->redirect(Yii::$app->request->referrer);
-    }
-
-    ////////////////////////////// A D M I N I Z A T O R  A P I  F U N C T I O N S ////////////////////////////////////
-
-
-    /**
-     * Retrieves an api data
-     * @param $id
-     * @param $type
-     * @param array $params
-     * @return mixed
-     * @throws Exception
-     */
-    private function getApiPostData($id,$type,$params = [])
-    {
-        $url = 'https://adminizator.com/api/post/'.$id.'/'.$type;
-        if(!empty($params)){
-            $url.='?'.http_build_query($params);
-        }
-
-        $curl = new Curl();
-        $curl->setOption(CURLOPT_TIMEOUT,15);
-        $curl->setOption(CURLOPT_CONNECTTIMEOUT,15);
-        $response = $curl->get($url);
-
-        if($curl->responseCode != 200){
-            throw neW Exception("Connection error",$curl->errorCode);
-        }
-
-        return json_decode($response,true);
-    }
-
-    /**
-     * Retrieve author-user by data
-     * @param $authorData
-     * @return User|array|null|\yii\db\ActiveRecord
-     */
-    private function getAuthor($authorData)
-    {
-        $log = "";
-        $fbId = ArrayHelper::getValue($authorData,'id');
-        $name = ArrayHelper::getValue($authorData,'name');
-        $surname = ArrayHelper::getValue($authorData,'surname');
-        $avatar_url = ArrayHelper::getValue($authorData,'avatar_url');
-
-        if(!empty($fbId)){
-            $user = User::find()->where(['fb_user_id' => $fbId])->one();
-
-            if(empty($user)){
-                $log .= "Creating new author-user with FB ID (app context) {$fbId} \n";
-
-                try{
-                    $user = new User();
-                    $user->fb_user_id = $fbId;
-                    $user->name = $name;
-                    $user->username = $fbId;
-                    $user->password = 'dummy_string';
-                    $user->surname = $surname;
-                    $user->avatar_file = $avatar_url;
-                    $user->fb_avatar_url = $avatar_url;
-                    $user->email = null;
-                    $user->updated_at = date('Y-m-d H:i:s',time());
-                    $user->updated_by_id = Yii::$app->user->id;
-                    $user->status_id = Constants::STATUS_ENABLED;
-                    $user->role_id = Constants::ROLE_REGULAR_USER;
-                    $user->type_id = Constants::USR_TYPE_IMPORTED;
-                    $user->save();
-                }catch (\Exception $ex){
-                    $log .= "ERROR: ".$ex->getMessage()."\n";
-                    return null;
-                }
-
-            }else{
-                $log .= "Author-user with FB ID (app context) {$fbId} found \n";
-            }
-
-            return $user;
-        }
-
-        return null;
-    }
-
-    /**
-     * Updating post's comments
-     * @param $post
-     * @return string
-     */
-    private function updateComments($post)
-    {
-        /* @var $post Post */
-
-        $log = "";
-        $pageProcessing = 1;
-        while(true){
-            $log .= "Querying adminizator API for comments (page {$pageProcessing}) \n";
-            $data = $this->getApiPostData($post->fb_sync_id,'comments',['page' => $pageProcessing]);
-
-            $total = ArrayHelper::getValue($data,'total');
-            $currentPage = ArrayHelper::getValue($data,'currentPage');
-            $lastPage = ArrayHelper::getValue($data,'lastPage');
-            $perPage = ArrayHelper::getValue($data,'perPage');
-            $items = ArrayHelper::getValue($data,'items');
-            $onPage = count($items);
-
-            if(empty($data) || empty($currentPage) || empty($items)){
-                $log .= "Can't retrieve data \n";
-                break;
-            }else{
-                $log .= "Found {$onPage} comments. Processing... \n";
-            }
-
-            foreach($items as $itemData){
-                $fbId = ArrayHelper::getValue($itemData,'id');
-                $sysId = (int)ArrayHelper::getValue($itemData,'system_id');
-                $answerToSysId = (int)ArrayHelper::getValue($itemData,'answer_to_id');
-                $content = ArrayHelper::getValue($itemData,'content');
-                $time = ArrayHelper::getValue($itemData,'published_time');
-                $authorData = ArrayHelper::getValue($itemData,'author');
-
-                /* @var $comment Comment */
-                $comment = Comment::find()->where(['fb_sync_id' => $fbId, 'post_id' => $post->id])->one();
-                if(empty($comment)){
-                    $log .= "Creating comment with FB ID {$fbId} for post {$post->id} \n";
-                    $comment = new Comment();
-                    $comment -> post_id = $post->id;
-                    $comment -> fb_sync_id = $fbId;
-                    $comment -> adm_id = $sysId;
-                    $comment -> answer_to_adm_id = $answerToSysId;
-                    $comment -> text = $content;
-                    $comment -> created_at = $time;
-                    $comment -> updated_at = date('Y-m-d H:i:s',time());
-                    $comment -> created_by_id = Yii::$app->user->id;
-                    $comment -> updated_by_id = Yii::$app->user->id;
-
-                    $author = $this->getAuthor($authorData);
-                    $comment -> author_id = ArrayHelper::getValue($author,'id',null);
-
-                    if(!empty($post->author_id)){
-                        $log .= "Author {$author->id} with FB ID (app context) {$author->fb_user_id} assigned to comment \n";
-                    }else{
-                        $log .= "ERROR: Author not assigned \n";
-                    }
-
-                    if($comment->save()){
-                        $log .= "Comment with FB ID {$comment->fb_sync_id} added to post {$post->id} \n";
-                    }else{
-                        $log .= "ERROR: Can't add comment \n";
-                    }
-                }else{
-                    $log .= "Comment already added \n";
-                }
-            }
-
-            if($pageProcessing >= $lastPage){
-                $post->refresh();
-                $added = count($post->comments);
-
-                $log .= "Comments adding done. Post has {$added} comments \n";
-                break;
-            }
-
-            $pageProcessing++;
-        }
-
-        if(!empty($post->comments)){
-            $log .= "Building nested relations, updating... \n";
-            foreach($post->comments as $comment){
-                if(!empty($comment->admParent)){
-                    $comment->answer_to_id = $comment->admParent->id;
-                    $comment->update();
-                }
-            }
-            $log .= "Nested relations updated \n";
-        }
-
-        $log .= "Comment adding finished";
-
-        return $log;
     }
 }

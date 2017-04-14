@@ -23,5 +23,5 @@ use kartik\helpers\Html;
         <button data-no-empty=".contentComments__post" class="btn" type="submit">Отправить</button>
     </form>
 
-    <?= $this->render('_load_comments',['comments' => $comments]); ?>
+    <?= $this->render('_load_comments',['comments' => $comments, 'post' => $post]); ?>
 </div>

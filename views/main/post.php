@@ -97,7 +97,7 @@ $this->registerJs('$(document).ready(function(){$(".click-auth").click(function(
                             <?php else: ?>
                                 <a href=""><?= $post->author_custom_name; ?></a>
                             <?php endif; ?>
-                            <span>• <?= Help::datefmt($post->published_at); ?></span>
+                            <span>• <?= Help::datefmt($post->delayed_at); ?></span>
                         </div>
 
                         <div class="share-box clearfix">

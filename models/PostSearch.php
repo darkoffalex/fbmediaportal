@@ -21,7 +21,7 @@ class PostSearch extends Post
     public function rules()
     {
         return [
-            [['name', 'content', 'published_at', 'created_at', 'need_finish', 'need_update', 'is_parsed', 'fb_sync_id'], 'string', 'max' => 255],
+            [['name', 'content', 'published_at', 'delayed_at', 'created_at', 'need_finish', 'need_update', 'is_parsed', 'fb_sync_id'], 'string', 'max' => 255],
             [['content_type_id', 'id', 'type_id', 'category_id', 'author_id', 'group_id', 'kind_id', 'status_id', 'nested', 'sticky'], 'integer'],
         ];
     }
@@ -179,14 +179,21 @@ class PostSearch extends Post
                 $range = explode(' - ',$this->created_at);
                 $date_from = $range[0];
                 $date_to = $range[1];
-                $q->andWhere('post.created_at >= :from AND post.created_at <= :to',['from' => $date_from, 'to' => $date_to]);
+                $q->andWhere('post.created_at >= :from1 AND post.created_at <= :to1',['from1' => $date_from, 'to1' => $date_to]);
+            }
+
+            if(!empty($this->delayed_at)){
+                $range = explode(' - ',$this->delayed_at);
+                $date_from = $range[0];
+                $date_to = $range[1];
+                $q->andWhere('post.delayed_at >= :from2 AND post.delayed_at <= :to2',['from2' => $date_from, 'to2' => $date_to]);
             }
 
             if(!empty($this->published_at)){
                 $range = explode(' - ',$this->published_at);
                 $date_from = $range[0];
                 $date_to = $range[1];
-                $q->andWhere('post.published_at >= :from AND post.published_at <= :to',['from' => $date_from, 'to' => $date_to]);
+                $q->andWhere('post.published_at >= :from3 AND post.published_at <= :to3',['from3' => $date_from, 'to3' => $date_to]);
             }
         }
 

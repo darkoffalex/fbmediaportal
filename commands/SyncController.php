@@ -176,44 +176,46 @@ class SyncController extends Controller
      * @param bool $update
      * @param bool $grab
      */
-    private function updateAttachments($post, $data, $update = false, $grab = false)
+    public function updateAttachments($post, $data, $update = false, $grab = false)
     {
-        foreach($data as $attachment){
-            $aType = ArrayHelper::getValue($attachment,'type');
-            $aFbId = ArrayHelper::getValue($attachment,'id');
-            $aImageUrl = ArrayHelper::getValue($attachment,'image_url');
-            $aVideoUrl = ArrayHelper::getValue($attachment,'origin_url');
+        if(!empty($data)){
+            foreach($data as $attachment){
+                $aType = ArrayHelper::getValue($attachment,'type');
+                $aFbId = ArrayHelper::getValue($attachment,'id');
+                $aImageUrl = ArrayHelper::getValue($attachment,'image_url');
+                $aVideoUrl = ArrayHelper::getValue($attachment,'origin_url');
 
-            if($aType == 'photo' || $aType == 'share'){
-                /* @var $image PostImage */
-                $image = PostImageDB::find()->where(['fb_sync_id' => $aFbId, 'post_id' => $post->id])->one();
+                if($aType == 'photo' || $aType == 'share'){
+                    /* @var $image PostImage */
+                    $image = PostImageDB::find()->where(['fb_sync_id' => $aFbId, 'post_id' => $post->id])->one();
 
-                if(empty($image)){
-                    $image = new PostImageDB();
-                    $image -> fb_sync_id = $aFbId;
-                    $image -> is_external = (int)true;
-                    $image -> file_url = $aImageUrl;
-                    $image -> post_id = $post->id;
-                    $image -> status_id = Constants::STATUS_ENABLED;
-                    $image -> priority = Sort::GetNextPriority(PostImage::className(),['post_id' => $post->id]);
-                    $image -> created_at = date('Y-m-d H:i:s',time());
-                    $image -> updated_at = date('Y-m-d H:i:s',time());
-                    $image -> created_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
-                    $image -> updated_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
-                    $image -> save();
-                }elseif($update){
-                    if($image->file_url != $aImageUrl){
+                    if(empty($image)){
+                        $image = new PostImageDB();
+                        $image -> fb_sync_id = $aFbId;
+                        $image -> is_external = (int)true;
                         $image -> file_url = $aImageUrl;
+                        $image -> post_id = $post->id;
+                        $image -> status_id = Constants::STATUS_ENABLED;
+                        $image -> priority = Sort::GetNextPriority(PostImage::className(),['post_id' => $post->id]);
+                        $image -> created_at = date('Y-m-d H:i:s',time());
                         $image -> updated_at = date('Y-m-d H:i:s',time());
+                        $image -> created_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
                         $image -> updated_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
-                        $image -> update();
+                        $image -> save();
+                    }elseif($update){
+                        if($image->file_url != $aImageUrl){
+                            $image -> file_url = $aImageUrl;
+                            $image -> updated_at = date('Y-m-d H:i:s',time());
+                            $image -> updated_by_id = AdminizatorApi::getInstance()->basicAdmin->id;
+                            $image -> update();
+                        }
                     }
+                }elseif($aType == 'video'){
+                    $post->video_key_fb = $aVideoUrl;
+                    $post->video_preview_fb = $aImageUrl;
+                    $post->video_attachment_id_fb = $aFbId;
+                    $post->update();
                 }
-            }elseif($aType == 'video'){
-                $post->video_key_fb = $aVideoUrl;
-                $post->video_preview_fb = $aImageUrl;
-                $post->video_attachment_id_fb = $aFbId;
-                $post->update();
             }
         }
     }
@@ -223,7 +225,7 @@ class SyncController extends Controller
      * @param $post
      * @throws \Exception
      */
-    private function updateComments($post)
+    public function updateComments($post)
     {
         /* @var $post Post */
         $meta = [];

@@ -49,7 +49,7 @@ $title = !empty($title) ? $title : false;
         <?php else: ?>
             <a href="#"><?= $post->author_custom_name; ?></a>
         <?php endif; ?>
-        <span>• <?= Help::datefmt($post->published_at); ?></span>
+        <span>• <?= Help::datefmt($post->delayed_at); ?></span>
     </div>
 
     <?php if($post->comment_count > 0): ?>

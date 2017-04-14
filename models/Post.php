@@ -395,9 +395,9 @@ class Post extends PostDB
         }
 
         //basic ordering stuff (lowest priority type, chronological order)
-        $ordering[] = "IF(content_type_id = :lowestPriorityType, 2147483647, 0) ASC";
+//        $ordering[] = "IF(content_type_id = :lowestPriorityType, 2147483647, 0) ASC";
         $ordering[] = "p.delayed_at DESC";
-        $orderingParams['lowestPriorityType'] = Constants::CONTENT_TYPE_POST;
+//        $orderingParams['lowestPriorityType'] = Constants::CONTENT_TYPE_POST;
 
         //apply ordering
         $q->orderBy(new Expression(implode(', ',$ordering), $orderingParams));
